@@ -1,62 +1,40 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# CN | CN Editor
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## About the CN Project
 
-## About Laravel
+**The goal of the "Corpus Nummorum" (CN) is systematically to collect and publish all ancient coins of lower Moesia, Mysia, Thrace, and the Troad.**  
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Corpus Nummorum Online is a web portal devoted to the ancient coins of lower Moesia, Thrace, Mysia and the Troad. This is a pilot project for assembling ancient Greek coinage by region and mint for the various purposes of research and cultural heritage preservation.  
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The research database is based primarily on Berlin collections, which include coins from more than 100 mints from the aforementioned regions in the [Münzkabinett Berlin](https://www.smb.museum/en/museums-institutions/muenzkabinett/home/), as well as an extensive collection of plaster casts that were made from coins in various collections worldwide and deposited at the [Berlin-Brandenburg Academy of Sciences and Humanities (BBAW)](https://www.bbaw.de/en/). These datasets will be further supplemented by digital museum catalogues and material from other sources. In line with the concept of public science, the portal also offers the possibility of augmenting the database by registering coins externally. The database makes it possible to sort individual coins systematically and group them by mints and types, as well as by dies that were used in the minting process. If needed, types can also be subdivided or arranged into larger groups, such as series or issues. All coins in the portal are scientifically described in both German and English. Standardised criteria for the description of coin images, both for coin types and individual specimens, have been developed (for the description guidelines, click here or use the Help button).  
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+As a collective endeavour of the Berlin-Brandenburg Academy of Sciences and Humanities, the Münzkabinett der Staatlichen Museen zu Berlin, and the [Big Data Lab of Goethe University in Frankfurt am Main](http://www.bigdata.uni-frankfurt.de/), the portal is being developed in close collaboration with other international initiatives for the typological presentation of Greek coins in the Semantic Web, such as the Online Greek Coinage project, which is under the patronage of the [International Numismatic Council](https://www.greekcoinage.org/). All relevant database fields are linked to stable Uniform Resource Identifiers (URIs) of numismatic concepts [Nomisma](http://nomisma.org). Because the portal is funded through various external-grant projects, there is variation in the scope of the data and the depth of coverage, but the overarching goal remains consistent: to create type catalogues for each respective coinage.
 
-## Learning Laravel
+## About the CN Editor App
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+The [CN Editor](https://data.corpus-nummorum.eu) provides a standardised and convenient way to enter, search and evaluate coins, types, dies and related data (description, origin, etc.). It is one of the most comprehensive, accessible and performant tools in numismatics available. It is comparatively lightweight and highly modular.  
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The backend consists of a MySQL database and a PHP JSON API. The frontend is a Vue.js single page application.
 
-## Laravel Sponsors
+The CN Editor was tailored to the specific needs of the CN. In order to be able to use the software directly for other projects, the same basic structure must be used as for the CN (this applies in particular to the database). Otherwise, it is advisable to create a fork and adapt the app at code level. With future updates we will generalise the editor more to make it easier for other projects to use it directly. However, all currently planned features must be implemented first.
+Please feel free to reuse the code for your personal projects as you wish.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Dependencies
 
-### Premium Partners
+* [Laravel ^8](https://laravel.com/)
+* [PHP 7.2.5](https://www.php.net/)
+* [MySQL 5.6](https://www.mysql.com/)
+* [Vue.js 5.6](https://vuejs.org/)
+* [Vuetify 2.3.7](https://vuetifyjs.com/en/)
+* [Vue Router 3.0.1](https://router.vuejs.org/)
+* [Vuex 3.0.1](https://vuex.vuejs.org/)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+## Realization and Licensing
 
-## Contributing
+[Berlin-Brandenburg Academy of Sciences and Humanities](https://www.bbaw.de/)   
+[TELOTA - IT/DH](https://www.bbaw.de/en/bbaw-digital/telota)  
+[Jan Köster](https://orcid.org/0000-0003-2713-5207)
+[CLaus Franke]()  
+2020-2021 
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The CN Editor App is open-sourced software licensed under the [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html).
