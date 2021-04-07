@@ -19,22 +19,22 @@ The backend consists of a MySQL database and a PHP JSON API. The frontend is a V
 The CN Editor was tailored to the specific needs of the CN. In order to be able to use the software directly for other projects, the same basic structure must be used as for the CN (this applies in particular to the database). Otherwise, it is advisable to create a fork and adapt the app at code level. With future updates we will generalise the editor more to make it easier for other projects to use it directly. However, all currently planned features must be implemented first.
 Please feel free to reuse the code for your personal projects as you wish.
 
-## Dependencies
+## Main Dependencies
 
-* [Laravel ^8](https://laravel.com/)
-* [PHP 7.2.5](https://www.php.net/)
+* [Laravel ^8.0](https://laravel.com/)
+* [PHP 8.0](https://www.php.net/)
 * [MySQL 5.6](https://www.mysql.com/)
-* [Vue.js 5.6](https://vuejs.org/)
-* [Vuetify 2.3.7](https://vuetifyjs.com/en/)
+* [Vue.js 2.6](https://vuejs.org/)
 * [Vue Router 3.0.1](https://router.vuejs.org/)
 * [Vuex 3.0.1](https://vuex.vuejs.org/)
+* [Vuetify 2.4.6](https://vuetifyjs.com/en/)
 
 ## Realization and Licensing
 
 [Berlin-Brandenburg Academy of Sciences and Humanities](https://www.bbaw.de/)   
 [TELOTA - IT/DH](https://www.bbaw.de/en/bbaw-digital/telota)  
-[Jan Köster](https://orcid.org/0000-0003-2713-5207)
-[CLaus Franke]()  
+[Jan Köster](https://orcid.org/0000-0003-2713-5207)  
+[Claus Franke]()  
 2020-2021 
 
 The CN Editor App is open-sourced software licensed under the [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html).

@@ -21,7 +21,7 @@
 	"dependencies": {
 		"vue": "^2.6.0",
 		"vue-template-compiler": "^2.6.10",
-		"vuetify": "^2.4.3",
+		"vuetify": "^2.4.6",
 		"vue-router": "^3.0.1",
 		"vuex": "^3.0.1",
 		"vue-progressbar": "^0.7.5"
