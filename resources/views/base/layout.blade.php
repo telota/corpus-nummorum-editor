@@ -9,61 +9,51 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CORPUS NUMMORUM DATA</title>
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+    <title>CN Data (Corpus Nummorum)</title>
 
     <!-- Styles -->
-    <style>
-        html, body {
-            background-color: #222222;
-            color: #ccc;
-            font-family: 'Raleway', sans-serif;
-            font-weight: 100;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .links > a {
-            color: #999;
-            padding: 0 25px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: .1rem;
-            text-decoration: none;
-            text-transform: uppercase;
-        }
-    </style>
+    {{--<link rel="shortcut icon" href="favicon.ico">--}}
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="96x96">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link href="{{ asset('css/base.css') }}" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
 
 </head>
 
 <body>
-    <div style="width: 100%; display: flex; justify-content: space-between;">
-        <div>
-            <a href="https://www.corpus-nummorum.eu/">Corpus Nummorum</a>
-        </div>
+    <div id="base-header">
+        <div id="base-header-container">
+            <div>
+                <a href="https://www.corpus-nummorum.eu/">Corpus Nummorum</a>
+            </div>
 
-        <div style="display: flex;">
-            @auth
-                <a href="{{ url('/home') }}">Home</a>
-                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+            <div style="display: flex;">
+                @auth
+                    <a href="{{ url('/') }}">Start</a>
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
 
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
-            @else
-                @if (Route::has('login'))
-                    <a href="{{ route('login') }}" >Log in</a>
-                @endif
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
+                @else
+                    @if (url()->current() !== env('APP_URL').'/login')
+                        <a href="{{ route('login') }}" >Log in</a>
+                    @endif
 
-                @if (Route::has('register'))
-                    <a href="{{ route('register') }}">Register</a>
-                @endif
-            @endauth
+                    @if (url()->current() !== env('APP_URL').'/register')
+                        <a href="{{ route('register') }}">Register</a>
+                    @endif
+                @endauth
+            </div>
         </div>
     </div>
 
-    <div>
+    <div id="base-container">
         @yield('content')
+    </div>
+
+    <div id="base-footer">
+        <div id="base-footer-container">
+            <div>Test</div>
+        </div>
     </div>
 </body>
 

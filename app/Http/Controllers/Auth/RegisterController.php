@@ -49,8 +49,10 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        if (!empty($data['affiliation'])) { abort(403); }
+
         return Validator::make($data, [
-            'name'      => ['required', 'string', 'max:255'],
+            //'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255', 'unique:app_editor_users'],
             'password'  => ['required', 'string', 'min:8', 'confirmed'],
             'firstname' => ['required','string','max:255'],
@@ -74,7 +76,8 @@ class RegisterController extends Controller
         ]);*/
 
         $user = User::create([
-            'name'      => $data['name'],
+            //'name'      => $data['name'],
+            'name'      => substr($data['firstname'], 0, 1).substr($data['lastname'], 0, 44),
             'email'     => $data['email'],
             'password'  => Hash::make($data['password']),
             'firstname' => $data['firstname'],

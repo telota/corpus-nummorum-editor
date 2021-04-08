@@ -16,8 +16,8 @@ The [CN Editor](https://data.corpus-nummorum.eu) provides a standardised and con
 
 The backend consists of a MySQL database and a PHP JSON API. The frontend is a Vue.js single page application.
 
-The CN Editor was tailored to the specific needs of the CN. In order to be able to use the software directly for other projects, the same basic structure must be used as for the CN (this applies in particular to the database). Otherwise, it is advisable to create a fork and adapt the app at code level. With future updates we will generalise the editor more to make it easier for other projects to use it directly. However, all currently planned features must be implemented first.
-Please feel free to reuse the code for your personal projects as you wish.
+The CN Editor was tailored to the specific needs of the CN. In order to be able to use the software directly for other projects, the same basic structure must be used as for the CN (this applies in particular to the database). Otherwise, it is advisable to create a fork and adapt the app at code level. With future updates we will generalise the editor more to make it easier for other projects to use it directly. However, all currently planned features must be implemented first.  
+In any way, please feel free to reuse the code for your personal projects as you wish.
 
 ## Main Dependencies
 
@@ -32,7 +32,8 @@ Please feel free to reuse the code for your personal projects as you wish.
 ## Realization and Licensing
 
 [Berlin-Brandenburg Academy of Sciences and Humanities](https://www.bbaw.de/)   
-[TELOTA - IT/DH](https://www.bbaw.de/en/bbaw-digital/telota) 
+[TELOTA - IT/DH](https://www.bbaw.de/en/bbaw-digital/telota)   
 2020-2021
 
-The CN Editor App is open-sourced software licensed under the [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html) - created by [Jan Köster](https://orcid.org/0000-0003-2713-5207) and supported by [Claus Franke](https://orcid.org/0000-0003-3371-6163) as database architect.
+The CN Editor App is open-sourced software licensed under the [GPLv3](http://www.gnu.org/licenses/gpl-3.0.en.html)   
+created by [Jan Köster](https://orcid.org/0000-0003-2713-5207) and supported by [Claus Franke](https://orcid.org/0000-0003-3371-6163) as database architect.

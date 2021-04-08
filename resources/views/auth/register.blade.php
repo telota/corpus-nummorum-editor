@@ -11,62 +11,115 @@
             <form method="POST" action="{{ route('register') }}">
                 @csrf
 
-                <!-- Name -->
-                <div class="form-group row">
-                    <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
-
-                    <div class="col-md-6">
-                        <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required autocomplete="name" autofocus>
-
-                        @error('name')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
+                <!-- Affiliation -->
+                <div class="register-affiliation">
+                    <label for="affiliation">Affiliation</label>
+                    <input type="text" name="affiliation" id="affiliation" value="" />
                 </div>
 
                 <!-- Email -->
-                <div class="form-group row">
-                    <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
+                <div class="form-group">
+                    <div class="form-label">
+                        <label for="email">E-Mail Address</label>
+                    </div>
 
-                    <div class="col-md-6">
-                        <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email">
+                    <div>
+                        <input id="email" type="email" class="form-field" name="email" value="{{ old('email') }}" required autofocus />
 
-                        @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
+                    @if (!$errors->has('email'))
+                        <div class="validation-error">
+                            Error! {{ $errors->first('email') }}
+                        </div>
+                    @endif
                     </div>
                 </div>
 
                 <!-- Password -->
-                <div class="form-group row">
-                    <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
+                <div class="form-group">
+                    <div class="form-label">
+                        <label for="password">Password</label>
+                    </div>
 
-                    <div class="col-md-6">
-                        <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
+                    <div>
+                        <input id="password" type="password" class="form-field" name="password" required />
 
-                        @error('password')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
+                    @if ($errors->has('password'))
+                        <div class="validation-error">
+                            Error! {{ $errors->first('password') }}
+                        </div>
+                    @endif
                     </div>
                 </div>
 
-                <div class="form-group row">
-                    <label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
+                <!-- Password Confirm -->
+                <div class="form-group">
+                    <div class="form-label">
+                        <label for="password-confirm">Confirm Password</label>
+                    </div>
 
-                    <div class="col-md-6">
-                        <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
+                    <div>
+                        <input id="password-confirm" type="password" class="form-field" name="password_confirmation" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <hr />
+                </div>
+
+                <!-- Firstname -->
+                <div class="form-group">
+                    <div class="form-label">
+                        <label for="firstname">Firstname</label>
+                    </div>
+
+                    <div>
+                        <input id="firstname" type="text" class="form-field" name="firstname" value="{{ old('firstname') }}" required />
+
+                    @if ($errors->has('firstname'))
+                        <div class="validation-error">
+                            Error! {{ $errors->first('firstname') }}
+                        </div>
+                    @endif
+                    </div>
+                </div>
+
+                <!-- Lastname -->
+                <div class="form-group">
+                    <div class="form-label">
+                        <label for="lastname">Lastname</label>
+                    </div>
+
+                    <div>
+                        <input id="lastname" type="text" class="form-field" name="lastname" value="{{ old('lastname') }}" required />
+
+                    @if ($errors->has('lastname'))
+                        <div class="validation-error">
+                            Error! {{ $errors->first('lastname') }}
+                        </div>
+                    @endif
+                    </div>
+                </div>
+
+                <!-- Country -->
+                <div class="form-group">
+                    <div class="form-label">
+                        <label for="country">Country</label>
+                    </div>
+
+                    <div>
+                        <input id="country" type="text" class="form-field" name="country" value="{{ old('country') }}" required />
+
+                    @if ($errors->has('country'))
+                        <div class="validation-error">
+                            Error! {{ $errors->first('country') }}
+                        </div>
+                    @endif
                     </div>
                 </div>
 
                 <!-- Button -->
-                <div class="form-group row mb-0">
-                    <div class="col-md-6 offset-md-4">
+                <div class="form-group">
+                    <div>
                         <button type="submit" class="btn btn-primary">
                             {{ __('Register') }}
                         </button>
