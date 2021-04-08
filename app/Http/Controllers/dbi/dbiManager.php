@@ -10,7 +10,6 @@ class dbiManager {
 
     public function index ($user) {
         $entities = [];
-
         foreach (config('dbi.permissions') as $entity => $permissions) {
             if ($user['level'] >= $permissions['read']) {
                 $entities[$entity] = [
