@@ -19,18 +19,32 @@ Route::get('/', function () {
 
 Auth::routes();
 
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home', function() {
     return redirect('/');
 });
 
-// Protected Routes
-Route::middleware(['auth'])->group(function () {
 
-    // Editor Frontend
-    Route::prefix('editor')->namespace ('App\Http\Controllers\editor')->group(function() {
-        Route::get('/', 'MainController@initiate')->name('editor');
+// Base Namespace ---------------------------------------------------------
+Route::namespace ('App\Http\Controllers\base')->group(function () {
+
+    Route::get('/account-status', 'AccountStatusController@index')->name('account-status');
+
+    Route::get('/readme', 'WikiController@readme')->name('readme');
+    Route::get('/license', 'WikiController@license')->name('license');
+
+    // Wiki
+    Route::prefix('wiki')->group(function() {
+        Route::get('/', 'WikiController@index')->name('wikiIndex');
     });
+});
+
+// Editor Frontend
+Route::prefix('editor')->namespace ('App\Http\Controllers\editor')->group(function() {
+    Route::get('/', 'MainController@initiate')->name('editor');
+});
+
+// Protected Routes -------------------------------------------------------
+Route::middleware(['auth'])->group(function () {
 
     // Internal API (DBI)
     Route::prefix('dbi')->namespace('App\Http\Controllers\dbi')->group(function() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Request;
 
 class LoginController extends Controller
 {
@@ -26,7 +27,15 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME; // set in app\Providers\RouteServiceProvider.php
+    //protected $redirectTo = RouteServiceProvider::HOME; // set in app\Providers\RouteServiceProvider.php
+
+    protected function redirectTo () {
+        $url = RouteServiceProvider::HOME;
+        $post = Request::post();
+        $anchor = (empty($post['redirect-to']) ? '' : ('#'.$post['redirect-to']));
+
+        return $url.$anchor;
+    }
 
     /**
      * Create a new controller instance.
@@ -35,6 +44,10 @@ class LoginController extends Controller
      */
     public function __construct()
     {
+        // Bot Honeypot as additional protection
+        $post = Request::post();
+        if(!empty($post['connection'])) { die(abort(403)); }
+
         $this->middleware('guest')->except('logout');
     }
 }

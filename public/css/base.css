@@ -20,7 +20,7 @@ a {
 #base-header {
     width: 100%;
     background-color: #272727;
-    position: absolute;
+    position: fixed;
     top: 0;
     z-index: 100;
     box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.15);
@@ -39,7 +39,7 @@ a {
 #base-footer {
     width: 100%;
     background-color: #272727;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     z-index: 100;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.15);
@@ -53,26 +53,41 @@ a {
 
 /* Card */
 .card {
-    padding: 30px;
+    padding: 25px;
     background-color: #272727;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
-
+    font-weight: 500;
+    font-size: 24px;
 }
 
 .card-body {
-
+    margin-top: 20px;
 }
 
 /* Forms */
 .form-group {
-    padding: 7px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.form-group > * {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 100px;
+    margin: 10px;
+}
+
+.form-element {
+    padding: 8px;
 }
 
 .form-label {
-    margin-bottom: 7px;
+    margin-bottom: 6px;
     margin-left: 5px;
     font-weight: 500;
 }
@@ -88,6 +103,11 @@ a {
     min-width: 200px;
 }
 
+.form-field:hover {
+    border: 2px solid #eee;
+    background-color: #373737;
+}
+
 .validation-error {
     color: red;
     font-weight: 400;
@@ -95,7 +115,48 @@ a {
     margin-left: 5px;
 }
 
-/* Registration */
-.register-affiliation {
+.h-field {
     display: none;
+}
+
+/* Buttons */
+.btn-group-center {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-primary {
+    border: none;
+    padding: 7px 13px 7px 13px;
+    font-weight: 400;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: .12rem;
+    cursor: pointer;
+}
+
+.btn-blue {
+    color: #eee;
+    background-color: #006699;
+}
+
+.btn-blue:hover {
+    background-color: #1472a1;
+}
+
+/* functional */
+.text-end {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
 }

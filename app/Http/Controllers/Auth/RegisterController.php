@@ -29,7 +29,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    protected $redirectTo = '/account-status'; //RouteServiceProvider::HOME;
 
     /**
      * Create a new controller instance.
@@ -49,7 +49,8 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        if (!empty($data['affiliation'])) { abort(403); }
+        // Bot Honeypot as additional protection
+        if (!empty($data['connection'])) { die(abort(403)); }
 
         return Validator::make($data, [
             //'name'      => ['required', 'string', 'max:255'],

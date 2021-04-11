@@ -7,12 +7,37 @@
     <!-- Card -->
     <div class="card">
         <!-- Card Header -->
-        <div class="card-header">{{ __('Login') }}</div>
+        <div class="card-header text-center text-uppercase">{{ __('Login') }}</div>
 
         <!-- Card Body -->
         <div class="card-body">
             <form method="POST" action="{{ route('login') }}">
+                {{-- CSRF Token --}}
                 @csrf
+
+                {{-- Bot Defence (Honeypot) --}}
+                <!-- Connection Type -->
+                <div class="h-field">
+                    <label for="connection">Connection</label>
+                    <input type="text" name="connection" id="connection" value="" />
+                </div>
+
+                @if (!empty($showRedirect))
+                {{-- Anchor won't be send to server, so we have to extract it using JS --}}
+                <!-- Redirect -->
+                <div class="h-field">
+                    <label for="redirect-to">Redirect to</label>
+                    <input type="text" name="redirect-to" id="redirect-to" value="" />
+
+                    <script>
+                        const url = window.location.href.split('#');
+                        url.shift();
+                        if (url[0]) {
+                            document.getElementById("redirect-to").value = url.join('');
+                        }
+                    </script>
+                </div>
+                @endif
 
                 <!-- Email -->
                 <div class="form-group row">

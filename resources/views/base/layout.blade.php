@@ -24,7 +24,7 @@
     <div id="base-header">
         <div id="base-header-container">
             <div>
-                <a href="https://www.corpus-nummorum.eu/">Corpus Nummorum</a>
+                <a href="{{ env('APP_URL') }}">Corpus Nummorum Data</a>
             </div>
 
             <div style="display: flex;">
@@ -58,5 +58,3 @@
 </body>
 
 </html>
-
-<style
