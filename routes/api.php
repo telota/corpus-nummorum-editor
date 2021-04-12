@@ -17,3 +17,18 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Redirect index route to wiki
+Route::get('/', function() {
+    return redirect('/wiki#usage-api');
+});
+
+Route::namespace('App\Http\Controllers\dbi')->group(function () {
+
+    Route::get  ('/documentation/{entity}/{resource?}', 'APIController@documentation');
+
+    Route::get  ('/cn_{entity}_{id}.json',              'APIController@select');
+    Route::get  ('/cn_{entity}_{id}',                   'APIController@select');
+
+    Route::match(['get', 'post'], '/{entity}/{id?}',    'APIController@select');
+});

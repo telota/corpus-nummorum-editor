@@ -29,18 +29,22 @@ Route::namespace ('App\Http\Controllers\base')->group(function () {
 
     Route::get('/account-status', 'AccountStatusController@index')->name('account-status');
 
-    Route::get('/readme', 'WikiController@readme')->name('readme');
-    Route::get('/license', 'WikiController@license')->name('license');
+    Route::get('/readme', 'InformationController@readme')->name('readme');
+    Route::get('/license', 'InformationController@license')->name('license');
+    Route::get('/licensing', 'InformationController@licensing')->name('licensing');
+    Route::get('/imprint', function() {
+        return redirect('https://www.corpus-nummorum.eu/legal-notice');
+    });
 
     // Wiki
     Route::prefix('wiki')->group(function() {
-        Route::get('/', 'WikiController@index')->name('wikiIndex');
+        Route::get('/', 'InformationController@wikiIndex')->name('wikiIndex');
     });
 });
 
 // Editor Frontend
 Route::prefix('editor')->namespace ('App\Http\Controllers\editor')->group(function() {
-    Route::get('/', 'MainController@initiate')->name('editor');
+    Route::get('/', 'AppController@initiate')->name('editor');
 });
 
 // Protected Routes -------------------------------------------------------

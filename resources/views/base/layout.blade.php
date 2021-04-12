@@ -47,7 +47,9 @@
     </div>
 
     <div id="base-container">
-        @yield('content')
+        <div class="base-container-helper">
+            @yield('content')
+        </div>
     </div>
 
     <div id="base-footer">

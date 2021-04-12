@@ -24,16 +24,26 @@ a {
     top: 0;
     z-index: 100;
     box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.15);
+    height: 40px;
 }
 
 #base-header-container {
     padding: 5px 10px 5px 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height: 30px;
 }
 
 #base-container {
-    padding-top: 50px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.base-container-helper {
+    margin: 80px 0 80px 0;
+    max-width: 1200px;
 }
 
 #base-footer {
@@ -43,12 +53,19 @@ a {
     bottom: 0;
     z-index: 100;
     box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.15);
+    height: 40px;
 }
 
 #base-footer-container {
     padding: 5px 10px 5px 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height: 30px;
+}
+
+.vert-spacer {
+    padding: 80px 0 80px 0;
 }
 
 /* Card */
@@ -125,7 +142,7 @@ a {
     justify-content: center;
 }
 
-.btn-primary {
+.btn-tile {
     border: none;
     padding: 7px 13px 7px 13px;
     font-weight: 400;

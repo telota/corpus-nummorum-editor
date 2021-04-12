@@ -1,8 +1,7 @@
 @extends('base.layout')
 
 @section('content')
-
-<div style="display: flex; justify-content: center;">
+<div style="display: flex; justify-content: center; min-height: 100%; align-items: center">
 
     <div class="card">
         <div class="card-header text-center">Registration for CN Editor</div>
@@ -30,11 +29,11 @@
                             <div>
                                 <input id="email" type="email" class="form-field" name="email" value="{{ old('email') }}" required autofocus />
 
-                            @if ($errors->has('email'))
+                                @if ($errors->has('email'))
                                 <div class="validation-error">
                                     Error! {{ $errors->first('email') }}
                                 </div>
-                            @endif
+                                @endif
                             </div>
                         </div>
 
@@ -47,11 +46,11 @@
                             <div>
                                 <input id="password" type="password" class="form-field" name="password" required />
 
-                            @if ($errors->has('password'))
+                                @if ($errors->has('password'))
                                 <div class="validation-error">
                                     Error! {{ $errors->first('password') }}
                                 </div>
-                            @endif
+                                @endif
                             </div>
                         </div>
 
@@ -130,7 +129,7 @@
                 <!-- Button -->
                 <div class="form-element btn-group-center" style="margin-top: 20px">
                     <div>
-                        <button type="submit" class="btn-primary btn-blue">
+                        <button type="submit" class="btn-tile btn-blue">
                             {{ __('Register') }}
                         </button>
                     </div>
@@ -140,5 +139,4 @@
     </div>
 
 </div>
-
 @endsection

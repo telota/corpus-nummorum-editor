@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="{{ $data['presets']['language'] }}">
 
 <head>
     <meta charset="utf-8">
@@ -28,9 +28,32 @@
 </head>
 
 <body>
-    <div>
-        @yield('app')
+
+    <!-- Initial Loading Screen -->
+    <div class="loader">
+        <div class="loader-background-gradient">
+            <div class="loader-text"><b>CN</b> Editor</div>
+            <div class="loader-spinner"></div>
+        </div>
+        <div class="loader-footer">
+            <p>
+                CORPUS NUMMORUM&ensp;|&ensp;TELOTA - IT/DH<br/>
+                Berlin-Brandenburg Academy of Sciences and Humanities<br/>
+                2020{!! date('y') > 20 ? ('&ndash;'.date('y')) : ('') !!}
+            </p>
+        </div>
     </div>
+
+    <!-- Vue SPA -->
+    <div id="editor">
+        <div id="vue">
+            @yield('app')
+        </div>
+    </div>
+
+    <!-- Editor JS -->
+    <script src="{{ asset('js/editor.js') }}"></script>
+
 </body>
 
 </html>
