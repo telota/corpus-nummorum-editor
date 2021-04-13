@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -21,30 +21,7 @@
 </head>
 
 <body>
-    <div id="base-header">
-        <div id="base-header-container">
-            <div>
-                <a href="{{ env('APP_URL') }}">Corpus Nummorum Data</a>
-            </div>
-
-            <div style="display: flex;">
-                @auth
-                    <a href="{{ url('/') }}">Start</a>
-                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
-                @else
-                    @if (url()->current() !== env('APP_URL').'/login')
-                        <a href="{{ route('login') }}" >Log in</a>
-                    @endif
-
-                    @if (url()->current() !== env('APP_URL').'/register')
-                        <a href="{{ route('register') }}">Register</a>
-                    @endif
-                @endauth
-            </div>
-        </div>
-    </div>
+    @include ('elements.header')
 
     <div id="base-container">
         <div class="base-container-helper">
@@ -52,11 +29,7 @@
         </div>
     </div>
 
-    <div id="base-footer">
-        <div id="base-footer-container">
-            <div>Test</div>
-        </div>
-    </div>
+    @include ('elements.footer')
 </body>
 
 </html>

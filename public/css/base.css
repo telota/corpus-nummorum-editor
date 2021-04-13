@@ -9,32 +9,10 @@ html, body {
 
 a {
     color: #999;
-    font-size: 12px;
-    font-weight: 600;
-    /*letter-spacing: .1rem;*/
     text-decoration: none;
-    text-transform: uppercase;
 }
 
 /* Layout */
-#base-header {
-    width: 100%;
-    background-color: #272727;
-    position: fixed;
-    top: 0;
-    z-index: 100;
-    box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.15);
-    height: 40px;
-}
-
-#base-header-container {
-    padding: 5px 10px 5px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 30px;
-}
-
 #base-container {
     height: 100%;
     display: flex;
@@ -44,24 +22,6 @@ a {
 .base-container-helper {
     margin: 80px 0 80px 0;
     max-width: 1200px;
-}
-
-#base-footer {
-    width: 100%;
-    background-color: #272727;
-    position: fixed;
-    bottom: 0;
-    z-index: 100;
-    box-shadow: 2px 3px 10px rgba(0, 0, 0, 0.15);
-    height: 40px;
-}
-
-#base-footer-container {
-    padding: 5px 10px 5px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 30px;
 }
 
 .vert-spacer {
