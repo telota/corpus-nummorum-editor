@@ -22,9 +22,10 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
-    protected function schedule(Schedule $schedule)
-    {
-        // $schedule->command('inspire')->hourly();
+    protected function schedule(Schedule $schedule) {
+        $schedule->command('cron:statistics')-> dailyAt('04:12');
+        $schedule->command('zotero:import')-> dailyAt('03:12');
+        $schedule->command('check:references')-> weeklyOn(1, '06:20');
     }
 
     /**

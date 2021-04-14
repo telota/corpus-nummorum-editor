@@ -29,19 +29,21 @@ Route::namespace ('App\Http\Controllers\base')->group(function () {
 
     Route::get('/account-status', 'AccountStatusController@index')->name('account-status');
 
-    Route::get('/readme', 'InformationController@readme')->name('readme');
-    Route::get('/license', 'InformationController@license')->name('license');
-    Route::get('/licensing', 'InformationController@licensing')->name('licensing');
+    Route::get('/readme', 'MarkdownController@readme')->name('readme');
+    Route::get('/license', 'MarkdownController@license')->name('license');
+    Route::get('/licensing', 'MarkdownController@licensing')->name('licensing');
+
+    Route::get('/wiki', 'MarkdownController@documentation')->name('wiki');
+    Route::get('/documentation', function() {
+        return redirect('/wiki');
+    });
+    Route::get('/changelog', 'MarkdownController@changelog')->name('changelog');
+
     Route::get('/imprint', function() {
         return redirect('https://www.corpus-nummorum.eu/legal-notice');
     });
     Route::get('/contact', function() {
         return redirect('https://www.corpus-nummorum.eu/contact');
-    });
-
-    // Wiki
-    Route::prefix('wiki')->group(function() {
-        Route::get('/', 'InformationController@wikiIndex')->name('wikiIndex');
     });
 });
 
