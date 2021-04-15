@@ -20,7 +20,7 @@ class AppController extends Controller {
 
         // Level is insufficent: show status
         else if ($user->access_level < 2) {
-            return redirect('/account-status');
+            return redirect('/account');
         }
 
         // Level is sufficient: get Data and return editor app

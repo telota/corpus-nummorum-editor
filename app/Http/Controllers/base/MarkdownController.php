@@ -12,21 +12,21 @@ class MarkdownController extends Controller {
         $helper = new MdMethods();
         $data = $helper->provideData('README.md');
 
-        return view('base.markdown_file', $data);
+        return view('base.markdown', $data);
     }
 
     public function license () {
         $helper = new MdMethods();
         $data = $helper->provideData('LICENSE.md');
 
-        return view('base.markdown_file', $data);
+        return view('base.markdown', $data);
     }
 
     public function licensing () {
         $helper = new MdMethods();
         $data = $helper->provideData('LICENSE.md');
 
-        return view('base.markdown_file', $data);
+        return view('base.markdown', $data);
     }
 
     public function changelog () {
@@ -36,7 +36,7 @@ class MarkdownController extends Controller {
         $data['heading'] = 'test';
         $data['introduction'] = 'test';
 
-        return view('base.markdown_file', $data);
+        return view('base.markdown', $data);
     }
 
     public function documentation () {
@@ -46,7 +46,7 @@ class MarkdownController extends Controller {
         $data['heading'] = 'test';
         $data['introduction'] = 'test';
 
-        return view('base.markdown_file', $data);
+        return view('base.markdown', $data);
     }
 }
 

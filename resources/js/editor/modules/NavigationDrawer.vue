@@ -1,21 +1,21 @@
 <template>
 <div>
-    <v-navigation-drawer 
-        app 
+    <v-navigation-drawer
+        app
         clipped
-        v-model="$root.drawer.active" 
+        v-model="$root.drawer.active"
         :expand-on-hover="$root.drawer.mini && $vuetify.breakpoint.mdAndUp"
-    > 
+    >
         <v-list :dense="dense" class="mt-n1">
 
             <!-- Dashbaord ------------------------------------------------------------------ -->
             <v-hover v-slot="{ hover }">
                 <a href="/editor#/dashboard" style="width: 100%">
                     <v-list-item :class="hover ? 'secondary' : ''">
-                        <v-list-item-action> 
+                        <v-list-item-action>
                             <v-icon v-text="'dashboard'" :class="$route.name === 'dashboard' ? 'blue_sec--text' : ''"></v-icon>
                         </v-list-item-action>
-                        <v-list-item-content> 
+                        <v-list-item-content>
                             <v-list-item-title>Dashboard</v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
@@ -33,10 +33,10 @@
                 <v-hover v-slot="{ hover }">
                     <a :href="'/editor#/' + p.name + '/search'" style="width: 100%">
                         <v-list-item :class="hover ? 'secondary' : ''">
-                            <v-list-item-action> 
+                            <v-list-item-action>
                                 <v-icon v-text="p.icon" :class="$route.name === p.name + '-search' ? 'blue_sec--text' : ''"></v-icon>
                             </v-list-item-action>
-                            <v-list-item-content> 
+                            <v-list-item-content>
                                 <v-list-item-title v-text="p.text"></v-list-item-title>
                             </v-list-item-content>
                         </v-list-item>
@@ -44,7 +44,7 @@
                 </v-hover>
 
                 <a :href="'/editor#/' + p.name + '/edit'">
-                    <advbtn 
+                    <advbtn
                         icon="add"
                         :color_main="$route.path === '/editor#/' + p.text + '/edit' ? 'marked' : 'sysbar'"
                         color_hover="secondary"
@@ -56,24 +56,24 @@
             <template v-for="(group, i) in routes">
                 <v-divider v-if="group === null" :key="'group' + i"></v-divider>
 
-                <v-list-group 
+                <v-list-group
                     v-else
-                    :key="'group' + i" 
-                    :prepend-icon="group.icon" 
+                    :key="'group' + i"
+                    :prepend-icon="group.icon"
                     no-action
                 >
                     <template v-slot:activator>
                         <v-list-item-content>
                             <v-list-item-title v-text="group.text"></v-list-item-title>
                         </v-list-item-content>
-                    </template>           
+                    </template>
 
-                    <v-hover 
-                        v-for="(route, r) in group.children" 
+                    <v-hover
+                        v-for="(route, r) in group.children"
                         :key="'group' + i + '.' + r"
                         v-slot="{ hover }"
                     >
-                        <a :href="'/editor#/' + route.name" style='width: 100%'>
+                        <a :href="route.name ? ('/editor#/' + route.name) : route.link" :target="route.name ? '_self' : '_blank'" style='width: 100%'>
                             <v-list-item :class="hover ? 'secondary' : ''" class="ml-8">
                                 <v-list-item-action>
                                     <v-icon v-text="route.icon" :class="$route.name === route.name ? 'blue_sec--text' : ''"></v-icon>
@@ -87,7 +87,7 @@
                 </v-list-group>
             </template>
 
-            <!-- Logout -->            
+            <!-- Logout -->
             <v-divider></v-divider>
 
             <v-list-item @click="$root.logout()">
@@ -98,7 +98,7 @@
                     <v-list-item-title v-text="'Logout'"></v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
-        </v-list> 
+        </v-list>
     </v-navigation-drawer>
 </div>
 </template>
@@ -106,7 +106,7 @@
 
 <script>
 export default {
-    data () {     
+    data () {
         return {
             primaries: [
                 { text: this.$root.label('types'),  icon: 'blur_circular',  name: 'types' },
@@ -119,9 +119,9 @@ export default {
         rank () {
             return this.$root.user?.level ? this.$root.user.level : 10
         },
-        routes (){ 
+        routes (){
             const routes = [
-                null,               
+                null,
                 { text: this.$root.label('Features'),         icon: 'info',               children: [
                     { text: this.$root.label('designs'),          icon: 'notes',              name: 'designs' },
                     { text: this.$root.label('legends'),          icon: 'translate',          name: 'legends' },
@@ -149,7 +149,7 @@ export default {
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          name: 'bibliography' },
                     { text: this.$root.label('file_browser'),     icon: 'folder_open',        name: 'files' },
                     //{ text: this.$root.label('broken_links'),     icon: 'link_off',           name: 'brokenlinks' }
-                ]}              
+                ]}
             ]
             // PR
             if (this.rank >= 21) {
@@ -170,6 +170,7 @@ export default {
             if (this.rank >= 31) {
                 routes.push(null)
                 routes.push({ text: this.$root.label('administrator'),  icon: 'font_download',  children: [
+                    { text: 'Gitlab',   icon: 'pending_actions',  link: 'https://gitup.uni-potsdam.de/TELOTA/cluster-alte-welt/corpus-nummorum/cn-dokumentation/issues' },
                     { text: 'Users',    icon: 'people',     name: 'users' },
                  // { text: 'Errorlog', icon: 'bug_report', name: 'errors' }
                 ]})

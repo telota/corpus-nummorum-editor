@@ -27,7 +27,7 @@ Route::get('/home', function() {
 // Base Namespace ---------------------------------------------------------
 Route::namespace ('App\Http\Controllers\base')->group(function () {
 
-    Route::get('/account-status', 'AccountStatusController@index')->name('account-status');
+    Route::get('/account', 'AccountController@status')->name('account-status');
 
     Route::get('/readme', 'MarkdownController@readme')->name('readme');
     Route::get('/license', 'MarkdownController@license')->name('license');
@@ -39,11 +39,28 @@ Route::namespace ('App\Http\Controllers\base')->group(function () {
     });
     Route::get('/changelog', 'MarkdownController@changelog')->name('changelog');
 
+    // Redirects
+    Route::get('/public-website', function() {
+        return redirect('https://www.corpus-nummorum.eu/');
+    });
     Route::get('/imprint', function() {
         return redirect('https://www.corpus-nummorum.eu/legal-notice');
     });
     Route::get('/contact', function() {
         return redirect('https://www.corpus-nummorum.eu/contact');
+    });
+    Route::get('/data-protection', function() {
+        return redirect('https://www.corpus-nummorum.eu/data-protection');
+    });
+    Route::get('/repository/research-data', function() {
+        return redirect('https://www.corpus-nummorum.eu/d2r');
+    });
+
+    Route::get('/repository/source-code', function() {
+        return redirect('https://github.com/telota');
+    });
+    Route::get('/repository/research-data', function() {
+        return redirect('https://github.com/telota');
     });
 });
 

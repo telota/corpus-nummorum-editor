@@ -22,14 +22,12 @@
             </a>
             <a
                 href="/licensing"
-                target="_blank"
                 class="footer-link"
             >
                 Licensing
             </a>
             <a
                 href="/wiki"
-                target="_blank"
                 class="footer-link"
             >
                 Wiki
@@ -69,7 +67,7 @@
         text-transform: uppercase;
         font-size: 11px;
         font-weight: 400;
-        letter-spacing: .1rem;
+        /*letter-spacing: .1rem;*/
         margin-right: 15px;
     }
 </style>
