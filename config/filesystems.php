@@ -13,7 +13,8 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DRIVER', 'local'),
+    //'default' => env('FILESYSTEM_DRIVER', 'local'),
+    'default' => env('FILESYSTEM_DRIVER', 'data'),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,6 +30,13 @@ return [
     */
 
     'disks' => [
+
+        'data' => [ // Data Storage (define directory in .env)
+            'driver' => 'local',
+            'root' => storage_path(env('APP_STORAGE')),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
 
         'local' => [
             'driver' => 'local',

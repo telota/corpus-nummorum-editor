@@ -27,8 +27,7 @@ Route::get('/home', function() {
 // Base Namespace ---------------------------------------------------------
 Route::namespace ('App\Http\Controllers\base')->group(function () {
 
-    Route::get('/account', 'AccountController@status')->name('account-status');
-
+    // Markdown
     Route::get('/readme', 'MarkdownController@readme')->name('readme');
     Route::get('/license', 'MarkdownController@license')->name('license');
     Route::get('/licensing', 'MarkdownController@licensing')->name('licensing');
@@ -73,6 +72,9 @@ Route::prefix('editor')->namespace ('App\Http\Controllers\editor')->group(functi
 
 // Routes protected by Middleware -----------------------------------------
 Route::middleware(['auth'])->group(function () {
+
+    // Account Status
+    Route::get('/account', 'App\Http\Controllers\base\AccountController@status')->name('account-status');
 
     // Internal API (DBI)
     Route::prefix('dbi')->namespace('App\Http\Controllers\dbi')->group(function() {

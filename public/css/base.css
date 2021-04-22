@@ -21,6 +21,7 @@ a {
 
 .base-container-helper {
     margin: 80px 0 80px 0;
+    width: 100%;
     max-width: 1400px;
 }
 

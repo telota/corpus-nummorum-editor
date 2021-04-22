@@ -1,6 +1,7 @@
 @extends('base.layout')
 
 @section('content')
+<div id="start"></div>
 <div id="md-content">
 
     @if (!empty($toc))
@@ -32,6 +33,10 @@
         <div id="md-file">
             {!! $content ? $content : 'NO CONTENT' !!}
         </div>
+
+        <div id="md-to-top">
+            <a href="#start">Back to Top</a>
+        </div>
     </div>
 
 </div>
@@ -43,13 +48,14 @@
     }
 
     #md-toc {
-        flex: 0 0 200px;
+        flex: 0 0 150px;
         margin: 0 50px 80px 0;
     }
 
     #md-article {
         flex: 1;
         position: relative;
+        margin-bottom: 50px;
     }
 
     #md-heading {
@@ -64,39 +70,55 @@
     }
 
     #md-introduction {
-
+        margin-bottom: 50px;
     }
 
     #md-file {
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+    }
 
+    #md-to-top {
+        margin-top: 30px;
+        text-align: end;
+        font-weight: 500;
+        font-size: 10pt;
     }
 
     /* Headings */
     .md-h2 {
+        margin-bottom: 0px;
+        padding-bottom: 0px;
     }
-
     .md-h3 {
+        margin-bottom: 0px;
+        padding-bottom: 0px;
     }
-
     .md-h4 {
+        margin-bottom: 0px;
+        padding-bottom: 0px;
     }
 
-    /* Toc Links */
-    .md-l2 {
+    /* Toc Entries */
+    .md-t:hover {
+        color: #fff;
+    }
+    .md-t2 {
         font-weight: 800;
         font-size: 15px;
+        margin-top: 15px;
     }
-
-    .md-l3 {
+    .md-t3 {
         font-weight: 600;
         font-size: 14px;
-        margin-left: 20px;
+        margin-left: 10px;
+        margin-top: 8px;
     }
-
-    .md-l4 {
-        font-weight: 300;
+    .md-t4 {
+        font-weight: 400;
         font-size: 11px;
-        margin-left: 40px;
+        margin-left: 20px;
+        margin-top: 4px;
     }
 </style>
 @endsection

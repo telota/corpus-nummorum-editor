@@ -8,145 +8,64 @@ use Illuminate\Support\Facades\Storage;
 use AccessLevel;
 use Response;
 use Request;
+use Auth;
 
 
 class FileController extends Controller {
 
     // Get alle directories in 'storage'
-    public function index () {   
-        /*$directories_raw = Storage::allDirectories ();
+    public function index () {
 
-        foreach ($directories_raw as $directory) {
-            if ( !preg_match ('/system/', $directory) )     // JK: exclude certain directories from list
-            {
-                $directories [] = 'storage/'.$directory;
-            }
-        }*/
+        // Check Auth
+        if (Auth::user()->access_level < 10) { die(abort(403)); }
 
-        AccessLevel::abort (10); // Authentification: Access Level Check
-
-        foreach (config ('dbi.files.directories') as $directory) {
-            // JK: Ensure directory exists
-            if ( Storage::disk ('silo10') -> has(ltrim ($directory, 'storage/'))) {
-                $directories [] = $directory;
+        foreach (config('dbi.files.directories') as $directory) {
+            // Ensure directory exists
+            if (Storage::disk('data')->has(ltrim($directory, 'storage/'))) {
+                $directories[] = $directory;
             }
         }
 
-        return Response::json($directories);
+        return empty($directories) ? abort(404) : Response::json($directories);
     }
 
     // Get all files in given directory
     public function browse ($directory) {
-        AccessLevel::abort (10); // Authentification: Access Level Check
 
-        $files_raw = Storage::Files($directory);
-
-        foreach ($files_raw as $file) {
-            $explode = explode ('/', $file);
-            $files[] = [
-                'url' => $file, 
-                'name' => end($explode)
-            ];
+        if (Auth::user()->access_level < 10 || !in_array('storage/'.$directory, config('dbi.files.directories'))) {
+            die(abort(403));
         }
-
-        return !isset($files) ? null : Response::json($files);
-
-        /*$files_raw  = Storage::Files ($directory);
-
-        foreach ($files_raw as $file) 
-        {
-            $directory      = explode ('/', $file);
-            $name           = array_pop ($directory);
-            $directory      = implode ('/',$directory);
-            $extension      = explode('.', $name);
-            $extension      = strtolower ( array_pop ($extension));
-
-            // JK: File is image which can be rendered by Browser
-            if (in_array ($extension, ['jpg', 'jpeg', 'png', 'gif', 'svg'] )) {
-                $src        = 'storage/'.$file;
-                $loading    = 'placeholder/placeholder_'.$extension.'.png';
-                $fallback   = 'placeholder/placeholder_'.$extension.'.png';
-            
-            // JK: File is image but cannot be rendered by Browser -> Digilib
-            } elseif (in_array ($extension, ['tif', 'tiff'] )) {
-                $src        = 'https://digilib.bbaw.de/digitallibrary/servlet/Scaler?fn=silo10/thrakien/'.$file.'&dh=250&dw=250'; //'placeholder/placeholder_'.$extension.'.png'; // -> this should be replaced by digilib-link
-                $loading    = 'placeholder/placeholder_'.$extension.'.png';
-                $fallback   = 'placeholder/placeholder_'.$extension.'.png';
-            
-            // JK: File is no image, but of known type
-            } elseif (in_array ($extension, ['pdf'] )) {
-                $src = $loading = $fallback = 'placeholder/placeholder_'.$extension.'.png';
-
-             // JK: File is of unknown type
-            } else {
-                $src = $loading = $fallback = 'placeholder/placeholder_not_supported.png';
+        else if (!Storage::disk('data')->exists($directory)) {
+            die(abort(404));
+        }
+        else  {
+            foreach (Storage::disk('data')->Files($directory) as $file) {
+                $explode = explode('/', $file);
+                $files[] = [
+                    'url' => $file,
+                    'name' => end($explode)
+                ];
             }
 
-            $files [] = [
-                'url'           => 'storage/'.$file,
-                'directory'     => 'storage/'.$directory,
-                'name'          => $name,
-                'extension'     => $extension,
-                'src'           => $src,
-                'src_loading'   => $loading,
-                'src_fallback'  => $fallback
-            ];
+            return empty($files) ? null : Response::json($files);
         }
-        
-        return !isset ($files) ? null : Response::json ($files);*/
     }
 
     // Get information about specific file
     public function info ($directory) {
-        /*
-        AccessLevel::abort (10); // Authentification: Access Level Check
-        
-        if ( !Storage::disk ('silo10') -> exists ($directory) ) // JK: Ensure file exists
-        {
-            $info ['error'] = config ('cn_admin_feedback.not_found').' The dataset was linked to a non existing file:'."\n".'"'.$directory.'"'."\n".'It has been either removed or renamed. Please assign another file.';
-        }
-        else
-        {   
-            $directory_explode      = explode ('/', $directory);
-            $name                   = array_pop ($directory_explode);
-            $extension              = explode('.', $name);
-            $extension              = strtolower ( array_pop ($extension));
-            $loading                = 'ui-elements/imgload.png';
-            $fallback               = 'ui-elements/nopreview.png';
-            $mimetype               = Storage::disk('silo10')->getMimeType($directory);
-            $size                   = Storage::disk('silo10')->size($directory);
-
-            $info = array (
-                'url'           => 'storage/'.$directory,
-                'directory'     => 'storage/'.implode ('/', $directory_explode),
-                'name'          => $name,
-                'extension'     => $extension,
-                'src'           => 'storage/'.$file,
-                'src_loading'   => $loading,
-                'src_fallback'  => $fallback,
-                'mimetype'      => $mimetype,
-                'size'          => $size
-            );
-        }
-
-        return Response::json ($info);*/
+        die(abort(404));
     }
 
     // Upload file to storage
     public function upload ($directory) {
-        AccessLevel::abort(12); // Authentification: Access Level Check
+
+        // Check Auth
+        if (Auth::user()->access_level < 11) { die(abort(403)); }
 
         $request = Request::all();
-        
-        if (!empty($request['file'])) { // JK: ensure a file was selected
-            
-            /*$file                   = $request ['file'];
-            $file_name_original     = urlencode ($file -> getClientOriginalName () );   // JK: urlencode to ensure filename is readable
-            $file_name_explode      = explode ('.', $file_name_original);
-            $file_name_extension    = strtolower (array_pop ($file_name_explode) );     // JK: separate extension from the rest
-            $file_name_cut          = implode ('.', $file_name_explode).'_01';          // JK: rebuild cut name and add increment
-            $file_name              = $file_name_cut.'.'.$file_name_extension;          // JK: rebuild full name*/
 
+        // ensure a file was selected
+        if (!empty($request['file'])) {
             $file                   = $request ['file'];
             $file_name_original     = trim($file -> getClientOriginalName());
             $file_name_explode      = explode('.', $file_name_original);
@@ -161,8 +80,8 @@ class FileController extends Controller {
             if (strlen($file_name_cut) < 5) { $file_name_cut = substr('.'.date('U'), -8); } // Replace name with shortened u if name shorther than 5 chars
             $file_name_cut          .= '_01';                                               // add increment
             $file_name              = $file_name_cut.$file_name_extension;                  // rebuild name
-            
-            $files  = Storage::Files($directory);
+
+            $files  = Storage::disk('data')->Files($directory);
             $i      = 2;
 
             // Check directory and increase increment if file of this name already exists
@@ -171,20 +90,20 @@ class FileController extends Controller {
                 $file_name     = $file_name_cut.$file_name_extension;
                 ++$i;
 
-                if ($i > 99) {   
+                if ($i > 99) {
                     $feedback['error'] = config('cn_admin_feedback.server_issue').'"'.$file_name.'" could not be uploaded to "storage/'.$directory.'". There are 99 files of the same name. Please rename the file providing an unique name.';
-                    die (Response::json($feedback)); 
+                    die (Response::json($feedback));
                 }
             }
 
-            if ( Storage::putFileAs($directory, $file, $file_name)) {
+            if (Storage::disk('data')->putFileAs($directory, $file, $file_name)) {
                 $feedback['success'] = config ('cn_admin_feedback.ok_created').'"'.$file_name.'" has been uploaded to "storage/'.$directory .'".';
                 $feedback['url']     = $directory.'/'.$file_name; //'storage/'.$directory.'/'.$file_name;
-            } 
+            }
             else {
                 $feedback['error'] = config('cn_admin_feedback.server_issue').'"'.$file_name.'" could not be uploaded to "storage/'.$directory.'". Please contact our IT team.';
-            }; 
-        } 
+            };
+        }
         else {
             $feedback['error'] = config('cn_admin_feedback.validation_issue').'no file selected. Please try again.';
         }
@@ -194,20 +113,24 @@ class FileController extends Controller {
 
     // Delete requested file
     public function delete () {
-        AccessLevel::abort (12); // Authentification: Access Level Check
 
-        $delete = substr(Request::post()['file'], 8) == 'storage/' ? substr(Request::post()['file'], 8) : Request::post()['file'];
+        // Check Auth
+        if (Auth::user()->access_level < 12) { die(abort(403)); }
 
-        if (Storage::disk('silo10') -> exists($delete)) // JK: Ensure file exists
-        {
-            if (Storage::delete($delete)) {
+        $file = Request::post()['file'];
+
+        $delete = substr($file, 8) === 'storage/' ? substr($file, 8) : $file;
+
+        // Ensure file exists
+        if (Storage::disk('data')->exists($delete)) {
+            if (Storage::disk('data')->delete($delete)) {
                 $feedback['success'] = config('cn_admin_feedback.ok_updated').' "storage/'.$delete.'" deleted.';
                 $feedback['url']     = 'storage/'.$delete;
-            } 
+            }
             else {
                 $feedback['error'] = config('cn_admin_feedback.server_issue').' "storage/'.$delete.'" could not be deleted.';
-            }            
-        } 
+            }
+        }
         else {
             $feedback['error'] = config('cn_admin_feedback.not_found').' "storage/'.$delete.'" could not be found. Someone else might deleted it, already. Please reload and try again.';
         }

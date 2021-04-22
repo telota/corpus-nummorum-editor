@@ -19,6 +19,10 @@ The backend consists of a MySQL database and a PHP JSON API. The frontend is a V
 The CN Editor was tailored to the specific needs of the CN. In order to be able to use the software directly for other projects, the same basic structure must be used as for the CN (this applies in particular to the database). Otherwise, it is advisable to create a fork and adapt the app at code level. With future updates we will generalise the editor more to make it easier for other projects to use it directly. However, all currently planned features must be implemented first.  
 In any way, please feel free to reuse the code for your personal projects as you wish.
 
+## Installation and Usage
+
+For instructions on installing and using the app, check DOCUMENTATION.md.
+
 ## Main Dependencies
 
 * [Laravel ^8.0](https://laravel.com/)

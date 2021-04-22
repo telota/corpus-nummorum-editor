@@ -21,6 +21,12 @@
                     Editor
                 </a>
                 <a
+                    href="/account"
+                    class="header-link"
+                >
+                    Account
+                </a>
+                <a
                     href="{{ route('logout') }}"
                     class="header-link"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
@@ -42,7 +48,7 @@
                         href="{{ route('login') }}"
                         class="header-link"
                     >
-                        Login
+                        Editor-Login
                     </a>
                 @endif
 

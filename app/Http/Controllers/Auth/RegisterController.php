@@ -87,7 +87,7 @@ class RegisterController extends Controller
         ]);
 
         // Get Email-Adresses of Admins
-        /*$admins = json_decode(DB::table(config('dbi.tablenames.users')) -> select('email') -> where('access_level', '>', 30) -> get(), true);
+        $admins = json_decode(DB::table(config('dbi.tablenames.users')) -> select('email') -> where('access_level', '>', 30) -> get(), true);
         if (!empty($admins[0])) {
             $admins = array_map(function ($item) { return $item['email']; }, $admins);
 
@@ -98,7 +98,7 @@ class RegisterController extends Controller
                     'view' => 'user_new'
                 ])
             );
-        }*/
+        }
 
         return $user;
     }

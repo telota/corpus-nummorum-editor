@@ -2,7 +2,7 @@
 
 export default ({
 
-    state: 
+    state:
     {
         el_uc: [ // JK: Greek capital letters without anything else
             { value: 'Α', text: 'Alpha' },
@@ -78,6 +78,7 @@ export default ({
             { value: ']',       text: ']' },
             { value: '<',       text: '<' },
             { value: '>',       text: '>' },
+            { value: '?',       text: '?' },
             { value: '[...]',   text: 'Omission Sign' }
         ],
 
@@ -112,13 +113,13 @@ export default ({
     },
 
 
-    actions: 
+    actions:
     {
     },
 
 
-    mutations: 
+    mutations:
     {
-    } 
+    }
 
 });

@@ -13,7 +13,7 @@ class AccountController extends Controller {
 
         // Not authenticated: show login form
         if (empty($user)) {
-            return view('auth.login');
+            die(abort(403));
         }
 
         // Authenticated: show account data

@@ -33,8 +33,9 @@ class MarkdownController extends Controller {
         $helper = new MdMethods();
         $data = $helper->provideData('CHANGELOG.md');
 
-        $data['heading'] = 'test';
-        $data['introduction'] = 'test';
+        $data['heading'] = 'Changelog';
+        $data['introduction'] = 'In this document we inform about major updates bringing new features or important bug fixes.<br/>
+        Smaller orthographic corrections or changes without noticeable effects for the user are not explicitly stated.';
 
         return view('base.markdown', $data);
     }
@@ -43,8 +44,10 @@ class MarkdownController extends Controller {
         $helper = new MdMethods();
         $data = $helper->provideData('DOCUMENTATION.md');
 
-        $data['heading'] = 'test';
-        $data['introduction'] = 'test';
+        $data['heading'] = 'CN Wiki';
+        $data['introduction'] = 'In this document we describe the use and technical structure of our services.<br/>
+        We will continuously expand and adapt the content, so check back regularly.<br/><br/>
+        If you have any further questions or suggestions, please do not hesitate to <a href="/contact" target="_blank">contact us</a>.';
 
         return view('base.markdown', $data);
     }
@@ -98,7 +101,11 @@ class MdMethods {
                 else {
                     $anchor = empty($split[1]) ? $text : substr($split[1], 0, -1); // check if an anchor was set in md
 
-                    $anchor = strtolower(str_replace(' ', '-', $anchor));
+                    $anchor = strtolower($anchor);
+                    $anchor = preg_replace('/\s\s+/', '-', $anchor);
+                    $anchor = str_replace([' ', '/', '.', ':'], '-', $anchor);
+                    $anchor = preg_replace('/[-]+/', '-', $anchor);
+                    $anchor = trim($anchor, '-');
                     $anchor = preg_replace('/[^\w-]/', '', $anchor);
 
                     if (in_array($anchor, $anchors)) { // check if anchor was already set, add increament if yes
@@ -109,7 +116,7 @@ class MdMethods {
                     $anchors[] = $anchors;
 
                     $replace = '<h'.$i.' id="'.$anchor.'" class="md-h'.$i.'">'.$text.'</h'.$i.'>'; // Heading in article (styling s. class in blade)
-                    $link = '<a href="#'.$anchor.'" class="md-l'.$i.'">'.$text.'</a><br/>'; // Link in TOC (styling s. class in blade)
+                    $link = '<div class="md-t'.$i.'"><a href="#'.$anchor.'" class="md-t">'.$text.'</a></div>'; // Link in TOC (styling s. class in blade)
 
                     $toc[] = $link;
                     return $replace;
