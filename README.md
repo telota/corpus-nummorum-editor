@@ -21,7 +21,7 @@ In any way, please feel free to reuse the code for your personal projects as you
 
 ## Installation and Usage
 
-For instructions on installing and using the app, check [DOCUMENTATION.md](https://github.com/telota/corpus-nummorum-editor/blob/github/).
+For instructions on installing and using the app, check [DOCUMENTATION.md](https://github.com/telota/corpus-nummorum-editor/blob/public/DOCUMENTATION.md).
 
 ## Main Dependencies
 
