@@ -56,7 +56,7 @@ Route::namespace ('App\Http\Controllers\base')->group(function () {
     });
 
     Route::get('/repository/source-code', function() {
-        return redirect('https://github.com/telota');
+        return redirect('https://github.com/telota/corpus-nummorum-editor');
     });
     Route::get('/repository/research-data', function() {
         return redirect('https://github.com/telota');

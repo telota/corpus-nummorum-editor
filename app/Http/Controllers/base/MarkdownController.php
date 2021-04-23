@@ -126,6 +126,9 @@ class MdMethods {
         );
         $content = trim($content);
 
+        $content = str_replace('<pre><code>', '<div class="md-src"><pre><code>', $content);
+        $content = str_replace('</code></pre>', '</code></pre></div>', $content);
+
         return [
             'toc' => $toc,
             'heading' => $heading,

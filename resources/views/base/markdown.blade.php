@@ -42,6 +42,14 @@
 </div>
 
 <style>
+    li {
+        margin-bottom: 10px;
+    }
+
+    code {
+        color: #cfc295;
+    }
+
     /* Basics */
     #md-content {
         display: flex;
@@ -85,18 +93,27 @@
         font-size: 10pt;
     }
 
+    .md-src {
+        background-color: #202020;
+        margin: 15px 0 15px 0;
+        padding: 2px 15px 2px 15px;
+    }
+
     /* Headings */
     .md-h2 {
-        margin-bottom: 0px;
+        margin-bottom: -7px;
         padding-bottom: 0px;
+        margin-top: 30px;
     }
     .md-h3 {
-        margin-bottom: 0px;
+        margin-bottom: -7px;
         padding-bottom: 0px;
+        margin-top: 30px;
     }
     .md-h4 {
-        margin-bottom: 0px;
+        margin-bottom: -7px;
         padding-bottom: 0px;
+        margin-top: 30px;
     }
 
     /* Toc Entries */

@@ -28,10 +28,10 @@
                     </p>
                     <!--<p>
                         We invite our community to <a href="/register">register</a> as an editor and join our common efforts.
-                    </p>
+                    </p>-->
                     <p>
                         It is open source software - feel free to adapt the <a href="/repository/source-code">source code</a> as you would like to.
-                    </p>-->
+                    </p>
                 </div>
             </div>
 
@@ -95,10 +95,7 @@
 
                 <div class="card-body text-justify">
                     <p>
-                        We publish the <a href="/repository/source-code">CN Editor App source Code</a> and our <a href="/repository/data">CN Type datasets</a> on Github for everyone free to use
-                    </p>
-                    <p style="font-weight: 600">
-                        <b>This feature is coming soon!</b>
+                        We publish the <a href="/repository/source-code">CN Editor App source Code</a> <!--and our <a href="/repository/data">CN Type datasets</a>--> on Github for everyone free to use
                     </p>
                 </div>
             </div>
