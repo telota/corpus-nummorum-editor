@@ -25,9 +25,10 @@ Route::get('/', function() {
 
 Route::namespace('App\Http\Controllers\dbi')->group(function () {
 
-    Route::get  ('/documentation/{entity}/{resource?}', 'APIController@documentation');
+    Route::get  ('/documentation/{entity}',             'APIController@documentation');
+    Route::get  ('/parameters/{entity}',                'APIController@parameters');
 
-    Route::get  ('/cn_{entity}_{id}.json',              'APIController@select');
+    Route::get  ('/cn_{entity}_{id}.{extension}',       'APIController@select');
     Route::get  ('/cn_{entity}_{id}',                   'APIController@select');
 
     Route::match(['get', 'post'], '/{entity}/{id?}',    'APIController@select');

@@ -69,6 +69,12 @@ Route::prefix('editor')->namespace ('App\Http\Controllers\editor')->group(functi
     Route::get('/', 'AppController@initiate')->name('editor');
 });
 
+// Raw Datasets
+Route::namespace('App\Http\Controllers\dbi')->group(function() {
+    Route::get  ('/cn_{entity}_{id}.{extension}',       'APIController@select');
+    Route::get  ('/cn_{entity}_{id}',                   'APIController@select');
+});
+
 
 // Routes protected by Middleware -----------------------------------------
 Route::middleware(['auth'])->group(function () {

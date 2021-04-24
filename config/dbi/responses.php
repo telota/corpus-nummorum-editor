@@ -71,6 +71,10 @@ return [
         'deleted' => [
             'de' => 'wurde gelöscht.',
             'en' => 'has been deleted.'
+        ],
+        'not_supported' => [
+            'de' => 'wird nicht unterstützt.',
+            'en' => 'is not being supported.'
         ]
     ],
 
