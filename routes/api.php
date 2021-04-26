@@ -26,6 +26,7 @@ Route::get('/', function() {
 Route::namespace('App\Http\Controllers\dbi')->group(function () {
 
     Route::get  ('/documentation/{entity}',             'APIController@documentation');
+    Route::get  ('/entities',                           'APIController@entities');
     Route::get  ('/parameters/{entity}',                'APIController@parameters');
 
     Route::get  ('/cn_{entity}_{id}.{extension}',       'APIController@select');

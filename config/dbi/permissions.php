@@ -11,7 +11,7 @@ return [
     // Secondary Entities
     'bibliography'  => ['read' => 2,    'write_own' => 12,  'write_all' => 12],
     'lists'         => ['read' => 2,    'write_own' => 99,  'write_all' => 99],
-    'entitylists'   => ['read' => 2,    'write_own' => 99,  'write_all' => 99],
+    //'entitylists'   => ['read' => 2,    'write_own' => 99,  'write_all' => 99],
 
     'denominations' => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'designs'       => ['read' => 2,    'write_own' => 11,  'write_all' => 12],

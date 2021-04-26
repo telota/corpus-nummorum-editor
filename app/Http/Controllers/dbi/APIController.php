@@ -38,7 +38,7 @@ class APIController extends Controller {
 
                 // Remove state_public from pagination
                 foreach ($dbi['pagination'] as $key => $val) {
-                    if (!is_array($val)) {
+                    if (!is_array($val) && !is_int($val)) {
                         $val = str_replace('state_public=1', '', $val);
                         $val = str_replace('&&', '&', $val);
                         $dbi['pagination'][$key] = rtrim($val, '&');
@@ -58,7 +58,7 @@ class APIController extends Controller {
 
                 // return Response
                 return Response::json([
-                    'meta' => $this->createMeta($entity),
+                    'meta' => $this->addMeta($entity),
                     'pagination' => isset($dbi['pagination']) ? $dbi['pagination'] : [],
                     'contents'  => $contents
                 ], 200);
@@ -71,6 +71,7 @@ class APIController extends Controller {
                     // Specific ID is requested
                     if(empty($id)) {
                         return Response::json([
+                            'meta' => $this->addMeta($entity),
                             'pagination' => [
                                 'self'  => $api.$entity,
                                 'count' => count($dbi)
@@ -81,7 +82,10 @@ class APIController extends Controller {
                     // List is rquested
                     else {
                         if(!empty($dbi)) {
-                            return Response::json(['contents' => $dbi], 200);
+                            return Response::json([
+                                'meta' => $this->addMeta($entity),
+                                'contents' => $dbi
+                            ], 200);
                         }
                         else {
                             return Response::json(['error' => $this->errorMessage($id, $entity, config('dbi.responses.api.no_content'))], 404);
@@ -162,8 +166,37 @@ class APIController extends Controller {
         }
 
         return Response::json([
-            'queryParameters' => $where,
-            'sortingParameters' => $sorters
+            'meta' => $this->addMeta(null),
+            'contents' => [
+                'queryParameters' => $where,
+                'sortingParameters' => $sorters
+            ]
+        ], 200);
+    }
+
+    public function entities () {
+        $manager = new dbiManager();
+        $api = env('APP_API').'/';
+        $contents = [];
+
+        foreach ($manager->index(['id' => 0, 'level' => 2]) as $key => $val) {
+            if ($key === 'lists') {
+                foreach (scandir('../app/Http/Controllers/dbi/entities/lists') as $list) {
+                    if (rtrim($list, '.php') && $list !== 'users.php') {
+                        $contents['lists/'.rtrim($list, '.php')] = $api.'lists/'.rtrim($list, '.php');
+                    }
+                };
+            }
+            else if (!in_array($key, ['team', 'texts', 'brokenlinks'])) {
+                $contents[$key] = $api.$key;
+            }
+        }
+
+        return Response::json([
+            'meta' => $this->addMeta(null),
+            'contents' => [
+                'entities' => $contents
+            ]
         ], 200);
     }
 
@@ -234,12 +267,27 @@ class APIController extends Controller {
         return $items;
     }
 
-    public function createMeta ($entity) {
+    public function addMeta ($entity) {
         $api = env('APP_API').'/';
-
-        return [
-            'documentation' => env('APP_URL').'/wiki#usage-api',
-            'availableParameters' => $api.'parameters/'.$entity
+        $meta = [
+            'serviceProvider' => [
+                'name' => 'Berlin-Brandenburg Academy of Sciences and Humanties, TELOTA - IT/DH',
+                'link' => 'https://www.bbaw.de/en/bbaw-digital/telota'
+            ],
+            'dataProvider' => [
+                'name' => 'Corpus Nummorum',
+                'link' => 'https://www.corpus-nummorum.eu'
+            ],
+            'operatingInstructions' => [
+                'manual' => env('APP_URL').'/wiki#usage-api',
+                'availableEntities' => $api.'entities'
+            ]
         ];
+
+        if (in_array($entity, ['coins', 'types'])) {
+            $meta['operatingInstructions']['availableParameters'] = $api.'parameters/'.$entity;
+        }
+
+        return $meta;
     }
 }
