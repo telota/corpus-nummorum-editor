@@ -37,6 +37,9 @@ class DataConverter {
         $graph['@id'] = 'https://www.corpus-nummorum.eu/'.$entity.'/'.$data['id'];
         $graph['@type'] = $entity === 'coins' ? 'http://nomisma.org/ontology#NumismaticObject' : 'http://nomisma.org/ontology#TypeSeriesItem';
 
+        // Name
+        $graph['dcterms:title'][0]['@value'] = 'cn '.rtrim($entity, 's').' '.$data['id'];
+
         // META ------------------------------------------------------------------
 
         // Publisher
@@ -61,9 +64,6 @@ class DataConverter {
 
         // DATA ------------------------------------------------------------------
 
-        // Name
-        $graph['dcterms:title'][0] = ['@value' => 'cn '.rtrim($entity, 's').' '.$data['id']];
-
         // Comment
         if (!empty($data['comment']['en'])) $graph['skos:note'][] = ['@value' => $data['comment']['en']];
         if (!empty($data['type_comment']['en'])) {
@@ -78,6 +78,15 @@ class DataConverter {
             '@value' => 'coin'
         ];
 
+        // Coin has Types
+        if (!empty($data['types'])) {
+            foreach ($data['types'] as $i => $t) {
+                $ts[$i]['@id'] = 'https://www.corpus-nummorum.eu/types/'.$t['id'];
+                //env('APP_URL').'/'.'cn_type_'.$t['id'].'.jsonld';
+                $ts[$i]['dcterms:title'][0]['@value'] = 'cn type '.$t['id'];
+            }
+            if (!empty($ts)) $graph['nmo:hasTypeSeriesItem'] = $ts;
+        }
         //nmo:hasTypeSeriesItem (for types)
         //nmo:TypeSeriesItem (for coins)
 
@@ -161,14 +170,14 @@ class DataConverter {
         // Axis
         if (!empty($data['axis']) || !empty($data['axes'])) {
             foreach (empty($data['axes']) ? [$data['axis']] : $data['axes'] as $i => $a) {
-                $graph['nmo:hasAxis'][$i]['@value'] = $a['value'];
+                $graph['nmo:hasAxis'][$i]['@value'] = is_array($a) ? $a['value'] : $a;
             }
         }
 
         // Appearance
         foreach(['obverse', 'reverse'] as $side) {
             $gs = null;
-            if (!empty($data[$side]['design']['text']['en'])) $gs['foaf:depiction'][0] = ['@value' => $data[$side]['design']['text']['en']];
+            if (!empty($data[$side]['design']['text']['en'])) $gs['dcterms:description'][0] = ['@value' => $data[$side]['design']['text']['en']];
             if (!empty($data[$side]['legend']['string'])) $gs['nmo:hasLegend'][0] = ['@value' => $data[$side]['legend']['string']];
 
             if (!empty($gs)) $graph['nmo:hasAppearance']['nmo:hasFace']['nmo:has'.ucfirst($side)] = $gs;
@@ -254,7 +263,13 @@ class DataConverter {
 
                         $imgs[$i]['@id'] = $link;
 
-                        //$rh = substr($link, 0, strlen(env('APP_URL'))) === env('APP_URL') ? null :
+                        if (substr($link, 0, strlen(env('APP_URL'))) === env('APP_URL')) {
+                            $file = substr($link, strlen(env('APP_URL')) + 9);
+                            $split = explode('.', $file);
+                            if (in_array(strtolower($split[1]), ['tif', 'tiff'])) {
+                                $imgs[$i]['foaf:thumbnail'] = config('dbi.url.digilib_scaler').$file.'&dw=100&dh=100';
+                            }
+                        }
 
                         $img_type = $img[$side]['kind'] === 'original' ? 'original' : 'reproduction';
 

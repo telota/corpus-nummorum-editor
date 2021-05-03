@@ -61,11 +61,16 @@ Route::namespace ('App\Http\Controllers\base')->group(function () {
     Route::get('/repository/research-data', function() {
         return redirect('https://github.com/telota');
     });
+
+	// SPARQL
+	Route::get('/sparql', function() {
+        return redirect('https://www.corpus-nummorum.eu/d2r/');
+	});
 });
 
 
 // Editor Frontend --------------------------------------------------------
-Route::prefix('editor')->namespace ('App\Http\Controllers\editor')->group(function() {
+Route::prefix('editor')->namespace('App\Http\Controllers\editor')->group(function() {
     Route::get('/', 'AppController@initiate')->name('editor');
 });
 

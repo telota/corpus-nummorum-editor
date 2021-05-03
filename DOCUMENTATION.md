@@ -1,5 +1,23 @@
 # CN | CN Editor - Documentation
 
+## Usage(#usage)
+
+### CN Editor Web App(#usage-editor)
+
+#### Requirements(#usage-editor-requirements)
+Since we are using some of Javascripts latest features, you need a modern up-to-date Browser to use the CN Editor App.  
+We are working with the CN Editor using Google Chrome (v. 89 +) or Firefox (v. 88 +). Older versions and other browsers might work but we did not try ourselves.
+
+#### Basic Functions(#usage-editor-basics)
+We have done our best to make the editor as powerful and intuitive as possible. However, some features are certainly not self-explanatory. We will therefore provide a guide for use in the near future.
+
+### API(#usage-api)
+The API is already working but not completed, yet. We are currently implementing the [Nomisma Ontology](http://nomisma.org/ontology). We will update this documentation as soon as this feature is released.  
+Check the list of [available entities](https://data.corpus-nummorum.eu/api/entities). There are also lists of [available coin parameters](http://jkdev:8107/api/parameters/coins) and [available type parameters](http://jkdev:8107/api/parameters/types). These parameters can be passed via GET or POST as single values or as an array of values.
+
+### SPARQL(#usage-sparql)
+We are providing a [SPARQL Endpoint](https://data.corpus-nummorum.eu/sparql). Some Frontend-features are currently not available, but the basic services are set. We are working on solving the remaining issues.
+
 ## Installation(#installation)
 
 ### Requirements(#installation-requirements)
@@ -15,7 +33,7 @@
 * go into the newly created src-directory and run `composer install` (ensure you are using the right PHP Version and have all required PHP Extensions installad)
 * create an `.env`-file (you can use `.env.example` as a blueprint), enter the required data (DB Connection, Emailsettings etc.) There is a key called `APP_STORAGE`. If you created the data-Subdirectory as mentioned above you don't have to change the location. Otherwise you have to enter the path to your static data.
 * grant writing permissions for www-data to `src/storage`
-* Setup the databases using our SQL-Dumps in `src/sql` (Artisan Migrations are planed for the future)
+* Setup the databases using our SQL-Dumps in `src/sql` (Artisan Migrations are planed for the future). You need to create `cn_app` (must be set as default in .env) and `cn_data`. Please note: the Laravel-User must be the same for both databases. SELECT, UPDATE, INSERT and DELETE must be granted as permissions. More operational rights are not required and not recommanded.
 * Setup the [Laravel Command Scheduler](https://laravel.com/docs/8.x/scheduling) as Cronjob: `* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1`
 * If your are in a local development instance you can run `php artisan serve` to start the Laravel Dev Server. For deployment you have to setup the server configuration (as described in the next section).
 For further information concerning installation have a look at [Laravel's Installation tips](https://laravel.com/docs/8.x/installation)
@@ -55,20 +73,6 @@ server {
 
 For further information have a look at [Laravel's Deployment tips](https://laravel.com/docs/8.x/deployment#nginx)
 
-## Usage(#usage)
-
-### CN Editor Web App(#usage-editor)
-
-#### Requirements(#usage-editor-requirements)
-Since we are using some of Javascripts latest features, you need a modern up-to-date Browser to use the CN Editor App.  
-We are working with the CN Editor using Google Chrome (v. 89 +) or Firefox (v. 88 +). Older versions and other browsers might work but we did not try ourselves.
-
-#### Basic Functions(#usage-editor-basics)
-We have done our best to make the editor as powerful and intuitive as possible. However, some features are certainly not self-explanatory. We will therefore provide a guide for use in the near future.
-
-### API(#usage-api')
-The API is already working but not completed, yet. We are currently implementing the [Nomisma Ontology](http://nomisma.org/ontology). We will update this documentation as soon as this feature is released.
-
 ## Development(#dev)
 
 ### Database Structure(#dev-db)
@@ -77,7 +81,8 @@ We are running two databases at the moment. One is called `cn_data` containing a
 
 ### Backend(#dev-backend)
 The Backend is completely managed by Laravel and PHP. There is a public interface provided by `api` and an internal one called `dbi`.  
-`api` is managed by `routes/api.php` and controlled by `App\Http\Controllers\dbi\APIController`. `dbi` is managed by `routes/web.php` and controlled by `App\Http\Controllers\dbi\dbiController`.  
+`api` is managed by `routes/api.php` and controlled by `App\Http\Controllers\dbi\APIController`.  
+`dbi` is managed by `routes/web.php` and controlled by `App\Http\Controllers\dbi\dbiController`.  
 These controllers handle the given parameters and the user authentication, but the actual request is passed to `App\Http\Controllers\dbi\dbiManager` in both cases. The `dbiManager` is the heart of the backend.
 
 #### dbiManager(#dev-backend-dbimanager)
@@ -85,7 +90,7 @@ The `dbiManager` handles the requests coming from the api- or dbiController. Via
 Some entities like the lists have their own namespace and interface to provide greater flexibility.
 
 #### Artisan Commands(#dev-backend-commands)
-`App\Console\Commands` provides some useful scripts which can be run by `php artisan SCRIPTNAME`. Most of some are automatic but of cause you can run them manually.
+`App\Console\Commands` provides some useful scripts which can be run by `php artisan SCRIPTNAME`. Most of them are automatic but of cause you can run them manually.
 
 #### Authentification and User Management(#dev-backend-auth)
 We are using [Laravel's Auth Mechanisms](https://laravel.com/docs/8.x/authentication#introduction) with some minor changes (e.G. the user table is called `app_editor_users` instead of the default name `users`).  
