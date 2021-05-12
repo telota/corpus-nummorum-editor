@@ -5,12 +5,12 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use DB;
 
-class cron_statistics extends Command {    
+class cron_statistics extends Command {
     protected $signature = 'cron:statistics';
     protected $description = 'Get current statistics';
     public function __construct() { parent::__construct(); }
     // ------------------------------------------------------------------------------
-    
+
     public function handle() {
         $time = date('U');
 
@@ -26,7 +26,7 @@ class cron_statistics extends Command {
             'troas'             => 4
         ];
         $publication_state = [
-            'all' => '!= 3', 
+            'all' => '!= 3',
             'pub' => '= 1'
         ];
 
@@ -52,15 +52,15 @@ class cron_statistics extends Command {
 
             foreach (['types', 'coins'] AS $entity) {
                 foreach ($publication_state AS $key => $val) {
-                    $select[$region][] = '\''.$entity.'_'.$key.'\',  (SELECT COUNT(b.id) 
+                    $select[$region][] = '\''.$entity.'_'.$key.'\',  (SELECT COUNT(b.id)
                     FROM '.$db_data.'data_'.$entity.' AS b
                     LEFT JOIN '.$db_data.'data_mints                    AS m    ON m.id = b.id_mint
                     LEFT JOIN '.$db_data.'nomisma_subregions_to_regions AS sr   ON sr.nomisma_id_region = m.imported_nomisma_subregion
                     WHERE b.publication_state '.$val.' && sr.id_region = '.$id.')';
                 }
             }
-            
-            $select[$region][] = '\'mints\',  (SELECT COUNT(m.id) 
+
+            $select[$region][] = '\'mints\',  (SELECT COUNT(m.id)
             FROM '.$db_data.'data_mints AS m
             LEFT JOIN '.$db_data.'nomisma_subregions_to_regions AS sr   ON sr.nomisma_id_region = m.imported_nomisma_subregion
             WHERE sr.id_region = '.$id.')';
@@ -77,9 +77,15 @@ class cron_statistics extends Command {
                     \'mints\',          ('.$count.' '.$db_data.'data_mints),
                     '.implode(",\n", $select_all).'
                 ),
-                \'regions\', JSON_OBJECT('.implode(",\n", $select_region).')
+                \'regions\', JSON_OBJECT('.implode(",\n", $select_region).'),
+
+                \'designs\', (SELECT COUNT(ad.id) FROM '.$db_data.'data_designs AS ad),
+                \'legends\', (SELECT COUNT(al.id) FROM '.$db_data.'data_legends AS al),
+                \'dies\', (SELECT COUNT(ac.id) FROM '.$db_data.'data_dies AS ac),
+                \'monograms\', (SELECT COUNT(am.id) FROM '.$db_data.'data_monograms AS am),
+                \'persons\', (SELECT COUNT(ap.id) FROM '.$db_data.'data_persons AS ap)
                 )
-            )'            
+            )'
         )]);
 
 

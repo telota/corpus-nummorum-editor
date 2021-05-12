@@ -11,10 +11,10 @@ class request_parametric_where {
         $db = 'cn_data.';
 
         $where = [
-            'id'                    => 't.id',            
+            'id'                    => 't.id',
             'id_creator'            => 't.id_creator',
             'id_editor'             => 't.id_editor',
-            
+
             'state_public'          => 't.publication_state',
 
             'state_linked'          => [
@@ -29,22 +29,22 @@ class request_parametric_where {
                 'joins' => [
                     [config('dbi.tablenames.coins_to_types').' AS ctt', 'ctt.id_type', '=', 't.id']
                 ]
-            ],            
-            
+            ],
+
             'state_inherited'       => [
                 'where' => ['raw' => 'IF(cti.id_type IS NOT NULL, 1, 0)'],
                 'joins' => [
                     [config('dbi.tablenames.coins_inherit').' AS cti', 'cti.id', '=', 'c.id']
                 ]
             ],
-            
+
             // General
             'state_source'          => ['raw' => 'IF(t.source_link IS NOT NULL, 1, 0)'],
             'source'                => ['t.source_link', 'LIKE', '%', '%'],
-            
+
             'state_comment_private' => ['raw' => 'IF(t.comment_private > \'\', 1, 0)'],
             'comment_private'       => ['t.comment_private', 'LIKE', '%', '%'],
-            
+
             'state_comment_public'  => ['raw' => 'IF(t.comment_public > \'\' || t.comment_public_en > \'\', 1, 0)'],
             'comment_public'        => [
                 ['raw' => 'CONCAT_WS("|", t.comment_public, t.comment_public_en)'], 'LIKE', '%', '%'
@@ -52,7 +52,7 @@ class request_parametric_where {
 
             'description_private'   => ['t.description_private', 'LIKE', '%', '%'],
             'name_private'          => 't.name_private',
-            
+
             'id_owner'              => [
                 'where' => 'c.id_owner_original',
                 'joins' => [
@@ -67,7 +67,7 @@ class request_parametric_where {
                     [config('dbi.tablenames.types_to_zotero').' AS tref', 'tref.id_type', '=', 't.id']
                 ]
             ],
-            
+
             'id_person'             => [
                 'where' => 'ttp.id_person',
                 'joins' => [
@@ -101,12 +101,12 @@ class request_parametric_where {
             ],
 
             'id_authority'          => 't.id_authority',
-            'id_issuer'             => 't.id_issuer',
+            //'id_issuer'             => 't.id_issuer',
             'id_authority_person'   => 't.id_authority_person',
             'id_authority_group'    => 't.id_authority_group',
-            
-            'id_material'           => 't.id_material',    
-            'id_denomination'       => 't.id_denomination',    
+
+            'id_material'           => 't.id_material',
+            'id_denomination'       => 't.id_denomination',
             'id_standard'           => 't.id_standard',
 
             'id_period'             => 't.id_period',
@@ -119,13 +119,13 @@ class request_parametric_where {
             'id_legend'             => [
                 ['raw' => 'CONCAT_WS("|", "c", t.id_legend_o, t.id_legend_r, "c")'], 'LIKE', '%|', '|%'
             ],
-            'id_monogram'           => [ 
+            'id_monogram'           => [
                 'where' => 'ttm.id_monogram',
                 'joins' => [
                     [config('dbi.tablenames.types_to_monograms').' AS ttm', 'ttm.id_type', '=', 't.id']
                 ]
             ],
-            'id_symbol'           => [ 
+            'id_symbol'           => [
                 'where' => 'tts.id_symbol',
                 'joins' => [
                     [config('dbi.tablenames.types_to_symbols').' AS tts', 'tts.id_type', '=', 't.id']
@@ -153,6 +153,30 @@ class request_parametric_where {
                 ]
             ],
             'has_images'          => ['raw' => 'IF(t.id_imageset IS NOT NULL, 1, 0)'],
+
+            'string' => [
+                'where' => [
+                    ['raw' => 'CONCAT_WS("||",
+                        sm.mint,
+                        pm.period_de,
+                        sap.person,
+                        sat.tribe_de,
+                        sdo.design_de,
+                        sdr.design_de,
+                        t.comment_public
+                    )'],
+                    'LIKE', '%', '%'
+                ],
+                'connector' => 'AND',
+                'joins' => [
+                    [config('dbi.tablenames.mints').' AS sm', 'sm.id', '=', 't.id_mint'],
+                    [config('dbi.tablenames.periods').' AS pm', 'pm.id', '=', 't.id_period'],
+                    [config('dbi.tablenames.persons').' AS sap', 'sap.id', '=', 't.id_authority_person'],
+                    [config('dbi.tablenames.tribes').' AS sat', 'sat.id', '=', 't.id_authority_group'],
+                    [config('dbi.tablenames.designs').' AS sdo', 'sdo.id', '=', 't.id_design_o'],
+                    [config('dbi.tablenames.designs').' AS sdr', 'sdr.id', '=', 't.id_design_r']
+                ]
+            ]
         ];
 
         // Obverse / Reverse
@@ -174,10 +198,10 @@ class request_parametric_where {
                     'connector' => 'AND',
                     'joins' => [
                         [config('dbi.tablenames.types_to_monograms').' AS '.$side.'ttm', $side.'ttm.id_type', '=', 't.id']
-                    ],   
+                    ],
                     'conditions' => [
                         [$side.'ttm.side', $side === 'o' ? 0 : 1]
-                    ] 
+                    ]
                 ],
 
                 $side.'_id_symbol'           => [

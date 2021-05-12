@@ -13,9 +13,9 @@ class input {
         $config = new input_definitions;
         $config = $config -> instructions();
         $base   = $config['base'];
-        $ID     = empty($input['id']) ? null : $input['id']; 
+        $ID     = empty($input['id']) ? null : $input['id'];
         /*
-        $base   = config('dbi.coins_input.base');*/ 
+        $base   = config('dbi.coins_input.base');*/
 
         // Empty Object given (new empty Item)
         if ($ID  === 'new') {
@@ -31,9 +31,9 @@ class input {
             foreach ($base['cols'] as $db => $insert) {
                 $base['input'][$db] = $input[$insert];
             }
-            
+
             // Write Input
-            if (empty($ID)) {                
+            if (empty($ID)) {
                 $base['input'][$base['creator']] = $user['id'];
                 $base['input'][$base['public']] = 0;
 
@@ -44,9 +44,9 @@ class input {
                 // Set current User as Editor
                 $base['input'][$base['editor']] = $user['id'];
                 $base['input'][$base['public']] = empty($input['public']) ? 0 : $input['public'];
-        
-                DB::table($base['table'])        
-                    -> where($base['id'], $ID) 
+
+                DB::table($base['table'])
+                    -> where($base['id'], $ID)
                     -> update($base['input']);
             }
 
@@ -61,13 +61,13 @@ class input {
 
             $this -> helper_images($config, $ID, $input['images']);
 
-            if(!empty($input['inherited']['id_type'])) { 
-                $this -> helper_inheritance($config, $ID, $input['inherited']); 
+            if(!empty($input['inherited']['id_type'])) {
+                $this -> helper_inheritance($config, $ID, $input['inherited']);
             }
         }
 
         return $ID;
-    }    
+    }
 
 
     function helpers ($config, $entity, $ID, $input) {
@@ -103,7 +103,7 @@ class input {
             DB::transaction (
                 function() use ($src, $ID, $new) {
                     // Delete old Helper Table Links
-                    DB::table($src['table']) 
+                    DB::table($src['table'])
                         -> where($src['id_base'], $ID)
                         -> delete();
 
@@ -133,19 +133,19 @@ class input {
             ];
         }
 
-        $this -> helpers($config, 'images', $ID, $data);        
+        $this -> helpers($config, 'images', $ID, $data);
     }
 
 
     function helper_inheritance ($config, $id, $i) {
 
-        DB::table('cn_data.data_coins_to_types_inherit') -> updateOrInsert( 
-            ['id' => $id], 
+        DB::table('cn_data.data_coins_to_types_inherit') -> updateOrInsert(
+            ['id' => $id],
             [
                 'id_type'                   => $i['id_type'],
 
                 'mint_inherited'            => empty($i['mint']) ? 0 : 1,
-                'issuer_inherited'          => empty($i['issuer']) ? 0 : 1,
+                'issuer_inherited'          => 0, //empty($i['issuer']) ? 0 : 1,
                 'authority_inherited'       => empty($i['authority']) ? 0 : 1,
                 'authority_person_inherited'=> empty($i['authority_person']) ? 0 : 1,
                 'authority_group_inherited' => empty($i['authority_group']) ? 0 : 1,
@@ -160,7 +160,7 @@ class input {
                 'symbol_o_inherited'        => empty($i['o_symbols']) ? 0 : 1,
                 'design_o_inherited'        => empty($i['o_design']) ? 0 : 1,
                 'monogram_o_inherited'      => empty($i['o_monograms']) ? 0 : 1,
-                
+
                 'legend_r_inherited'        => empty($i['r_legend']) ? 0 : 1,
                 'symbol_r_inherited'        => empty($i['r_symbols']) ? 0 : 1,
                 'design_r_inherited'        => empty($i['r_design']) ? 0 : 1,
@@ -174,8 +174,8 @@ class input {
         );
 
         // Add inheriting type to coins_to_types if not existing
-        DB::table('cn_data.data_coins_to_types') -> updateOrInsert( 
-            ['id_coin' => $id, 'id_type' => $i['id_type']], 
+        DB::table('cn_data.data_coins_to_types') -> updateOrInsert(
+            ['id_coin' => $id, 'id_type' => $i['id_type']],
             ['id_coin' => $id, 'id_type' => $i['id_type']]
         );
     }

@@ -27,16 +27,16 @@ class input_definitions {
 
                     'pecularities_de'       => 'pecularities_de',
                     'pecularities_en'       => 'pecularities_en',
-                    
+
                     'id_mint'               =>  'mint',
 
-                    'id_issuer'             =>  'issuer',
+                    //'id_issuer'             =>  'issuer',
                     'id_authority'          =>  'authority',
                     'id_authority_person'   =>  'authority_person',
                     'id_authority_group'    =>  'authority_group',
 
                     'id_material'           =>  'material',
-                    'id_denomination'       =>  'denomination', 
+                    'id_denomination'       =>  'denomination',
                     'id_standard'           =>  'standard',
 
                     'id_legend_o'           =>  'o_legend',
@@ -54,7 +54,7 @@ class input_definitions {
                     'countermark_r_de'      =>  'r_countermark_de',
                     'undertype_r_en'        =>  'r_undertype_en',
                     'undertype_r_de'        =>  'r_undertype_de',
-                    
+
                     'id_period'             =>  'period',
                     'date_start'            =>  'date_start',
                     'date_end'              =>  'date_end',

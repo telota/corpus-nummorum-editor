@@ -1,8 +1,8 @@
 <template>
     <div>
         <v-card tile class="sysbar mb-2" style="width: 100%;" :loading="loading">
-            <div 
-                class="pa-4 d-flex justify-center title" 
+            <div
+                class="pa-4 d-flex justify-center title"
                 v-text="labels['welcome' + (data_user.last_login ? '_back' : '')] + ', ' + data_user.fullname + '!'"
             ></div>
         </v-card>
@@ -27,9 +27,9 @@
                             </v-btn>
                         </a>
                     </v-card-title>
-                    
+
                     <v-card-text class="d-flex component-wrap">
-                        <v-text-field dense filled outlined clearable 
+                        <v-text-field dense filled outlined clearable
                             v-model="search[resource]"
                             :label="'cn ' + resource.slice(0, -1) + ' ID quick search'"
                             :rules="[$handlers.rules.numeric]"
@@ -60,21 +60,21 @@
                             <div v-if="data.activities['latest_' + resource].length < 1" v-text="'No unpublished ' + resource + ' edited by you.'"></div>
                             <div v-else>
                                 <div v-for="(v) in data.activities['latest_' + resource]" :key="v.id" class="mb-2 d-flex component-wrap align-start">
-                                    <div 
+                                    <div
                                         class="caption mr-5 mt-1"
                                         style="white-space: nowrap"
                                         v-text="$editor_format.date(l, (v.updated_at ? v.updated_at : v.created_at), true)"
                                     ></div>
                                     <div>
-                                        <a 
-                                            :href="'/editor#/' + resource + '/edit/' + v.id" 
+                                        <a
+                                            :href="'/editor#/' + resource + '/edit/' + v.id"
                                             class="mr-2 body-1"
                                             style="white-space: nowrap"
                                             v-text="'cn ' + resource.slice(0, -1) + ' ' + v.id"
                                         ></a>
                                         <span
-                                            v-if="v.mint" 
-                                            class="caption" 
+                                            v-if="v.mint"
+                                            class="caption"
                                             v-html="'(' + v.mint.replace('_', ' ') + ')'"
                                         ></span>
                                     </div>
@@ -86,7 +86,7 @@
             </v-col>
 
             <!-- CN -->
-            <v-col cols="12" sm="6" md="3">                
+            <v-col cols="12" sm="6" md="3">
                 <v-card tile>
                     <v-card-title class="ma-0 component-wrap d-flex align-end">
                         <div v-text="labels['statistics_general']"></div>
@@ -104,6 +104,7 @@
                                     <td :class="td_key" v-text="labels['mints']"></td>
                                     <td :class="td_val" v-text="num(data.statistics.all.mints)"></td>
                                 </tr>
+
                                 <template v-for="(e) in ['types', 'coins']">
                                     <tr :key="'all' + e">
                                         <td :class="td_key" v-text="labels[e]"></td>
@@ -116,6 +117,7 @@
                                         <td :class="td_val" v-text="num(data.statistics.all[e + '_trend'])"></td>
                                     </tr>
                                 </template>
+
                                 <tr>
                                     <td colspan=4><v-divider class="mt-4 mb-n2"></v-divider></td>
                                 </tr>
@@ -135,6 +137,19 @@
                                         <td :class="td_val" v-html="percentage(data[e + '_pub'], data[e + '_all'])"></td>
                                     </tr>
                                 </template>
+
+                                <tr>
+                                    <td colspan=4><v-divider class="mt-5 mb-2"></v-divider></td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="4" v-text="$root.label('assets')" class="font-weight-bold pb-1 body-1"></td>
+                                </tr>
+
+                                <tr v-for="(key) in ['designs', 'legends', 'dies', 'monograms', 'persons']" :key="'assets' + key">
+                                    <td :class="td_key" v-text="$root.label(key)"></td>
+                                    <td :class="td_val" v-text="num(data.statistics[key])"></td>
+                                </tr>
                             </v-simple-table>
                         </v-card-text>
                     </v-expand-transition>
@@ -198,8 +213,8 @@
                                     <td>
                                         {{ data_user.role }}
                                         <v-tooltip bottom>
-                                            <template v-slot:activator="{ on }"> 
-                                                <v-icon v-on="on" class="ml-2">help_outline</v-icon>                               
+                                            <template v-slot:activator="{ on }">
+                                                <v-icon v-on="on" class="ml-2">help_outline</v-icon>
                                             </template>
                                             <span v-text="labels[data_user.role.toLowerCase() + '_description']"></span>
                                         </v-tooltip>
@@ -214,8 +229,8 @@
                                     <td>
                                         {{ data_user.email }}
                                         <v-tooltip v-if="!data.verified" bottom>
-                                            <template v-slot:activator="{ on }"> 
-                                                <v-btn v-on="on" @click="" class="red--text ml-2" icon small><v-icon>error_outline</v-icon></v-btn>                                
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn v-on="on" @click="" class="red--text ml-2" icon small><v-icon>error_outline</v-icon></v-btn>
                                             </template>
                                             <span>Click to verify your email adress.</span>
                                         </v-tooltip>
@@ -240,9 +255,9 @@ export default {
             loading:    false,
             data:       {},
 
-            search:     { 
-                coins: null, 
-                types: null 
+            search:     {
+                coins: null,
+                types: null
             },
             search_buttons: {
                 show: 'preview',
@@ -282,6 +297,6 @@ export default {
         percentage (part, sum) {
             return part && sum ? '~&nbsp;' + Math.ceil(part / sum * 100) + '&nbsp;%' : ''
         }
-    } 
+    }
 }
 </script>

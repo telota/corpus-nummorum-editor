@@ -7,36 +7,36 @@ export default {
             create_item: (entity, data) => {
 
                 const d         = data
-                const item      = {};    
-    
+                const item      = {};
+
                 // Coin and Type --------------------------------------------------------------------
                 if(['coins', 'types'].includes(entity)) {
-    
+
                     item.id                 =   d?.id                       ? d.id : null
                     item.public             =   d?.dbi?.public              ? d.dbi.public : null
                     item.description        =   d?.dbi?.description         ? d.dbi.description : null
-    
+
                     item.source             =   d?.source?.link             ? d.source.link : null
                     item.comment_public_de  =   d?.comment?.de              ? d.comment.de : null
                     item.comment_public_en  =   d?.comment?.en              ? d.comment.en : null
                     item.comment_private    =   d?.dbi?.comment             ? d.dbi.comment : null
-                    
+
                     item.created_at         =   d?.created_at               ? d.created_at : null
                     item.updated_at         =   d?.updated_at               ? d.updated_at : null
                     item.creator            =   d?.dbi?.creator             ? d.dbi.creator : null
                     item.editor             =   d?.dbi?.editor              ? d.dbi.editor : null
-                    
+
                     item.mint               =   d?.mint?.id                 ? d.mint.id : null
-                    
+
                     item.issuer             =   d?.issuer?.id               ? d.issuer.id : null
                     item.authority          =   d?.authority?.kind?.id      ? d.authority.kind.id : null
                     item.authority_person   =   d?.authority?.person?.id    ? d.authority.person.id : null
                     item.authority_group    =   d?.authority?.group?.id     ? d.authority.group.id : null
-                    
+
                     item.material           =   d?.material?.id             ? d.material.id : null
                     item.denomination       =   d?.denomination?.id         ? d.denomination.id : null
                     item.standard           =   d?.standard?.id             ? d.standard.id : null
-                    
+
                     item.period             =   d?.date?.period?.id         ? d.date.period.id : null
                     item.date_start         =   d?.dbi?.date_start          ? d.dbi.date_start : null
                     item.date_end           =   d?.dbi?.date_end            ? d.dbi.date_end : null
@@ -45,8 +45,8 @@ export default {
 
                     item.pecularities_de    =   d?.pecularities?.de         ? d.pecularities.de : null
                     item.pecularities_en    =   d?.pecularities?.en         ? d.pecularities.en : null
-    
-                    item.links              =   !d?.web_references?.[0]     ? [] : d.web_references.map((v) => { 
+
+                    item.links              =   !d?.web_references?.[0]     ? [] : d.web_references.map((v) => {
                         return {
                             link: v.link,
                             semantics: v.semantics,
@@ -54,24 +54,24 @@ export default {
                             comment_en: v.comment.en,
                         }
                     })
-    
+
                     item.groups             =   d?.dbi?.groups?.[0] ? d.dbi.groups : []
-    
+
                     item.persons            =   !d?.persons?.[0] ? [] : d.persons.map((v) => {
                         return {
-                            id: v.id, 
+                            id: v.id,
                             function: v.function.id
                         }
                     });
-    
+
                     ['citations', 'literature'].forEach((key) => {
-                        item [key]      =   !d?.[key]?.[0] ? [] : d[key].map((v) => { 
+                        item [key]      =   !d?.[key]?.[0] ? [] : d[key].map((v) => {
                             return {
                                 id: v.id,
-                                page: v.quote.page, 
-                                number: v.quote.number, 
-                                plate: v.quote.plate, 
-                                picture: v.quote.picture, 
+                                page: v.quote.page,
+                                number: v.quote.number,
+                                plate: v.quote.plate,
+                                picture: v.quote.picture,
                                 annotation: v.quote.annotation,
                                 comment_de: v.quote.comment.de,
                                 comment_en: v.quote.comment.en,
@@ -79,7 +79,7 @@ export default {
                             }
                         });
                     });
-    
+
                     ['obverse', 'reverse'].forEach (
                         (key) => {
                             const s = key.slice(0, 1)
@@ -87,28 +87,28 @@ export default {
                             item[s + '_design'] = d?.[key]?.design?.id ? d[key].design.id : null
                             item[s + '_legend'] = d?.[key]?.legend?.id ? d[key].legend.id : null
                             //item [s+'_legend_direction']   =   !d ? null : (d[key] ? (d[key].legend.direction ? d[key].legend.direction.id  : null) : null);
-    
-                            item[s + '_monograms'] = !d?.[key]?.monograms ? [] : d[key].monograms.map((v) => { 
+
+                            item[s + '_monograms'] = !d?.[key]?.monograms ? [] : d[key].monograms.map((v) => {
                                 return {
-                                    id: v.id, 
+                                    id: v.id,
                                     position: v.position.id,
                                     image: v.link,
                                     side: key == 'obverse' ? 0 : 1
                                 }
                             })
-    
-                            item[s + '_symbols'] = !d?.[key]?.symbols ? [] : d[key].symbols.map((v) => { 
+
+                            item[s + '_symbols'] = !d?.[key]?.symbols ? [] : d[key].symbols.map((v) => {
                                 return {
-                                    id: v.id, 
-                                    position: 
+                                    id: v.id,
+                                    position:
                                     v.position.id,
                                     side: key == 'obverse' ? 0 : 1
                                 }
                             })
-    
-                            if(entity === 'coins') {    
+
+                            if(entity === 'coins') {
                                 item[s + '_die'] =   d?.[key]?.die?.id ? d[key].die.id : null
-                                
+
                                 item[s + '_controlmarks'] = !d?.[key]?.controlmarks ? [] : d[key].controlmarks.map ((v) => {
                                     return {
                                         id: v.id,
@@ -118,10 +118,10 @@ export default {
                                         side: key == 'obverse' ? 0 : 1
                                     }
                                 })
-    
+
                                 item[s + '_countermark_en'] = d?.[key]?.countermark?.text?.en ? d[key].countermark.text.en : null
                                 item[s + '_countermark_de'] = d?.[key]?.countermark?.text?.de ? d[key].countermark.text.de : null
-    
+
                                 item[s + '_undertype_en'] = d?.[key]?.undertype?.text?.en ? d[key].undertype.text.en : null
                                 item[s + '_undertype_de'] = d?.[key]?.undertype?.text?.de ? d[key].undertype.text.de : null
                             }
@@ -130,53 +130,53 @@ export default {
 
                     item.public = !d?.dbi?.public ? 0 : d.dbi.public
                 }
-    
-    
+
+
                 // Coin specific --------------------------------------------------------------------
                 if(entity === 'coins') {
-                    
-                    item.types              =   !d?.types ? [] : d.types.map (v => { 
-                        return { 
-                            type: v.id 
-                        } 
+
+                    item.types              =   !d?.types ? [] : d.types.map (v => {
+                        return {
+                            type: v.id
+                        }
                     })
                     item.inherited          =   !d?.dbi?.inherited?.id_type ? inheritance_object() : d.dbi.inherited
-    
+
                     item.provenience        =   !d?.owner?.provenience                  ? null : d.owner.provenience
                     item.owner_original     =   !d?.owner?.original?.id                 ? null : d.owner.original.id
                     item.owner_unsure       =   !d?.owner?.original?.is_unsure          ? 0 : 1
-                    item.collection         =   !d?.owner?.original?.collection_nr      ? null : d.owner.original.collection_nr                    
+                    item.collection         =   !d?.owner?.original?.collection_nr      ? null : d.owner.original.collection_nr
                     item.owner_reproduction =   !d?.owner?.reproduction?.id             ? null : d.owner.reproduction.id
                     item.plastercast        =   !d?.owner?.reproduction?.collection_nr  ? null : d.owner.reproduction.collection_nr
-                    
+
                     item.diameter_min       =   !d?.diameter?.value_min ? null : d.diameter.value_min.toFixed(2)
                     item.diameter_max       =   !d?.diameter?.value_max ? null : d.diameter.value_max.toFixed(2)
                     item.diameter_ignore    =   !d?.diameter?.ignore    ? 0 : 1
 
                     item.weight             =   !d?.weight?.value       ? null : d.weight.value.toFixed(2)
                     item.weight_ignore      =   !d?.weight?.ignore      ? 0 : 1
-    
+
                     item.axis               =   !d?.axis                ? null : d.axis
                     item.centerhole         =   !d?.centerhole?.value   ? 0 : d.centerhole.value
-    
+
                     item.images             =   !d?.dbi?.images ? [] : d.dbi.images
-    
+
                     /*item.literature_type    =   !d ? []   : (d.type_literature  ?   d.type_literature.map (v => { return {
                         id: v.id,
                         //string: 'Type ' + v.id_type + ':&ensp;' + v.title + ', ' + v.quote.text.de +'&emsp;( <a href="' + v.link + '" target="_blank">' + v.id + '</a> )',
                         comment_de: v.quote.comment.de,
                         comment_en: v.quote.comment.en
                     }}) : []);*/
-    
+
                     item.findspot           =   d?.findspot?.id ? d.findspot.id : null
                     item.hoard              =   d?.hoard?.id ? d.hoard.id : null
                     item.forgery            =   d?.is_forgery ? 1 : 0
                 }
-    
-    
+
+
                 // Type specific --------------------------------------------------------------------
-                else if(entity === 'types') {                
-                    
+                else if(entity === 'types') {
+
                     item.coins          =   !d?.coins ? [] : d.coins.map ((v) => {
                         return {
                             coin: v.id
@@ -184,18 +184,18 @@ export default {
                     })
                     //item.inherited      =   {}
                     item.name           =   !d?.dbi?.name ? null : d.dbi.name
-        
+
                     item.image          =   !d?.images?.[0]?.id     ? null : d.images[0].id
                     item.images         =   !d?.images              ? [] : d.images
-                    
-                    item.variations     =   !d?.variations ? [] : d.variations.map((v) => { 
-                        return { 
-                            de: v.text.de, 
-                            en: v.text.en, 
-                            comment: v.comment 
+
+                    item.variations     =   !d?.variations ? [] : d.variations.map((v) => {
+                        return {
+                            de: v.text.de,
+                            en: v.text.en,
+                            comment: v.comment
                         }
                     })
-        
+
                     item.findspots      =   !d?.dbi?.findspots  ? [] : d.dbi.findspots
                     item.hoards         =   !d?.dbi?.hoards     ? [] : d.dbi.hoards
                 }
@@ -223,10 +223,10 @@ export default {
             show_item_data: (language, entity, item_data, key, section) => {
 
                 const d     = item_data
-    
+
                 // Coin and Type --------------------------------------------------------------------
                 if(['coins', 'types'].includes(entity)) {
-                    
+
                     // Production
                     if (key === 'mint')                     { return to_string.mint(d?.mint, language) }
                     else if (key === 'issuer')              { return to_string.individual(d?.issuer) }
@@ -245,7 +245,7 @@ export default {
 
                     // Depiction
                     else if (['design', 'legend'].includes(key))        { return to_string.design_legend(key, d?.[section]?.[key], language) }
-                    else if (['monograms', 'symbols'].includes(key))    { return !d?.[section]?.[key] ? '--' : d[section][key].map((data) => { return to_string.monogram_symbol(key, data, language) }).join('\n') }                    
+                    else if (['monograms', 'symbols'].includes(key))    { return !d?.[section]?.[key] ? '--' : d[section][key].map((data) => { return to_string.monogram_symbol(key, data, language) }).join('\n') }
                     else if (key === 'controlmarks')                    { return !d?.[section]?.[key] ? '--' : d[section][key].map((data) => { return to_string.controlmark(data, language) }).join('\n') }
                     else if (['countermark', 'undertype'].includes(key)){ return to_string.countermark_undertype(key, d?.[section], language) }
                     else if (key === 'pecularities')        { return to_string.simple_text(d?.pecularities?.[language]) }
@@ -297,7 +297,7 @@ export default {
                         else if (d?.dbi?.public === 3) {
                             color = 'red'
                         }
-                        
+
                         const created = format_date(language, d?.created_at, true) + '&ensp;(&nbsp;' + (d?.dbi?.creator_name ? d.dbi.creator_name : '???') + '&nbsp;) '
                         const edited = format_date(language, d?.updated_at, true) + '&ensp;(&nbsp;' + (d?.dbi?.editor_name ? d.dbi.editor_name : '???') + '&nbsp;) '
                         const state = '<span class="' + color + '--text"> &#11044;</span>'
@@ -360,7 +360,7 @@ export default {
                 cn_public_link: (item, mask)                => {
                     if (item?.id && (item?.public === 1 || item?.dbi?.public === 1)) {
                         return '<a href="' + urls.cn + (item.kind?.toLowerCase() === 'coin' ? 'coins?id=' : 'types/') + item.id + '" target="_blank">' +
-                        (mask ? mask : '') + 
+                        (mask ? mask : '') +
                         '&nbsp;&ast;</a>'
                     }
                     else {
@@ -372,7 +372,7 @@ export default {
                         const length = item.types?.length
                         if (length) {
                             const inherited = item.types?.find(type => type.inherited === 1)
-                            return  { 
+                            return  {
                                 id: inherited?.id ? inherited.id : item.types[0].id,
                                 inherited: inherited?.id ? 1 : 0
                             }
@@ -395,7 +395,7 @@ export default {
                 cn_entity: (entity, id) => {
                     entity = (entity.slice(-1) === 's' ? entity.slice(0, -1) : entity)
                     return 'cn ' + entity + (id ? (' ' + id) : '')
-                },                
+                },
                 email_link:     (link, showLink)            => { return make_element.email_link(link, showLink) },
             },
 
@@ -418,7 +418,7 @@ export default {
                     const pattern = /^(0|[1-9][0-9]*)$/
                     return pattern.test(v) || 'Must be numeric.'
                 },
-                id: (v) => { 
+                id: (v) => {
                     const pattern = /^(null|[1-9][0-9]*)$/
                     return (v !== null ? pattern.test(v) : true) || 'ID must be numeric.'
                 },
@@ -438,17 +438,17 @@ export default {
 
 // General Constants
 const inheritance_keys = [
-    'id_type', 'mint', 'issuer', 'authority', 'authority_person', 'authority_group', 'date', 'period',    
-    'material', 'denomination', 'standard',                    
-    'o_design', 'o_legend', 'o_symbols', 'o_monograms',    
-    'r_design', 'r_legend', 'r_symbols', 'r_monograms', 
-    'persons',    
+    'id_type', 'mint', /*'issuer',*/ 'authority', 'authority_person', 'authority_group', 'date', 'period',
+    'material', 'denomination', 'standard',
+    'o_design', 'o_legend', 'o_symbols', 'o_monograms',
+    'r_design', 'r_legend', 'r_symbols', 'r_monograms',
+    'persons',
     //'comment_private', 'comment_public'
 ]
 const inheritance_object = () => {
     const item = {}
-    inheritance_keys.forEach((key) => { 
-        item[key] = null 
+    inheritance_keys.forEach((key) => {
+        item[key] = null
     })
     return item
 }
@@ -476,19 +476,19 @@ const urls = {
 
 // Stringify object property
 const to_string = {
-    
+
     mint: (data, language) => {
-        return !data?.id ? '--' : 
-        (//format_id(data.id) + 
-        make_element.editor_link('mints', data.id) + 
-        data.text[language] + 
+        return !data?.id ? '--' :
+        (//format_id(data.id) +
+        make_element.editor_link('mints', data.id) +
+        data.text[language] +
         (data.region?.id ? (', ' + data.region.text[language]) : '') +
         make_element.resource_link(data.link))
     },
     individual: (data, language) => { // works for persons, issuer, authority_person, authority_group
-        return !data?.id ? '--' : 
-        (//format_id(data.id) + 
-        make_element.editor_link('persons', data.id) + 
+        return !data?.id ? '--' :
+        (//format_id(data.id) +
+        make_element.editor_link('persons', data.id) +
         data.name +
         //(person.alias ? (' | ' + person.alias) : '') +
         make_element.resource_link(data.link)) +
@@ -498,37 +498,37 @@ const to_string = {
         return '[&nbsp;' + (start ? start : '--') + '&nbsp;|&nbsp;' + (end ? end : '--') + '&nbsp;]&ensp;' +
         (!date?.text ? '--' : (date.text[language] ? date.text[language] : (date.text.de ? date.text.de : '--')))
     },
-    
+
     basic: (data, language, key) => { // works for authority, period, material, denomination, standard
         return !data?.id ? '--' : (
-            (['period', 'material', 'denomination', 'standard'].includes(key) ? make_element.editor_link(key + 's', data.id) : format_id(data.id)) + 
+            (['period', 'material', 'denomination', 'standard'].includes(key) ? make_element.editor_link(key + 's', data.id) : format_id(data.id)) +
             data.text[language] + make_element.resource_link(data.link)
-        )        
+        )
     },
-    
+
     design_legend: (key, data, language) => {
         return !data?.id ? '--' :
         (//format_id(data.id) +
-            make_element.editor_link(key + 's', data.id) + 
-            (key === 'design' ? data.text[language] : ('<span class="font-weight-thin">' + data.string + '</span>'))
+            make_element.editor_link(key + 's', data.id) +
+            (key === 'design' ? data.text[language] : ('<span class="font-weight-thin">' + data.string + '</span>&ensp;' + make_element.image_tile(data?.direction?.link, 15)))
         )
     },
     monogram_symbol: (key, data, language) => {
         return !data?.id ? '--' : '<div class="d-flex component-wrap align-start pr-2">' +
             make_element.image_link(data.link, 40) +
-            '<div>' + 
-            //format_id(data.id) + 
+            '<div>' +
+            //format_id(data.id) +
             make_element.editor_link(key, data.id) +
             (key === 'monograms' ? data.combination?.replaceAll(' ', '') : data.text[language]) +
-            (data.position?.id ? ('&ensp;(' + data.position.text[language].slice(0, 1).toLowerCase() + data.position.text[language].slice(1) + ')') : '') + 
+            (data.position?.id ? ('&ensp;(' + data.position.text[language].slice(0, 1).toLowerCase() + data.position.text[language].slice(1) + ')') : '') +
             '</div>' +
         '</div>'
     },
     controlmark: (data, language) => {
         return !data?.id ? '--' : '<div class="d-flex component-wrap align-start pr-2">' +
             make_element.image_link(data.link, 40) +
-            '<div>' + 
-            format_id(data.id) + 
+            '<div>' +
+            format_id(data.id) +
             data.count + 'x ' +
             (data.name ? data.name : '--') +
             '</div>' +
@@ -542,16 +542,16 @@ const to_string = {
     },
     simple_text: (string) => {
         return string ? string : '--'
-    },    
-    weight: (data, entity, language) => {        
+    },
+    weight: (data, entity, language) => {
         const add = entity === 'types' ? (
             data.count ? (' (&nbsp;' + data.count + '&nbsp;) ') : ''
         ) : (
             data.ignore ? (' (&nbsp;<i>ignore</i>&nbsp;) ') : ''
         )
-        return !data?.value ? '--' : ( format_decimal(language, data.value) + '&nbsp;g' + add)    
+        return !data?.value ? '--' : ( format_decimal(language, data.value) + '&nbsp;g' + add)
     },
-    diameter: (data, entity, language) => {        
+    diameter: (data, entity, language) => {
         if (!data?.value_min && !data?.value_max) { return '--' }
         else {
             const add = entity === 'types' ? (
@@ -581,11 +581,11 @@ const to_string = {
     owner: (data, language) => {
         if (!data.id) { return '--' }
         else {
-            return make_element.editor_link('owners', data.id) + //format_id(data.id) + 
-            (data.name ? data.name : '--') + 
+            return make_element.editor_link('owners', data.id) + //format_id(data.id) +
+            (data.name ? data.name : '--') +
             make_element.resource_link(data.link) +
-            (data.is_unsure ? '&nbsp;(?)' : '') + 
-            (data.city ? (', ' + data.city) : '') + 
+            (data.is_unsure ? '&nbsp;(?)' : '') +
+            (data.city ? (', ' + data.city) : '') +
             (data.country ? (', ' + data.country) : '')
         }
 
@@ -595,15 +595,15 @@ const to_string = {
         else {
             language = language === 'de' ? 'de' : 'en'
 
-            return '<div>' + make_element.zotero_link(data.id) + 
-            (data.title ? data.title : '--') +  
+            return '<div>' + make_element.zotero_link(data.id) +
+            (data.title ? data.title : '--') +
             make_element.resource_link(data.link) +
             (data.quote?.text?.[language] ? (', ' + data.quote.text[language]) : '') + '</div>' +
             (data.quote?.comment?.[language] ? ('<div class="mt-1"><i>' + data.quote.comment[language] + '</i></div>') : '')
         }
     },
     weblink: (data, language) => {
-        return '<div>' +  
+        return '<div>' +
         make_element.resource_link(data.link, true) + (data.semantics ? (', ' + data.semantics) : '') + '</div>' +
         (data.comment?.[language] ? ('<div class="mt-1"><i>' + data.comment[language] + '</i></div>') : '')
     },
@@ -612,18 +612,18 @@ const to_string = {
         else {
             language = language === 'de' ? 'de' : 'en'
 
-            return '<div>' + make_element.editor_link('objectgroups', data.id) + //format_id(data.id) + 
+            return '<div>' + make_element.editor_link('objectgroups', data.id) + //format_id(data.id) +
             (data.name ? data.name : '--') + '</div>' +
-            (data.text?.[language] ? ('<div class="mt-1"><i>' + data.text[language] + '</i></div>') : '')  
+            (data.text?.[language] ? ('<div class="mt-1"><i>' + data.text[language] + '</i></div>') : '')
         }
     },
     hoard_findspot: (data, language, key) => {
         if (!data) { return '--' }
         else {
-            return make_element.editor_link(key, data.id) + 
-            (data.name ? data.name : '--') + 
+            return make_element.editor_link(key, data.id) +
+            (data.name ? data.name : '--') +
             make_element.resource_link(data.link) +
-            (data.country ? (', ' + data.country) : '') 
+            (data.country ? (', ' + data.country) : '')
         }
     },
     rgew: (material, language) => {
@@ -634,8 +634,8 @@ const to_string = {
 
 // Handy HTML Generators for specific elements like a tags or images
 const make_element = {
-    resource_link: (link, showLink) => { 
-        return !link ? '' : ((showLink ? '' : '&nbsp;') + '<a href="' + link + '" target="_blank">' + (showLink ? link.split('?')[0] + ('&nbsp;') : '') + '&#10064;</a>') 
+    resource_link: (link, showLink) => {
+        return !link ? '' : ((showLink ? '' : '&nbsp;') + '<a href="' + link + '" target="_blank">' + (showLink ? link.split('?')[0] + ('&nbsp;') : '') + '&#10064;</a>')
     },
     image_link: (link, size) => {
 
@@ -649,7 +649,7 @@ const make_element = {
                 '</div>' +
             '</a>'
         }
-        else { 
+        else {
             return ''
         }
     },
@@ -662,7 +662,7 @@ const make_element = {
                     '<img src="' + format_image_path(link, img_size) + '" loading="lazy" style="width: ' + img_size + 'px; height: ' + img_size + 'px; object-fit: contain">' +
                 '</div>'
         }
-        else { 
+        else {
             return ''
         }
     },
@@ -682,8 +682,8 @@ const make_element = {
             return ''
         }
     },
-    email_link: (link, showLink) => { 
-        return !link ? '' : ('<a href= "mailto:' + link.trim() + '">' + (showLink ? (link + '&nbsp;') : '') + '&#9993;</a>') 
+    email_link: (link, showLink) => {
+        return !link ? '' : ('<a href= "mailto:' + link.trim() + '">' + (showLink ? (link + '&nbsp;') : '') + '&#9993;</a>')
     }
 }
 
@@ -714,10 +714,10 @@ const format_date = (language, date, giveminutes) => {
     const day       = date ? date.slice(8,10)   : '--'
     const hour      = date && giveminutes ? date.slice(11,13)   : '--'
     const minutes   = date && giveminutes ? date.slice(14,16)   : '--'
-        
+
     if (language === 'de') {
         return day + '.' + month + '.' + year + (giveminutes ? (', ' + hour + ':' + minutes) : '')
-    } 
+    }
     else {
         return month + '/' + day + '/' + year + (giveminutes ? (', ' + hour + ':' + minutes) : '')
     }
@@ -746,12 +746,12 @@ const format_number = (language, number) => {
 
         number = String(number).split('').reverse().join('')
         const delimiter = language === 'de' ? '.' : ','
-        
+
         const splits = []
 
         for (let i = 0; i <= number.length; i = i + 3) {
             const to_push = number.substr(i, (i+3)).split('').reverse().join('')
-            if(to_push) { splits.push(to_push)} 
+            if(to_push) { splits.push(to_push)}
         }
 
         return splits.reverse().join(delimiter)
@@ -781,7 +781,7 @@ const format_image_path = (link, size, raw) => {
 
         // Link is internal
         else {
-            const format = extract_file_format(link)           
+            const format = extract_file_format(link)
 
             // file is TIFF and shall be given as digilib link
             if (tiff.includes(format) && !raw) {
@@ -822,7 +822,7 @@ const format_digilib_link = (link, scale) => {
         else if (link.slice(0, baseURL.length) === baseURL) { link = link.slice(baseURL.length) }
 
         scale = scale ? (Number.isInteger(scale) ? scale : 500) : 500
-        
+
         return {
             scaler: digilib.scaler + link.trim() + '&dw=' + scale + '&dh=' + scale,
             viewer: digilib.viewer + link.trim()

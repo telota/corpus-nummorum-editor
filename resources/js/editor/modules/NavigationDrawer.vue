@@ -2,7 +2,6 @@
 <div>
     <v-navigation-drawer
         app
-        clipped
         v-model="$root.drawer.active"
         :expand-on-hover="$root.drawer.mini && $vuetify.breakpoint.mdAndUp"
     >

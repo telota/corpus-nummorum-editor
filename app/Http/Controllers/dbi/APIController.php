@@ -29,12 +29,12 @@ class APIController extends Controller {
                 $contents = $dbi['contents'];
 
                 // Remap list of links if scheme is not website
-                if (empty($id) && $scheme !== 'website') {
+                /*if (empty($id) && $scheme !== 'website') {
                     $contents = array_map(function ($item) use ($entity) {
                         $split = explode('/', $item['self']);
                         return env('APP_URL').'/'.'cn_'.rtrim($entity, 's').'_'.end($split).'.jsonld';
                     }, $contents);
-                }
+                }*/
 
                 // Remove state_public from pagination
                 foreach ($dbi['pagination'] as $key => $val) {

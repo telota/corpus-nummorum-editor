@@ -8,7 +8,7 @@ use Request;
 use DB;
 
 
-class legends implements dbiInterface  { 
+class legends implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ class legends implements dbiInterface  {
         // DB Pre Query if no ID is given
         if (empty($id)) {
             $input = Request::post();
-            
+
             $allowed_keys = [
                 'where' => [
                     'id'            => 'id',
@@ -60,7 +60,7 @@ class legends implements dbiInterface  {
                 -> leftJoin(config('dbi.tablenames.images').' AS c_img', 'c_img.CoinID', '=', 'c.id')
                 -> leftJoin(config('dbi.tablenames.types').' AS t', DB::raw('IF(l.side = 1, t.id_legend_r, t.id_legend_o)'), '=', 'l.id')
                 -> leftJoin(config('dbi.tablenames.images').' AS t_img', 't_img.ImageID', '=', 't.id_imageset')
-                -> select([                
+                -> select([
                     'l.id AS id',
                     'l.legend                     AS legend',
                     'l.legend_sort_basis          AS legend_sort',
@@ -102,13 +102,13 @@ class legends implements dbiInterface  {
                 DB::Raw('IFNULL(is_type, 0) AS role'),
                 DB::Raw('IFNULL(side, 0)    AS side'),
                 'id_legend_direction        AS direction',
-                DB::Raw('IF(id_legend_direction IS NOT NULL, CONCAT("'.config('dbi.url.storage').'", "Legenddirections/", id_legend_direction, "richtung.jpg"), null) AS image'),
+                DB::Raw('IF(id_legend_direction IS NOT NULL, CONCAT("'.config('dbi.url.storage').'", "legend-directions/", LPAD(id_legend_direction, 3, 0), ".svg"), null) AS image'),
                 'fulltext_proposal          AS full_text',
                 'keywords                   AS keywords',
                 'comment                    AS comment',
 
-                'created_at                 AS created_at',                
-                'updated_at                 AS updated_at', 
+                'created_at                 AS created_at',
+                'updated_at                 AS updated_at',
             ];
 
             $dbi = $handler -> mainQuery(config('dbi.tablenames.legends'), $select, $where);
@@ -118,8 +118,8 @@ class legends implements dbiInterface  {
         }
 
         return empty($id) ? [
-            'pagination'    => $prequery['pagination'], 
-            'where'         => $prequery['where'], 
+            'pagination'    => $prequery['pagination'],
+            'where'         => $prequery['where'],
             'contents'      => $dbi
         ] : $dbi;
     }

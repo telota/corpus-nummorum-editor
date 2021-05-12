@@ -16,17 +16,18 @@
         :label="label"
         :prepend-icon="icon"
         :no-data-text="loading ? 'Loading ...' : 'Sorry, no matching data'"
-        :disabled="inherited"
-        :hint="inherited ? 'Value inherited from type' : ''"
-        :persistent-hint="inherited"
+        :disabled="inherited || (disabled ? true : false)"
+        :hint="inherited || disabled ? (inherited ? 'Value inherited from type' : disabled) : ''"
+        :persistent-hint="inherited || (disabled ? true : false)"
+        :rules="rules"
         v-on:input="selectItem"
         v-on:click:clear="selectItem"
     >
         <!-- Sticky Dopdown Keyboard -->
         <template v-slot:prepend-item>
             <v-card
-                v-if="!hide_keyboard" 
-                tile 
+                v-if="!hide_keyboard"
+                tile
                 flat
                 style="position: sticky; top: 0; z-index: 10"
             >
@@ -41,7 +42,7 @@
                 ></v-btn>
 
                 <v-divider class="mb-1"></v-divider>
-                
+
                 <v-expand-transition>
                     <div v-if="keyboard">
                         <keyboard
@@ -61,16 +62,16 @@
         <!-- List Item -->
         <template v-slot:item="slot">
             <v-list-item-avatar
-                v-if="slot.item.image" 
+                v-if="slot.item.image"
                 tile
                 class="white pa-1"
             >
                 <img :src="$handlers.format.image_link(slot.item.image, 40)">
             </v-list-item-avatar>
             <v-list-item-content>
-                <div 
+                <div
                     class="body-2"
-                    v-text="slot.item.string" 
+                    v-text="slot.item.string"
                 ></div>
                 <div
                     class="caption"
@@ -82,8 +83,8 @@
         <!-- Sticky Dialog Option at the End -->
         <template v-if="dialog_available" v-slot:append-item>
             <v-card
-                v-if="!hide_keyboard" 
-                tile 
+                v-if="!hide_keyboard"
+                tile
                 flat
                 class="appbar"
                 style="position: sticky; bottom: 0; z-index: 10"
@@ -162,11 +163,11 @@
 
     </v-autocomplete>
 
-    <!--<ChildDialog 
+    <!--<ChildDialog
         v-if="dialog_available && dialog"
         :prop_active="dialog"
         :prop_component="entity"
-        :prop_item="{ key: 'id', id: selected }" 
+        :prop_item="{ key: 'id', id: selected }"
         v-on:assignment="selectDialogItem"
         v-on:close="dialog = false"
     ></ChildDialog>-->
@@ -203,24 +204,26 @@ export default {
         entity:             { type: String, required: true },
         selected:           { type: [String, Number], default: null },
         inherited:          { type: Boolean, default: false },
+        disabled:           { type: [String, Boolean], default: null },
         conditions:         { type: Array },
 
         label:              { type: String },
         icon:               { type: String, default: 'help_outline' },
 
         sk:                 { type: String, default: 'el_uc' },
-        hide_keyboard:      { type: Boolean, default: false }
+        hide_keyboard:      { type: Boolean, default: false },
+        rules:              { type: Array }
     },
-    
+
     computed: {
         l () { return this.$root.language },
         labels () { return this.$root.labels },
-        entity_label () { 
-            return this.labels[this.entity] ? this.labels[this.entity] : (this.entity.slice(0, 1).toUpperCase() + this.entity.slice(1)) 
+        entity_label () {
+            return this.labels[this.entity] ? this.labels[this.entity] : (this.entity.slice(0, 1).toUpperCase() + this.entity.slice(1))
         },
 
-        sync () { 
-            return this.items?.[0]?.search === undefined ? true : false 
+        sync () {
+            return this.items?.[0]?.search === undefined ? true : false
         },
         dialog_available () {
             return this.inherited ? false : (Vue.options.components[this.entity] ? true : false)
@@ -342,7 +345,7 @@ export default {
         },
 
         async selectDialogItem (emit) {
-            // Check if emited is in list            
+            // Check if emited is in list
             if (!this.items.map((row) => { return row.id }).includes(emit.id)) {
                 if (this.sync) {
                     this.items = await this.getItems(null, emit.id)
@@ -352,7 +355,7 @@ export default {
                     this.$store.commit('SET_LIST', { entity: this.entity, data: this.items })
                 }
             }
-                
+
             this.$emit('select', emit.id)
             this.$root.snackbar(this.label + ' ' + emit.id + ' selected.')
             this.search = ''

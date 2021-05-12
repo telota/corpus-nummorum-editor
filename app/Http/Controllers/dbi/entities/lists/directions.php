@@ -16,18 +16,18 @@ class directions implements listsInterface  {
                 // String
                 'legend_direction AS string',
                 // Image
-                DB::raw('IF(image > "", CONCAT("'.config('dbi.url.storage').'Legenddirections/", image), null) AS image'),
+                DB::raw('IF(image > "", CONCAT( "'.config('dbi.url.storage').'", "legend-directions/", LPAD(id, 3, 0), ".svg"), null) AS image'),
                 // Search
                 DB::raw('LOWER(CONCAT_ws("|",
                     legend_direction
                 )) AS search')
             ]);
-        
+
         // Where
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('legend_direction', $search);
                 });

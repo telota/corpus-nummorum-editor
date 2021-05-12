@@ -3,25 +3,25 @@
 
     <!-- JK: Tools -->
     <v-card tile class="mb-5" scrollable>
-        
+
         <!-- Header -->
-        <v-btn 
-            tile 
+        <v-btn
+            tile
             x-large
             block
             color="sysbar"
             class="d-flex component-wrap justify-space-between"
             :disabled="!items [0]"
-            :depressed="tools || !items [0] ? false : true"  
-            @click="tools = !tools" 
+            :depressed="tools || !items [0] ? false : true"
+            @click="tools = !tools"
         >
-            <div 
-                class="headline d-flex justify-start" 
+            <div
+                class="headline d-flex justify-start"
                 v-text="'Search ' + labels[entity]"
             ></div>
             <div
                 v-if="dbi_params.count"
-                class="caption text-center" 
+                class="caption text-center"
                 style="position: absolute; width: 100%"
                 v-text="$editor_format.number(l, dbi_params.count) + ' ' + labels[dbi_params.count > 1 ? entity : entity.slice(0, -1)] + ' found'"
             ></div>
@@ -52,25 +52,37 @@
 
                 <v-tabs-items v-model="tab" class="pa-5 transparent">
 
-                    
+
                     <!-- Quick Search --------------------------------------------------------------------------------------------------------------------------------- -->
                     <v-tab-item value="tab-1" transition="expand-transition" reverse-transition="expand-transition">
                         <v-row>
+                            <!-- String -->
+                            <v-col cols=12>
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.string"
+                                    :label="$root.label('quick_search')"
+                                    prepend-icon="search"
+                                    class="mt-3"
+                                    hint="Search in Mint, Period, Ruler, Tribe, Design, Public Comment | separate keywords by blanks "
+                                    v-on:keyup.enter="RunSearch()"
+                                ></v-text-field>
+                            </v-col>
+
                             <!-- JK: ID -->
                             <v-col cols="12" sm="6">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.id" 
-                                    :label="labels[entity.slice(0, -1)] + ' ID'" 
-                                    prepend-icon="fingerprint" 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.id"
+                                    :label="labels[entity.slice(0, -1)] + ' ID'"
+                                    prepend-icon="fingerprint"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
 
                             <!-- JK: Mint -->
                             <v-col cols="12" sm="6">
-                                <SearchForeignKey 
-                                    entity="mints" 
-                                    label="Mint" 
+                                <SearchForeignKey
+                                    entity="mints"
+                                    label="Mint"
                                     icon="museum"
                                     :selected="search"
                                     selected_key="id_mint"
@@ -81,10 +93,10 @@
 
                             <!-- JK: Linked to Type/coin -->
                             <v-col cols="12" sm="2">
-                                <v-select dense outlined filled 
-                                    :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'" 
-                                    :label="'Linked to '+(entity == 'coins' ? 'Type' : 'Coin')+'?'" 
-                                    v-model="search.state_linked" 
+                                <v-select dense outlined filled
+                                    :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
+                                    :label="'Linked to '+(entity == 'coins' ? 'Type' : 'Coin')+'?'"
+                                    v-model="search.state_linked"
                                     :items="selects.state_yes_no"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-select>
@@ -92,9 +104,9 @@
 
                             <!-- JK: ID Opposite Entity -->
                             <v-col cols="12" sm="2">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search ['id_'+(entity == 'coins' ? 'type' : 'coin')]" 
-                                    :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'" 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search ['id_'+(entity == 'coins' ? 'type' : 'coin')]"
+                                    :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'"
                                     :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
@@ -102,10 +114,10 @@
 
                             <!-- JK: Linked to Type/coin -->
                             <v-col cols="12" sm="2">
-                                <v-select dense outlined filled 
-                                    prepend-icon="sync" 
-                                    :label="(entity == 'coins' ? 'Is inherited' : 'Inherits to Coins')+'?'" 
-                                    v-model="search.state_inherited" 
+                                <v-select dense outlined filled
+                                    prepend-icon="sync"
+                                    :label="(entity == 'coins' ? 'Is inherited' : 'Inherits to Coins')+'?'"
+                                    v-model="search.state_inherited"
                                     :items="selects.state_yes_no"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-select>
@@ -113,9 +125,9 @@
 
                             <!-- JK: Creator / Editor -->
                             <v-col cols="12" sm="2">
-                                <SearchForeignKey 
-                                    entity="users" 
-                                    label="Creator" 
+                                <SearchForeignKey
+                                    entity="users"
+                                    label="Creator"
                                     icon="person"
                                     :selected="search"
                                     selected_key="id_creator"
@@ -124,9 +136,9 @@
                                 ></SearchForeignKey>
                             </v-col>
                             <v-col cols="12" sm="2">
-                                <SearchForeignKey 
-                                    entity="users" 
-                                    label="Editor" 
+                                <SearchForeignKey
+                                    entity="users"
+                                    label="Editor"
                                     icon="person_outline"
                                     :selected="search"
                                     selected_key="id_editor"
@@ -140,26 +152,26 @@
                                 <v-select dense outlined filled
                                     :items="selects.state_public"
                                     v-model="search.state_public"
-                                    prepend-icon="publish" 
+                                    prepend-icon="publish"
                                     label="Publication State"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-select>
                             </v-col>
 
                             <v-col cols="12" sm="2">
-                                <v-select dense outlined filled 
-                                    v-model="search.imported" 
+                                <v-select dense outlined filled
+                                    v-model="search.imported"
                                     :items="$store.state.lists.manual.imports"
-                                    prepend-icon="arrow_circle_down" 
-                                    label="Coins Import" 
+                                    prepend-icon="arrow_circle_down"
+                                    label="Coins Import"
                                     v-on:keyup.enter="RunSearch()"
-                                ></v-select> 
+                                ></v-select>
                             </v-col>
 
                             <v-col cols="12" sm="2">
-                                <SearchForeignKey 
-                                    entity="objectgroups" 
-                                    label="Object Group" 
+                                <SearchForeignKey
+                                    entity="objectgroups"
+                                    label="Object Group"
                                     icon="control_camera"
                                     :selected="search"
                                     selected_key="id_group"
@@ -177,19 +189,19 @@
 
                             <!-- JK: Has external Comment -->
                             <v-col cols="12" sm="2">
-                                <v-select dense outlined filled 
-                                    v-model="search.state_comment_public" 
+                                <v-select dense outlined filled
+                                    v-model="search.state_comment_public"
                                     :items="selects.state_yes_no"
-                                    prepend-icon="chat_bubble" 
-                                    label="Has public Comment?" 
+                                    prepend-icon="chat_bubble"
+                                    label="Has public Comment?"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-select>
                             </v-col>
 
                             <v-col cols="12" sm="4">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.comment_public" 
-                                    label="Public Comment" 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.comment_public"
+                                    label="Public Comment"
                                     prepend-icon="chat_bubble"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
@@ -197,104 +209,104 @@
 
                             <!-- JK: Has internal Comment -->
                             <v-col cols="12" sm="2">
-                                <v-select dense outlined filled 
-                                    v-model="search.state_comment_private" 
+                                <v-select dense outlined filled
+                                    v-model="search.state_comment_private"
                                     :items="selects.state_yes_no"
-                                    prepend-icon="chat_bubble_outline" 
-                                    label="Has private Comment?" 
+                                    prepend-icon="chat_bubble_outline"
+                                    label="Has private Comment?"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-select>
-                            </v-col>                            
+                            </v-col>
 
                             <v-col cols="12" sm="4">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.comment_private" 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.comment_private"
                                     label="Private Comment"
-                                    prepend-icon="chat_bubble_outline" 
+                                    prepend-icon="chat_bubble_outline"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
 
                             <!-- JK: Has Source -->
                             <v-col cols="12" sm="2">
-                                <v-select dense outlined filled 
-                                    v-model="search.state_source" 
+                                <v-select dense outlined filled
+                                    v-model="search.state_source"
                                     :items="selects.state_yes_no"
-                                    prepend-icon="arrow_circle_down" 
-                                    label="Has Source?"  
+                                    prepend-icon="arrow_circle_down"
+                                    label="Has Source?"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-select>
-                            </v-col>                            
+                            </v-col>
 
                             <v-col cols="12" sm="4">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.source" 
-                                    label="Source (Import)" 
-                                    prepend-icon="arrow_circle_down" 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.source"
+                                    label="Source (Import)"
+                                    prepend-icon="arrow_circle_down"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
 
                             <!-- Private Description -->
                             <v-col cols="12" sm="6">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.description_private" 
-                                    label="Private Description" 
-                                    prepend-icon="label_important" 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.description_private"
+                                    label="Private Description"
+                                    prepend-icon="label_important"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
 
                             <v-col cols="12" sm="6">
-                                <SearchForeignKey 
-                                    entity="persons" 
-                                    label="Person" 
+                                <SearchForeignKey
+                                    entity="persons"
+                                    label="Person"
                                     icon="emoji_people"
                                     :selected="search"
                                     selected_key="id_person"
-                                    v-on:select="(emit) => { search.id_person = emit }" 
+                                    v-on:select="(emit) => { search.id_person = emit }"
                                     v-on:keyup_enter="RunSearch()"
                                 ></SearchForeignKey>
                             </v-col>
 
                             <!-- JK: References -->
                             <v-col cols="12" sm="6">
-                                <SearchForeignKey 
-                                    entity="references" 
-                                    label="Bibliography" 
+                                <SearchForeignKey
+                                    entity="references"
+                                    label="Bibliography"
                                     icon="menu_book"
                                     :selected="search"
                                     selected_key="id_reference"
-                                    v-on:select="(emit) => { search.id_reference = emit }" 
+                                    v-on:select="(emit) => { search.id_reference = emit }"
                                     v-on:keyup_enter="RunSearch()"
                                 ></SearchForeignKey>
                             </v-col>
 
                             <!-- JK: Owner -->
                             <v-col cols="12" sm="6">
-                                <SearchForeignKey 
-                                    entity="owners" 
-                                    label="Owner" 
+                                <SearchForeignKey
+                                    entity="owners"
+                                    label="Owner"
                                     icon="account_circle"
                                     :selected="search"
                                     selected_key="id_owner"
-                                    v-on:select="(emit) => { search.id_owner = emit }" 
+                                    v-on:select="(emit) => { search.id_owner = emit }"
                                     v-on:keyup_enter="RunSearch()"
                                 ></SearchForeignKey>
                             </v-col>
 
                             <v-col cols="12" sm="6">
                                 <v-text-field dense outlined filled clearable
-                                    v-if="entity === 'coins'"  
-                                    v-model="search.provenience" 
-                                    label="Provenience" 
+                                    v-if="entity === 'coins'"
+                                    v-model="search.provenience"
+                                    label="Provenience"
                                     prepend-icon="play_circle_outline"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                                 <v-text-field dense outlined filled clearable
-                                    v-if="entity === 'types'" 
-                                    v-model="search.name_private" 
-                                    label="Private Name" 
+                                    v-if="entity === 'types'"
+                                    v-model="search.name_private"
+                                    label="Private Name"
                                     prepend-icon="label"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
@@ -302,17 +314,17 @@
 
                             <!-- Collection -->
                             <v-col cols="12" sm="6" v-if="entity === 'coins'">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.collection_nr" 
-                                    label="Collection Nr." 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.collection_nr"
+                                    label="Collection Nr."
                                     prepend-icon="bookmarks"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6" v-if="entity === 'coins'">
-                                <v-text-field dense outlined filled clearable 
-                                    v-model="search.plastercast_nr" 
-                                    label="Plastercast Nr." 
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.plastercast_nr"
+                                    label="Plastercast Nr."
                                     prepend-icon="bookmarks"
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
@@ -320,9 +332,9 @@
 
                             <!-- JK: Hoards -->
                             <v-col cols="12" sm="6">
-                                <SearchForeignKey 
-                                    entity="hoards" 
-                                    label="Hoard" 
+                                <SearchForeignKey
+                                    entity="hoards"
+                                    label="Hoard"
                                     icon="grain"
                                     :selected="search"
                                     selected_key="id_hoard"
@@ -335,7 +347,7 @@
                             <v-col cols="12" sm="6">
                                 <SearchForeignKey
                                     entity="findspots"
-                                    label="Findspot" 
+                                    label="Findspot"
                                     icon="pin_drop"
                                     :selected="search"
                                     selected_key="id_findspot"
@@ -353,9 +365,9 @@
 
                             <!-- JK: Mint -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
-                                    entity="mints" 
-                                    label="Mint" 
+                                <SearchForeignKey
+                                    entity="mints"
+                                    label="Mint"
                                     icon="museum"
                                     :selected="search"
                                     selected_key="id_mint"
@@ -366,9 +378,9 @@
 
                             <!-- Region -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
-                                    entity="regions" 
-                                    label="Region" 
+                                <SearchForeignKey
+                                    entity="regions"
+                                    label="Region"
                                     icon="terrain"
                                     :selected="search"
                                     selected_key="id_region"
@@ -379,9 +391,9 @@
 
                             <!-- Authority -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
-                                    entity="authorities" 
-                                    label="Type of Coinage" 
+                                <SearchForeignKey
+                                    entity="authorities"
+                                    label="Type of Coinage"
                                     icon="toll"
                                     :selected="search"
                                     selected_key="id_authority"
@@ -390,7 +402,7 @@
                                 ></SearchForeignKey>
                             </v-col>
 
-                            <!-- Issuer -->
+                            <!-- Issuer
                             <v-col cols="12" sm="4">
                                 <SearchForeignKey
                                     entity="persons"
@@ -401,13 +413,13 @@
                                     v-on:select="(emit) => { search.id_issuer = emit }"
                                     v-on:keyup_enter="RunSearch()"
                                 ></SearchForeignKey>
-                            </v-col>
+                            </v-col> -->
 
                             <!-- Authority Person -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
+                                <SearchForeignKey
                                     entity="persons"
-                                    :conditions="[{ authority: 1 }]" 
+                                    :conditions="[{ authority: 1 }]"
                                     label="Authority Person"
                                     icon="how_to_reg"
                                     :selected="search"
@@ -419,9 +431,9 @@
 
                             <!-- Authority Group -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
-                                    entity="tribes" 
-                                    label="Authority Group" 
+                                <SearchForeignKey
+                                    entity="tribes"
+                                    label="Authority Group"
                                     icon="sports_kabaddi"
                                     :selected="search"
                                     selected_key="id_authority_group"
@@ -436,7 +448,7 @@
 
                             <!-- Materials -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
+                                <SearchForeignKey
                                     entity="materials"
                                     label="Material"
                                     icon="palette"
@@ -449,9 +461,9 @@
 
                             <!-- Denomination -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
-                                    entity="denominations" 
-                                    label="Denomination" 
+                                <SearchForeignKey
+                                    entity="denominations"
+                                    label="Denomination"
                                     icon="bubble_chart"
                                     :selected="search"
                                     selected_key="id_denomination"
@@ -462,9 +474,9 @@
 
                             <!-- Standard -->
                             <v-col cols="12" sm="4">
-                                <SearchForeignKey 
-                                    entity="standards" 
-                                    label="Standard" 
+                                <SearchForeignKey
+                                    entity="standards"
+                                    label="Standard"
                                     icon="group_work"
                                     :selected="search"
                                     selected_key="id_standard"
@@ -481,7 +493,7 @@
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
-                            
+
                             <v-col cols="12" sm="2" v-if="entity == 'coins'">
                                 <v-text-field dense outlined filled
                                     v-model="search.weight_end"
@@ -490,7 +502,7 @@
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
-                            
+
                             <v-col cols="12" sm="2" v-if="entity == 'coins'">
                                 <v-text-field dense outlined filled
                                     v-model="search.diameter_start"
@@ -499,7 +511,7 @@
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
-                            
+
                             <v-col cols="12" sm="2" v-if="entity == 'coins'">
                                 <v-text-field dense outlined filled
                                     v-model="search.diameter_end"
@@ -535,7 +547,7 @@
                                     v-on:keyup.enter="RunSearch()"
                                 ></v-text-field>
                             </v-col>
-                            
+
                             <v-col cols="12" sm="2">
                                 <v-text-field dense outlined filled
                                     v-model="search.date_end"
@@ -568,11 +580,11 @@
                             </v-col>
 
                             <v-col cols="12" sm="6">
-                                <SearchForeignKey 
+                                <SearchForeignKey
                                     :entity="'designs'"
-                                    :conditions="[{ side: key }]" 
-                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Design'" 
-                                    icon="notes" 
+                                    :conditions="[{ side: key }]"
+                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Design'"
+                                    icon="notes"
                                     :selected="search"
                                     :selected_key="key + '_id_design'"
                                     v-on:select="(emit) => { search[key + '_id_design'] = emit }"
@@ -585,7 +597,7 @@
                                 <SearchForeignKey
                                     :entity="'legends'"
                                     :conditions="[{ side: key }]"
-                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Legend'" 
+                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Legend'"
                                     icon="translate"
                                     sk="el_uc_adv"
                                     :selected="search"
@@ -597,9 +609,9 @@
 
                             <!-- JK: Monograms -->
                             <v-col cols="12" sm="3">
-                                <SearchForeignKey 
-                                    entity="monograms" 
-                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Monogram'" 
+                                <SearchForeignKey
+                                    entity="monograms"
+                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Monogram'"
                                     icon="functions"
                                     :selected="search"
                                     :selected_key="key + '_id_monogram'"
@@ -612,7 +624,7 @@
                             <v-col cols="12" sm="3">
                                 <SearchForeignKey
                                     entity="symbols"
-                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Symbol'" 
+                                    :label="(key === 'o' ? 'Ob' : 'Re') + 'verse Symbol'"
                                     icon="flare"
                                     :selected="search"
                                     :selected_key="key + '_id_symbol'"
@@ -623,16 +635,16 @@
 
                         </v-row>
                     </v-tab-item>
-                </v-tabs-items>                
+                </v-tabs-items>
 
                 <!-- Search Button ----------------------------------------------------- ----------------------------------------------------- ----------------------------------------------------- -->
                 <v-row class="mb-4">
                     <v-col cols="12" sm="2" md="4"></v-col>
                     <v-col cols="12" sm="10" md="4" class="text-center">
                         <!-- Search -->
-                        <v-btn 
-                            large 
-                            tile 
+                        <v-btn
+                            large
+                            tile
                             block
                             color="blue_prim"
                             class="title"
@@ -640,8 +652,8 @@
                             @click="RunSearch()"
                         ></v-btn>
                         <!-- Restore Default -->
-                        <v-btn 
-                            text 
+                        <v-btn
+                            text
                             small
                             class="mt-3"
                             v-text="'Reset Search Parameters'"
@@ -650,16 +662,16 @@
                     </v-col>
                     <!-- Restore previous Search Parameters -->
                     <v-col cols="12" sm="2" md="4">
-                        <v-menu 
-                            v-if="$store.state.previousSearches[entity][0]" 
-                            offset-y 
+                        <v-menu
+                            v-if="$store.state.previousSearches[entity][0]"
+                            offset-y
                             transition="scale-transition"
                             max-width="300"
                         >
                             <template v-slot:activator="{ on: menu }">
                                 <v-tooltip bottom>
                                 <template v-slot:activator="{ on: tooltip }">
-                                    <v-btn 
+                                    <v-btn
                                         v-on="{ ...tooltip, ...menu }"
                                         fab
                                         small
@@ -673,17 +685,17 @@
                             </template>
                             <v-card tile>
                                 <v-card-subtitle
-                                    class="appbar" 
+                                    class="appbar"
                                     v-text="'Previous Searches'"
                                 ></v-card-subtitle>
                                 <v-list dense class="pa-0 ma-0">
-                                    <v-list-item 
-                                        v-for="(ls, i) in $store.state.previousSearches[entity]" 
+                                    <v-list-item
+                                        v-for="(ls, i) in $store.state.previousSearches[entity]"
                                         :key="i"
                                         @click="restorePreviousSearch(ls)"
                                     >
-                                        <div 
-                                            class="caption mb-1" 
+                                        <div
+                                            class="caption mb-1"
                                             v-text="printPreviousSearch(ls)"
                                         ></div>
                                     </v-list-item>
@@ -691,9 +703,9 @@
                             </v-card>
                         </v-menu>
                     </v-col>
-                        
+
                 </v-row>
-            
+
             </v-card-text>
         </v-expand-transition>
 
@@ -706,8 +718,8 @@
                     <template v-slot:activator="{ on }">
                         <v-btn v-on="on" depressed color="sysbar"
                             :tile="$root.user.level > 18"
-                            :text="$root.user.level < 18" 
-                            :disabled="$root.user.level < 18" 
+                            :text="$root.user.level < 18"
+                            :disabled="$root.user.level < 18"
                             @click="TogglePublisher()"
                         >
                             <v-icon v-text="publisher ? 'public_off' : 'public'"></v-icon>
@@ -718,21 +730,21 @@
 
                 <v-spacer></v-spacer>
 
-                <pagination 
-                    :offset="dbi_params.offset" 
-                    :limit="dbi_params.limit" 
-                    :count="dbi_params.count" 
+                <pagination
+                    :offset="dbi_params.offset"
+                    :limit="dbi_params.limit"
+                    :count="dbi_params.count"
                     v-on:offset="(emit) => { dbi_params.offset = emit; SetItems () }"
                 ></pagination>
-                
+
                 <v-spacer></v-spacer>
-                
+
                 <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" 
-                            depressed 
-                            tile 
-                            color="sysbar" 
+                        <v-btn v-on="on"
+                            depressed
+                            tile
+                            color="sysbar"
                             @click="$router.push(entity === 'coins' ? '/types/search' : '/coins/search')"
                         >
                             <v-icon v-text="entity === 'coins' ? 'blur_circular' : 'copyright'"></v-icon>
@@ -744,7 +756,7 @@
         </v-card>
 
         <div class="appbar d-flex component-wrap">
-            
+
             <!-- Publisher -->
             <v-fade-transition>
                 <div v-if="publisher" class="d-flex component-wrap">
@@ -752,8 +764,8 @@
                         <template v-slot:activator="{ on }">
                             <v-btn v-on="on" color="blue_prim" depressed
                                 :tile="items[0] ? true : false"
-                                :text="items[0] ? false : true" 
-                                :disabled="items[0] ? false : true" 
+                                :text="items[0] ? false : true"
+                                :disabled="items[0] ? false : true"
                                 @click="checked_state = !checked_state; SetChecked (checked_state);"
                             >
                                 <v-icon v-text="checked_state ? 'radio_button_unchecked' : 'radio_button_checked'"></v-icon>
@@ -766,8 +778,8 @@
                         <template v-slot:activator="{ on }">
                             <v-btn v-on="on" color="blue_prim" depressed
                                 :tile="items[0] ? true : false"
-                                :text="!checked.filter((check) => { return check.state === true })[0]" 
-                                :disabled="!checked.filter((check) => { return check.state === true })[0]" 
+                                :text="!checked.filter((check) => { return check.state === true })[0]"
+                                :disabled="!checked.filter((check) => { return check.state === true })[0]"
                                 @click="Publish(checked, 1)"
                             >
                                 <v-icon>publish</v-icon>
@@ -792,8 +804,8 @@
                     </v-tooltip>
                 </template>
                 <v-list>
-                    <v-list-item 
-                        v-for="(ipp, i) in $store.state.ItemsPerPage" 
+                    <v-list-item
+                        v-for="(ipp, i) in $store.state.ItemsPerPage"
                         :key="i"
                         :class="dbi_params.limit === ipp ? 'font-weight-black' : ''"
                         @click="dbi_params.limit = ipp; SetItems ();"
@@ -817,8 +829,8 @@
                 </template>
                 <v-card tile>
                     <v-list>
-                        <v-list-item 
-                            v-for="(sorter, i) in sorters" 
+                        <v-list-item
+                            v-for="(sorter, i) in sorters"
                             :key="i"
                             :class="dbi_params.sort_by === sorter.value ? 'font-weight-black' : ''"
                             @click="OrderBy(sorter.value)"
@@ -846,8 +858,8 @@
                 </template>
                 <v-card tile>
                     <v-list>
-                        <v-list-item 
-                            v-for="(dm, i) in display_mode" 
+                        <v-list-item
+                            v-for="(dm, i) in display_mode"
                             :key="i"
                             :class="display === dm.value ? 'font-weight-black' : ''"
                             @click="setDisplayMode(dm.value)"
@@ -866,8 +878,8 @@
                 <template v-slot:activator="{ on }">
                     <v-btn v-on="on" depressed
                         :tile="items[0] ? true : false"
-                        :text="items[0] ? false : true" 
-                        :disabled="items[0] ? false : true" 
+                        :text="items[0] ? false : true"
+                        :disabled="items[0] ? false : true"
                         @click="SetItems ();"
                     >
                         <v-icon>refresh</v-icon>
@@ -880,29 +892,29 @@
     </v-card>
 
     <!-- Search Results ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-    
+
     <!-- Error -->
-    <div 
-        v-if="error" 
+    <div
+        v-if="error"
         class="pt-5 headline d-flex justify-center"
         v-html="'Sorry, an error occured.&ensp;Please reload and retry'"
     ></div>
 
     <!-- Content -->
     <div v-if="items[0]">
-        
+
         <!-- Trading Cards || Index Cards -->
         <div v-if="[0, 1, 2].includes(display)">
             <v-row>
                 <v-col
-                    v-for="(item, i) in items" 
+                    v-for="(item, i) in items"
                     :key="i + ' ' + display"
-                    cols="12" 
-                    :sm="display === 0 ? 6 : 12" 
-                    :md="display === 0 ? 3 : 12" 
+                    cols="12"
+                    :sm="display === 0 ? 6 : 12"
+                    :md="display === 0 ? 3 : 12"
                     :lg="display === 0 ? 2 : 12"
                 >
-                    <component 
+                    <component
                         :is="display_mode[display].component"
                         :key="display + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
                         :entity="entity"
@@ -919,19 +931,19 @@
     </div>
 
     <!-- Pagination -->
-    <v-card 
+    <v-card
         v-if="items[0]"
-        tile 
+        tile
         :class="'sysbar d-flex component-wrap justify-center'+(display !== 1 ? ' mt-5' : '')"
         sytel="position: relative"
     >
-        <pagination 
-            :offset="dbi_params.offset" 
-            :limit="dbi_params.limit" 
-            :count="dbi_params.count" 
+        <pagination
+            :offset="dbi_params.offset"
+            :limit="dbi_params.limit"
+            :count="dbi_params.count"
             v-on:offset="(emit) => {
-                dbi_params.offset = emit; 
-                SetItems(); 
+                dbi_params.offset = emit;
+                SetItems();
                 ScrollTop();
             }"
         ></pagination>
@@ -939,8 +951,8 @@
             <!-- Refresh -->
             <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
-                    <v-btn 
-                        v-on="on" 
+                    <v-btn
+                        v-on="on"
                         depressed
                         tile
                         color="grey_prim"
@@ -992,7 +1004,7 @@ export default {
             items:              [],
 
             search:             {
-                id: null, 
+                id: null,
                 state_public:   this.publisher ? 0 : null
             },
             //previous_search:    [],
@@ -1007,7 +1019,7 @@ export default {
 
             tab:                'tab-1',
             tabs:               [
-                {value: 1,  text: 'Quick Search'},
+                {value: 1,  text: 'Frequently used'},
                 {value: 2,  text: 'General'},
                 {value: 3,  text: 'Production'},
                 {value: 4,  text: 'Depiction'}
@@ -1015,7 +1027,7 @@ export default {
 
             display:            this.$store.state.displayMode,
             display_mode:       [
-                {value: 0, component: 'tradingcard',    text: 'Tiles',   icon: 'view_comfy'}, 
+                {value: 0, component: 'tradingcard',    text: 'Tiles',   icon: 'view_comfy'},
                 {value: 1, component: 'indexcard',      text: 'Cards',     icon: 'view_list'},
                 {value: 2, component: 'tablerow',       text: 'Text',      icon: 'view_column'}
             ],
@@ -1025,14 +1037,14 @@ export default {
                 state_public:       [
                     { value: null, text: 'All' },
                     { value: 0, text: 'Not published' },
-                    { value: 2, text: 'Publishing requested' },  
-                    { value: 1, text: 'Published' }, 
-                    { value: 3, text: 'Deleted' } 
+                    { value: 2, text: 'Publishing requested' },
+                    { value: 1, text: 'Published' },
+                    { value: 3, text: 'Deleted' }
                 ],
                 state_yes_no:       [
-                    { value: null, text: 'All' }, 
-                    { value: 0, text: 'No' }, 
-                    { value: 1, text: 'Yes' } 
+                    { value: null, text: 'All' },
+                    { value: 0, text: 'No' },
+                    { value: 1, text: 'Yes' }
                 ]
             }
         }
@@ -1047,7 +1059,7 @@ export default {
         // Localization
         l () { return this.$root.language },
         labels () { return this.$root.labels },
-        
+
         given_id () {
             return this.$route.params.id === undefined ? this.prop_id : this.$route.params.id
         },
@@ -1055,7 +1067,7 @@ export default {
         label () {
             return this.entity == 'coins' ? {s: 'Coin', p: 'Coins'} : {s: 'Type', p: 'Types'};
         },
-        
+
         sorters () {
             return this.entity === 'coins' ? [
                 { value: 'id', text: 'ID' },
@@ -1082,7 +1094,7 @@ export default {
     watch: {
         entity: function() { this.Init() }
     },
-    
+
     created () {
         this.Init()
     },
@@ -1090,7 +1102,7 @@ export default {
     methods: {
         Init () {
             this.$store.commit('setBreadcrumbs',[
-                { label: this.labels[this.entity], to:'' }, 
+                { label: this.labels[this.entity], to:'' },
                 { label: 'Search', to:'' }
             ])
             this.SearchDefaults(false)
@@ -1121,7 +1133,7 @@ export default {
                 if (key === 'state_public') {
                    search[key] = self.search[key] === null ? [0, 1, 2] : self.search[key]
                 }
-                else if (key === 'o_design' || key === 'r_design') {
+                else if (['string', 'o_design', 'r_design'].includes(key)) {
                     if (self.search[key]) {
                         search[key] = self.search[key].split(' ')
                     }
@@ -1151,10 +1163,10 @@ export default {
                 this.dbi_params = dbi.pagination
 
                 this.items = Object.values(dbi.contents)
-                if (this.items[0]) { 
-                    this.SetChecked (false) 
-                } 
-                else { 
+                if (this.items[0]) {
+                    this.SetChecked (false)
+                }
+                else {
                     this.$root.snackbar('No ' + this.labels[this.entity] + ' found')
                 }
             }
@@ -1162,7 +1174,7 @@ export default {
                 console.log(dbi)
                 this.error = true
             }
-            
+
             this.loading = false
         },
 
@@ -1175,7 +1187,7 @@ export default {
             })
             this.checked = checkers
         },
-        
+
         SearchDefaults (refresh) {
             const self = this
             const search = {}
@@ -1202,20 +1214,20 @@ export default {
         OrderBy (input) {
             if (input === this.dbi_params.sort_by) {
                 this.dbi_params.sort_by_op = this.dbi_params.sort_by_op != 'ASC' ? 'ASC' : 'DESC'
-            } 
+            }
             else {
                 this.dbi_params.sort_by = input
                 this.dbi_params.sort_by_op = 'ASC'
             }
-            this.dbi_params.offset = 0           
-            this.cacheCurrentSearch()           
+            this.dbi_params.offset = 0
+            this.cacheCurrentSearch()
             this.SetItems();
         },
 
         TogglePublisher () {
             if (!this.publisher){
                 this.publisher = true
-                if (this.search.state_public !== 2) { 
+                if (this.search.state_public !== 2) {
                     this.search.state_public = this.publisher ? 2 : null
                     this.$root.snackbar('Publishing activated (' + this.labels[this.entity] + ' requested to be published only)')
                     this.dbi_params.offset = 0;
@@ -1229,8 +1241,8 @@ export default {
                 this.SetItems()
             }
         },
-        
-        async Publish (input, mode) {            
+
+        async Publish (input, mode) {
             let items = input.filter(item => { return item.state === true })
 
             if (items [0]) {
@@ -1240,13 +1252,13 @@ export default {
                     const response = await this.$root.DBI_INPUT_POST('publish', 'input', { entity: this.entity, items: items.map((item) => { return item.id }), mode: mode });
 
                     if (response.success) {
-                        this.$root.snackbar(response.success, 'success')                    
+                        this.$root.snackbar(response.success, 'success')
                         this.SetItems()
                     }
                 }
             }
             else {
-                this.snackbar('No items selected!');                    
+                this.snackbar('No items selected!');
                 this.SetItems();
             }
         },
@@ -1272,7 +1284,7 @@ export default {
                 }
             })
             if (search) {
-                const params = {                    
+                const params = {
                     sort_by: self.dbi_params.sort_by,
                     sort_by_op: self.dbi_params.sort_by_op,
                     count:  0,
@@ -1284,7 +1296,7 @@ export default {
                 this.$store.state.previousSearches[this.entity].forEach((ls) => {
                     ls_array.push(ls)
                 })
-                this.$store.commit('set_previous_search', { entity: this.entity, data: ls_array }) 
+                this.$store.commit('set_previous_search', { entity: this.entity, data: ls_array })
             }
         },
 

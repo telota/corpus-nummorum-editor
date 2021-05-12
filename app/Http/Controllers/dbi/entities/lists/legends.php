@@ -13,24 +13,26 @@ class legends implements listsInterface  {
             -> select([
                 // ID
                 'id AS id',
-                // String 
+                // String
                 'legend AS string',
                 // Addition
                 DB::raw('CONCAT_WS(", ",
                     CASE
                         WHEN is_type = 2 THEN IF("'.$language.'" = "de", "MÜNZE/TYP", "COIN/TYPE")
                         WHEN is_type = 1 THEN IF("'.$language.'" = "de", "TYP", "TYPE")
-                        ELSE IF("'.$language.'" = "de", "MÜNZE", "COIN") 
+                        ELSE IF("'.$language.'" = "de", "MÜNZE", "COIN")
                     END,
                     LOWER(keywords)
-                ) AS addition')
+                ) AS addition'),
+                // Image
+                DB::raw('IF(id_legend_direction IS NOT NULL, CONCAT( "'.config('dbi.url.storage').'", "legend-directions/", LPAD(id_legend_direction, 3, 0), ".svg"), null) AS image'),
                 // Search
                 /*DB::raw('CONCAT_ws("|",
                     legend_sort_basis,
                     LOWER(REPLACE(TRIM(keywords), ", ", "|"))
                 ) AS search')*/
             ]);
-        
+
         // Where
         if (!empty($input['id'])) {
             $query -> orWhereIn('id', $input['id']);
@@ -38,7 +40,7 @@ class legends implements listsInterface  {
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('legend', 'LIKE', '%'.$search.'%')
                         -> orWhere('legend_sort_basis', 'LIKE', '%'.$search.'%')
@@ -57,7 +59,7 @@ class legends implements listsInterface  {
             (empty($input['id']) ? '' : 'FIELD(id, '.implode(',', array_reverse($input['id'])).') DESC, ').
             'legend_sort_basis IS NULL, '.
             'legend_sort_basis ASC'
-        ) 
+        )
         -> limit(50);
 
         return json_decode($query->get(), TRUE);

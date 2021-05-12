@@ -63,13 +63,13 @@ class request_id_select {
                 )
             )'], // IFNULL(( SELECT n.mint_name FROM cn_data.nomisma_mints_text AS n WHERE n.nomisma_id_mint = mint.nomisma_id && n.language = "en"), mint.mint)
 
-            'issuer'            =>  ['raw' => 'JSON_OBJECT(
+            /*'issuer'            =>  ['raw' => 'JSON_OBJECT(
                 "id",           t.id_issuer,
                 "name",         ip.person,
                 "alias",        ip.alias,
                 "role",         ip.position,
                 "link",         IF(ip.nomisma_id_person > "", CONCAT("'.config('dbi.url.nomisma').'", ip.nomisma_id_person), null)
-            )'],
+            )'],*/
 
             'authority'         =>  ['raw' => 'JSON_OBJECT(
                 "kind",         JSON_OBJECT(
@@ -261,7 +261,7 @@ class request_id_select {
                         "string",       l.legend,
                         "direction",    IF( l.id_legend_direction IS NOT NULL, JSON_OBJECT(
                             "id",       l.id_legend_direction,
-                            "link",     CONCAT( "'.config('dbi.url.storage').'", "Legenddirections/", l.id_legend_direction, "richtung.jpg") ), null)
+                            "link",     CONCAT( "'.config('dbi.url.storage').'", "legend-directions/", LPAD(l.id_legend_direction, 3, 0), ".svg") ), null)
                     )
                     FROM '.config('dbi.tablenames.legends').' AS l
                     WHERE l.id = t.id_legend_'.$side.'
