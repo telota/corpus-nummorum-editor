@@ -43,7 +43,6 @@ Vue.component('simpleSelectDialog', require('./templates/simpleDataSelectDialog.
 Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').default);
 Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
 
-//Vue.component('DeriveTemplate',     require('./modules/DeriveTemplate.vue').default);
 Vue.component('Imager',             require('./modules/Imager.vue').default);
 Vue.component('InputForeignKey',    require('./modules/InputForeignKey.vue').default);
 Vue.component('SearchForeignKey',   require('./modules/SearchForeignKey.vue').default);
@@ -53,8 +52,7 @@ Vue.component('ScreenKeys',         require('./modules/ScreenKeys.vue').default)
 Vue.component('files',              require('./modules/files.vue').default);
 Vue.component('upload',             require('./modules/upload.vue').default);
 Vue.component('subheader',          require('./modules/subheader.vue').default);
-//Vue.component('entitylinker',       require('./modules/entitylinker.vue').default);
-//Vue.component('gallery',            require('./modules/gallery.vue').default);
+Vue.component('wysiwyg',            require('./modules/wysiwyg.vue').default);
 
 // Elements
 Vue.component('advbtn',             require('./modules/advbtn.vue').default);
@@ -65,26 +63,20 @@ Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').defaul
 Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);
 Vue.component('ItemEditInput',      require('./pages/entities_primary/ItemEditInput.vue').default);
 Vue.component('ItemInputTemplate',  require('./templates/itemInputTemplate.vue').default);
-//Vue.component('types',              require('./pages/entities_primary/types.vue').default);
-//Vue.component('coins',              require('./pages/entities_primary/coins.vue').default);
 Vue.component('ItemSearch',         require('./pages/entities_primary/ItemSearch.vue').default);
 Vue.component('ItemCopy',           require('./pages/entities_primary/ItemCopy.vue').default);
 Vue.component('ItemDetails',        require('./pages/entities_primary/ItemDetails.vue').default);
-//Vue.component('ItemBar',            require('./pages/entities_primary/ItemBar.vue').default);
 Vue.component('detailsdialog',      require('./pages/entities_primary/modules/detailsDialog.vue').default);
 Vue.component('ItemGallery',           require('./pages/entities_primary/modules/ItemGallery.vue').default);
-//Vue.component('importer',           require('./pages/entities_primary/importer.vue').default);
 Vue.component('commandbar',         require('./pages/entities_primary/modules/commandBar.vue').default);
 
 // Secondary Entities
 Vue.component('denominations',      require('./pages/entities_secondary/denominations.vue').default);
 Vue.component('designs',            require('./pages/entities_secondary/designs.vue').default);
 Vue.component('dies',               require('./pages/entities_secondary/dies.vue').default);
-//Vue.component('emissions',          require('./pages/entities_secondary/emissions.vue').default);
 Vue.component('periods',            require('./pages/entities_secondary/periods.vue').default);
 Vue.component('findspots',          require('./pages/entities_secondary/findspots.vue').default);
 Vue.component('hoards',             require('./pages/entities_secondary/hoards.vue').default);
-//Vue.component('legenddirections',   require('./pages/entities_secondary/legenddirections.vue').default);
 Vue.component('legends',            require('./pages/entities_secondary/legends.vue').default);
 Vue.component('materials',          require('./pages/entities_secondary/materials.vue').default);
 Vue.component('mints',              require('./pages/entities_secondary/mints.vue').default);

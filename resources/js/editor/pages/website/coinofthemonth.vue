@@ -201,71 +201,32 @@
                             cols="12" sm="12" md="6"
                         >
                             <subheader :label="l.toUpperCase()" class="mb-5"></subheader>
-                            <!-- JK: DE : Header -->
+                            <!-- Header -->
                             <v-textarea dense outlined filled no-resize
                                 v-model="slot.item['header_' + l]"
                                 :label="attributes['header_' + l].text"
                                 rows="2"
-                                prepend-icon="short_text"
                                 hint="visible on preview: yes"
                                 counter=255
                             ></v-textarea>
-                            <!-- JK: DE : Teaser -->
+                            <!-- Teaser -->
                             <v-textarea dense outlined filled no-resize
                                 v-model="slot.item['teaser_' + l]"
                                 :label="attributes['teaser_' + l].text"
                                 rows="5"
-                                prepend-icon="short_text"
                                 hint="visible on preview: yes"
                                 counter=21845
                                 class="mt-5"
                             ></v-textarea>
-                            <!-- JK: DE : Text -->
-                            <v-textarea dense outlined filled no-resize
-                                v-if="!htmleditor"
+                            <!-- Text -->
+                            <wysiwyg
                                 v-model="slot.item['text_' + l]"
                                 :label="attributes['text_' + l].text"
-                                rows="10"
-                                prepend-icon="notes"
-                                counter=21845
-                                class="mt-5"
-                            ></v-textarea>
-                            <div v-else class="ml-9 mb-3">
-                                <div class="grey_sec mt-5" style="position: relative; height: 700px; width: 100%">
-                                    <v-progress-linear indeterminate style="position: absolute"></v-progress-linear>
-                                    <div class="pt-10 text-center" style="width: 100%; position: absolute" v-text="'Editor wird geladen ...'"></div>
-                                    <!--</div>
-                                    <tinymce
-                                        style="position: absolute"
-                                        v-model="slot.item['text_' + l]"
-                                        api-key="no-api-key"
-                                        :init="{
-                                            height:         700,
-                                            menubar:        true,
-                                            plugins: [
-                                                'advlist autolink lists link image charmap print preview anchor',
-                                                'searchreplace visualblocks code fullscreen',
-                                                'insertdatetime media table paste code help wordcount'
-                                                ],
-                                            toolbar:
-                                                'undo redo | formatselect | bold italic backcolor | \
-                                                alignleft aligncenter alignright alignjustify | \
-                                                bullist numlist outdent indent | removeformat | help'}"
-                                    ></tinymce>-->
-                                </div>
-                            </div>
-                            <div class="d-flex justify-end">
-                                <v-hover>
-                                    <template v-slot:default="{ hover }" >
-                                        <div
-                                            style="cursor: pointer"
-                                            :class="hover ? 'blue_sec--text' : ''"
-                                            v-text="'Zu ' + (htmleditor ? 'Text-Editor' : 'HTML-Editor') + ' wechseln'"
-                                            @click="htmleditor = !htmleditor"
-                                        ></div>
-                                    </template>
-                                </v-hover>
-                            </div>
+                                :counter="21845"
+                                filled
+                                outlined
+                                :unique="l"
+                            />
                         </v-col>
 
                     </v-row>
@@ -314,10 +275,12 @@
 
 
 <script>
+import wysiwyg from '../../modules/wysiwyg.vue'
 
 //import tinymce from '@tinymce/tinymce-vue'
 
 export default {
+  components: { wysiwyg },
     /*components: {
         tinymce
     },*/

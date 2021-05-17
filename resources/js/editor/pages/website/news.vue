@@ -89,7 +89,7 @@
                 <div>
                     <v-row>
                         <!-- JK: Release Date -->
-                        <v-col cols="12" md="6">
+                        <v-col cols="12" md="3">
                             <v-menu offset-y
                                 :close-on-content-click="false"
                                 transition="scale-transition"
@@ -109,7 +109,7 @@
                         </v-col>
 
                         <!-- JK: Creator -->
-                        <v-col cols="12" md="6">
+                        <v-col cols="12" md="3">
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item.creator"
                                 :label="attributes.creator.text"
@@ -158,8 +158,6 @@
                             </diV>
                         </v-col>
 
-                        <v-col cols="12" md="6"></v-col>
-
                         <!-- JK: Description -->
                         <v-col
                             v-for="(l) in ['de', 'en']"
@@ -171,78 +169,38 @@
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item['date_' + l]"
                                 :label="attributes['date_' + l].text"
-                                :prepend-icon="attributes.release.icon"
                             ></v-text-field>
-                            <!-- JK: DE : Header -->
+                            <!-- Header -->
                             <v-textarea dense outlined filled no-resize
                                 v-model="slot.item['header_' + l]"
                                 :label="attributes['header_' + l].text"
                                 rows="2"
-                                prepend-icon="short_text"
                                 hint="visible on preview: yes"
                                 counter=255
                             ></v-textarea>
-                            <!-- JK: DE : Teaser -->
+                            <!-- Teaser -->
                             <v-textarea dense outlined filled no-resize
                                 v-model="slot.item['teaser_' + l]"
                                 :label="attributes['teaser_' + l].text"
                                 rows="5"
-                                prepend-icon="short_text"
                                 hint="visible on preview: yes"
                                 counter=21845
                                 class="mt-5"
                             ></v-textarea>
-                            <!-- JK: DE : Text -->
-                            <v-textarea dense outlined filled no-resize
-                                v-if="!htmleditor"
+                            <!-- Text -->
+                            <wysiwyg
                                 v-model="slot.item['text_' + l]"
                                 :label="attributes['text_' + l].text"
-                                rows="10"
-                                prepend-icon="notes"
-                                counter=21845
-                                class="mt-5"
-                            ></v-textarea>
-                            <div v-else class="ml-9 mb-3">
-                                <div class="grey_sec mt-5" style="position: relative; height: 700px; width: 100%">
-                                    <v-progress-linear indeterminate style="position: absolute"></v-progress-linear>
-                                    <div class="pt-10 text-center" style="width: 100%; position: absolute" v-text="'Editor wird geladen ...'"></div>
-                                    <!--</div>
-                                    <tinymce
-                                        style="position: absolute"
-                                        v-model="slot.item['text_' + l]"
-                                        api-key="no-api-key"
-                                        :init="{
-                                            height:         700,
-                                            menubar:        true,
-                                            plugins: [
-                                                'advlist autolink lists link image charmap print preview anchor',
-                                                'searchreplace visualblocks code fullscreen',
-                                                'insertdatetime media table paste code help wordcount'
-                                                ],
-                                            toolbar:
-                                                'undo redo | formatselect | bold italic backcolor | \
-                                                alignleft aligncenter alignright alignjustify | \
-                                                bullist numlist outdent indent | removeformat | help'}"
-                                    ></tinymce>-->
-                                </div>
-                            </div>
-                            <div class="d-flex justify-end">
-                                <v-hover>
-                                    <template v-slot:default="{ hover }" >
-                                        <div
-                                            style="cursor: pointer"
-                                            :class="hover ? 'blue_sec--text' : ''"
-                                            v-text="'Zu ' + (htmleditor ? 'Text-Editor' : 'HTML-Editor') + ' wechseln'"
-                                            @click="htmleditor = !htmleditor"
-                                        ></div>
-                                    </template>
-                                </v-hover>
-                            </div>
+                                :counter="21845"
+                                filled
+                                outlined
+                                :unique="l"
+                            />
                         </v-col>
 
                         <!-- JK: Links-->
                         <v-col cols=12>
-                            <v-divider class="mt-n3 mb-5"></v-divider>
+                            <v-divider class="mb-5"></v-divider>
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item.links_value"
                                 label="Link"
