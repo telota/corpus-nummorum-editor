@@ -50,6 +50,7 @@ return [
     'monograms'             => $db_data.'data_monograms',
     'mints'                 => $db_data.'data_mints',
     'mints_nomisma'         => $db_data.'nomisma_mints',
+    'mints_nomisma_text'    => $db_data.'nomisma_mints_text',
     'objectgroups'          => $db_data.'data_objectgroups',
     'owners'                => $db_data.'data_owners',
     'periods'               => $db_data.'data_periods',
@@ -72,4 +73,8 @@ return [
     'team'                  => $db_app.'app_website_team',
     'texts'                 => $db_app.'app_website_texts',
     'users'                 => $db_app.'app_editor_users',
+
+    // Indexes
+    'index_coins'           => $db_data.'index_coins',
+    'index_types'           => $db_data.'index_types'
 ];
