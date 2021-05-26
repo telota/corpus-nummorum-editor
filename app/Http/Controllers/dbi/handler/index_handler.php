@@ -6,6 +6,8 @@ use DB;
 use App\Http\Controllers\dbi\entities\coins\index_handler as coins;
 use App\Http\Controllers\dbi\entities\types\index_handler as types;
 
+use Response;
+
 class index_handler {
 
     public function updateOrInsert ($entity, $id)  {
@@ -150,4 +152,128 @@ class index_handler {
 
         return true;
     }
+
+    public function handleSearch ($string) {
+
+        $string = trim(preg_replace('/\s+/', ' ', $string));
+        if (empty($string)) die ("\nNo String given\n");
+
+        $query = DB::table(DB::Raw('(
+            SELECT id_coin as id, json_arrayagg(
+                CONCAT_WS("::",
+                    CONCAT_WS("_", data_key, data_language),
+                    REPLACE(data_value, \'"\', "")
+                )
+            ) AS vals
+            FROM '.config('dbi.tablenames.index_coins').'
+            GROUP BY id_coin
+        ) AS concated_index'))
+        ->select(['id', 'vals']);
+
+        // Where Statement
+        $query->where(function ($queryByOr) use ($string) {
+
+            // Split by OR
+            foreach ($this->splitString($string, false) as $byOr) {
+                $queryByOr->orWhere(function ($queryByAnd) use (&$byOr) {
+                    $byOr = trim($byOr);
+
+                    // Split by AND
+                    foreach ($this->splitString($byOr, true) as $byAnd) {
+                        $byAnd = trim($byAnd);
+
+                        $queryByAnd->where(function ($subQuery) use ($byAnd) {
+                            $this->createWhere($subQuery, $byAnd, false);
+                        });
+                    }
+                });
+            }
+
+        });
+
+        $data = $query->limit(10)->get();
+        $data = json_decode($data, true);
+
+        foreach ($data as $dat) {
+            echo "\n".$dat['id'];
+        }
+
+        /*return Response::json([
+            'string' => $input,
+            'matches' => $this->recursiveSplit([], $input, 0)
+        ]);*/
+    }
+
+    public function splitString ($string, $isAnd = false) {
+        if ($isAnd) {
+            // Escape Space after NOT to avoid blank split
+            $string = str_replace('NOT ', 'NOT___', $string);
+            // Replace AND with blanks to make split easier
+            $string = str_replace('AND', ' ', $string);
+            // Add trailing blanks to enhance quoting-match
+            $string = ' '.$string.' ';
+            // Replace blanks in quoted strings to avoid being split
+            $string = preg_replace_callback('/"(.*?)" /', function ($match) {
+                return str_replace(' ', '___', trim($match[1])).' ';
+            }, $string);
+            // Trim and Replace multiple Spaces to avoid empty matches after split
+            $string = trim(preg_replace('/\s+/', ' ', $string));
+            $split = explode(' ', $string);
+            // Replace Escape-Chars in quoted Strings
+            foreach ($split as $key => $val) {
+                if (empty($val)) unset($split[$key]);
+                else $split[$key] = trim(str_replace('___', ' ', $val));
+            }
+
+            return $split;
+        }
+
+        else return explode(' OR ', $string);
+    }
+
+    public function createWhere ($query, $string, $isRegex = false) {
+        $connector = 'LIKE';
+        $modificator = '';
+
+        // Look for NOT in String
+        if (substr($string, 0, 4) === 'NOT ') {
+            $string = trim(substr($string, 3));
+            $modificator = 'NOT ';
+        }
+
+        // Look for stated columnnames (column::string)
+        $split = explode('::', $string);
+
+        if (empty($split[1])) {
+            if (empty($isRegex)) $string = '%'.$string.'%';
+        }
+        else {
+            $isRegex = true;
+            $string = '"'.$split[0].'[^"]*'.$split[1];
+        }
+
+        // Add R if REGEX is required
+        if ($isRegex === true) $modificator .= 'R';
+
+        //echo "\n".$modificator.$connector.' '.$string;
+
+        $query->where(DB::Raw('vals COLLATE utf8mb4_unicode_ci'), $modificator.$connector, $string);
+    }
+
+    // https://www.php.net/manual/de/regexp.reference.recursive.php
+    /*public function recursiveSplit($string, $layer) {
+
+        preg_match_all("/\((([^()]*|(?R))*)\)/",$string,$matches);
+        // iterate thru matches and continue recursive split
+        if (count($matches) > 1) {
+            for ($i = 0; $i < count($matches[1]); $i++) {
+                if (is_string($matches[1][$i])) {
+                    if (strlen($matches[1][$i]) > 0) {
+                        echo $layer.":   ".$matches[1][$i];
+                        $this->recursiveSplit($matches[1][$i], $layer + 1);
+                    }
+                }
+            }
+        }
+    }*/
 }

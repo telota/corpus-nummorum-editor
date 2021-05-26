@@ -116,3 +116,6 @@ Route::middleware(['auth'])->group(function () {
         //Route::get  ('/files/info/storage/{directory}',     'FileController@info')   -> where('directory', '.+');
     });
 });
+
+
+//Route::get  ('/test/{input?}', 'App\Http\Controllers\dbi\handler\index_handler@parseStatement');
