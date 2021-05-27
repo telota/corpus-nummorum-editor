@@ -5,6 +5,7 @@ namespace App\Http\Controllers\dbi\handler;
 use DB;
 use Request;
 use App\Http\Controllers\dbi\handler\pagination;
+use App\Http\Controllers\dbi\handler\index_handler;
 
 
 class complex_select {
@@ -14,27 +15,27 @@ class complex_select {
         $base_alias = substr($entity, 0, 1);
         $base_id    = $base_alias.'.id';
 
-        // ID given -> single detailed Request -----------------------------------------------------
+        // ID given->single detailed Request -----------------------------------------------------
         if(!empty($id)) {
             $query = DB::table($base_name.' AS '.$base_alias);
-    
-            // Join
-            $join = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_id_join'; 
-            $join = new $join();
-            $query = $join -> instructions($query);
 
-            // Select 
+            // Join
+            $join = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_id_join';
+            $join = new $join();
+            $query = $join->instructions($query);
+
+            // Select
             $select = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_id_select';
             $select = new $select();
-            $query -> select($this -> createSelect($select -> instructions($user)));
+            $query->select($this->createSelect($select->instructions($user)));
 
-            $query -> where($base_id, $id);
+            $query->where($base_id, $id);
 
-            return $this -> postProcessing($query -> get()); 
+            return $this->postProcessing($query->get());
         }
 
-        
-        // No ID given -> parametric request -----------------------------------------------------
+
+        // No ID given->parametric request -----------------------------------------------------
         else {
             $input = Request::post();
             // Hide not published objects for any average user
@@ -45,44 +46,50 @@ class complex_select {
 
 
             // Prequery -------------------------------------------------------------------
-            $prequery = DB::table($base_name.' AS '.$base_alias) -> select($base_id.' AS id');
+            $prequery = DB::table($base_name.' AS '.$base_alias)->select($base_id.' AS id');
 
             // Where
             $where = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_parametric_where';
             $where = new $where();
-            $allowed_where = $where -> instructions();
-            $where = $this -> getWhereParams($allowed_where, $input);
+            $allowed_where = $where->instructions();
+            $where = $this->getWhereParams($allowed_where, $input);
             $where_display = $where['display'];
 
-            if (!empty($where['where'])) {
-                $prequery = $this -> handleWhere($entity, $allowed_where, $where, $prequery);
+            if (!empty($where['where'])) $prequery = $this->handleWhere($entity, $allowed_where, $where, $prequery);
+
+            // Quicksearch
+            if (!empty($input['q']) && in_array($entity, ['coins', 'types'])) {
+                $indexHandler = new index_handler();
+                $handled = $indexHandler->handleSearch($entity, $prequery, $input);
+                $where_display = array_merge($handled['where'], $where_display);
+                $prequery = $handled['query'];
             }
 
             // Order by
             if (empty($input['sort_by'])) {
                 $pagination['sort_by'] = 'id ASC';
-                $prequery -> orderBy($base_id, 'ASC');
+                $prequery->orderBy($base_id, 'ASC');
             }
             else {
                 $order_by = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_parametric_order_by';
                 $order_by = new $order_by();
-                $allowed_order_by = $order_by -> instructions();
+                $allowed_order_by = $order_by->instructions();
 
-                $ordered = $this -> orderBy($base_id, $allowed_order_by, $input, $prequery);
+                $ordered = $this->orderBy($base_id, $allowed_order_by, $input, $prequery);
                 $pagination['sort_by'] = $ordered['sort_by'];
                 $prequery = $ordered['query'];
-            }            
+            }
 
             // Execute Prequery
-            $dbi = $prequery -> get();
-            $dbi = json_decode($dbi, TRUE);            
+            $dbi = $prequery->get();
+            $dbi = json_decode($dbi, TRUE);
 
             // count records
             $count = $pagination['count'] = empty($dbi[0]) ? 0 : count($dbi);
-            
+
             // Pagination
             $paginator = new pagination;
-            $pagination = array_merge($pagination, $paginator -> process($count, $input));
+            $pagination = array_merge($pagination, $paginator->process($count, $input));
             $offset = $pagination['offset'];
             $limit = $pagination['limit'];
 
@@ -90,39 +97,39 @@ class complex_select {
             for ($i = $offset; $i < ($offset + $limit); $i++) {
                 if ($i >= $count) { break; }
                 $selection[] = $dbi[$i]['id'];
-            }            
+            }
 
             // Mainquery -------------------------------------------------------------------
             if (!empty($selection)) {
                 $query = DB::table($base_name.' AS '.$base_alias);
 
-                // Select 
+                // Select
                 $select = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_parametric_select';
                 $select = new $select();
-                $query -> select($this -> createSelect($select -> instructions($user)));
-        
-                // Join
-                $join = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_parametric_join'; 
-                $join = new $join();
-                $query = $join -> instructions($query);
+                $query->select($this->createSelect($select->instructions($user)));
 
-                $dbi = $query 
-                    -> whereIntegerInRaw($base_id, $selection)
-                    -> orderByRaw('FIELD('.$base_id.', '.implode(',', $selection).')')
-                    -> get();
-                
-                $dbi = $this -> postProcessing($dbi);
+                // Join
+                $join = 'App\Http\Controllers\dbi\entities\\'.$entity.'\request_parametric_join';
+                $join = new $join();
+                $query = $join->instructions($query);
+
+                $dbi = $query
+                   ->whereIntegerInRaw($base_id, $selection)
+                   ->orderByRaw('FIELD('.$base_id.', '.implode(',', $selection).')')
+                   ->get();
+
+                $dbi = $this->postProcessing($dbi);
             }
 
             // Return -------------------------------------------------------------------
             return [
-                'pagination'    => $paginator -> finalize($pagination, $where_display), 
-                'where'         => $where_display, 
+                'pagination'    => $paginator->finalize($pagination, $where_display),
+                'where'         => $where_display,
                 'contents'      => empty($dbi) ? [] : $dbi
             ];
         }
     }
-     
+
 
     public function createSelect ($input) {
         foreach ($input As $key => $val) {
@@ -138,31 +145,28 @@ class complex_select {
 
 
     public function getWhereParams ($allowed_keys, $input) {
-        $where  = [];
-        $display   = [
-            'accepted' => [], 
-            'ignored' => []
-        ];
+        $where  = $accepted = $ignored = [];
+
         //die(print_r(array_keys($allowed_keys)));
-        foreach ($input as $key => $val) {            
-            foreach ((is_array($val) ? $val : [$val]) as $value) { // ensure given value is an array            
+        foreach ($input as $key => $val) {
+            foreach ((is_array($val) ? $val : [$val]) as $value) { // ensure given value is an array
                 // check if parameter is not null/empty
                 if ($value !== null && $value !== '') {
                     // set given key to lower case to improve compability
                     $key = strtolower($key);
                     // check if parameter is allowed
                     if (in_array($key, array_keys($allowed_keys), true)) {
-                        $where[$key][] = $display['accepted'][$key][] = $value;
+                        $where[$key][] = $accepted[$key][] = $value;
                     }
                     else if (!in_array($key, ['sort_by', 'limit', 'offset'])) { // ignore pagination params
-                        $display['ignored'][$key][] = $value;
+                        $ignored[$key][] = $value;
                     }
                 }
             }
         };
 
         return [
-            'display' => $display, 
+            'display' => $accepted,
             'where' => $where
         ];
     }
@@ -181,43 +185,43 @@ class complex_select {
 
                 // Generic Search without specific Connector ( === OR)
                 if (!isset($src['connector'])) {
-                    $query -> whereIn($table_id, function ($subquery) use ($src, $value, $table_name, $table_id) {
+                    $query->whereIn($table_id, function ($subquery) use ($src, $value, $table_name, $table_id) {
 
                         // Set base table
-                        $subquery -> select($table_id) -> from($table_name);
+                        $subquery->select($table_id)->from($table_name);
                         // Joins
                         foreach ($src['joins'] as $join) {
-                            $subquery -> leftJoin(...$join);
+                            $subquery->leftJoin(...$join);
                         }
                         // Conditions if given
                         if (isset($src['conditions'])) {
-                            $subquery -> where($src['conditions']);
+                            $subquery->where($src['conditions']);
                         }
                         // Where
-                        $subquery -> where(function ($subsubquery) use ($src, $value) {
-                            foreach($this -> createWhere($src['where'], $value) AS $val) {
-                                $subsubquery -> orWhere([$val]);
+                        $subquery->where(function ($subsubquery) use ($src, $value) {
+                            foreach($this->createWhere($src['where'], $value) AS $val) {
+                                $subsubquery->orWhere([$val]);
                             }
                         });
                     });
                 }
                 // Connected Search - AND is given
                 elseif ($src['connector'] === 'AND') {
-                    foreach($this -> createWhere($src['where'], $value) AS $val) {
-                        $query -> whereIn($table_id, function ($subquery) use ($src, $val, $table_name, $table_id) {
+                    foreach($this->createWhere($src['where'], $value) AS $val) {
+                        $query->whereIn($table_id, function ($subquery) use ($src, $val, $table_name, $table_id) {
 
                             // Set base table
-                            $subquery -> select($table_id) -> from($table_name);
+                            $subquery->select($table_id)->from($table_name);
                             // Joins
                             foreach ($src['joins'] as $join) {
-                                $subquery -> leftJoin(...$join);
+                                $subquery->leftJoin(...$join);
                             }
                             // Conditions if given
                             if (isset($src['conditions'])) {
-                                $subquery -> where($src['conditions']);
+                                $subquery->where($src['conditions']);
                             }
                             // Where
-                            $subquery -> where([$val]);
+                            $subquery->where([$val]);
                         });
 
                     }
@@ -228,14 +232,14 @@ class complex_select {
             else {
                 $src = $allowed_keys[$key];
 
-                $query -> where(function ($subquery) use ($src, $value) {
-                    foreach($this -> createWhere($src, $value) AS $val) {
-                        $subquery -> orWhere([$val]);
+                $query->where(function ($subquery) use ($src, $value) {
+                    foreach($this->createWhere($src, $value) AS $val) {
+                        $subquery->orWhere([$val]);
                     }
                 });
             }
         }
-            
+
         return $query;
     }
 
@@ -255,11 +259,11 @@ class complex_select {
             $operator   = isset($src[1]) ? $src[1] : '=';
             $wc_start   = isset($src[2]) ? $src[2] : '';
             $wc_end     = isset($src[3]) ? $src[3] : '';
-        
+
             foreach ($value as $val) {
                 $wheres[] = [
-                    isset($column['raw']) ? DB::raw($column['raw']) : $column, 
-                    $operator, 
+                    isset($column['raw']) ? DB::raw($column['raw']) : $column,
+                    $operator,
                     $wc_start.$val.$wc_end
                 ];
             }
@@ -269,7 +273,7 @@ class complex_select {
     }
 
 
-    public function orderBy ($base_id, $allowed_order_by, $input, $prequery) {            
+    public function orderBy ($base_id, $allowed_order_by, $input, $prequery) {
         // Explode sort by to extract key and operator
         $sort_explode   = explode('.', $input['sort_by']);
         $exploded_op    = isset($sort_explode[1]) ? strtoupper(array_pop($sort_explode)) : 'ASC';
@@ -287,14 +291,14 @@ class complex_select {
             else {
                 $ob_col = $allowed_order_by[$ob_key];
             }
-            
-            $prequery -> orderByRaw(
+
+            $prequery->orderByRaw(
                 $ob_col.' IS NULL, '.   // NULLs last
-                $ob_col.' '.$ob_op      // order by given key and operator 
+                $ob_col.' '.$ob_op      // order by given key and operator
             );
         }
         else {
-            $prequery -> orderBy($base_id, 'ASC');
+            $prequery->orderBy($base_id, 'ASC');
             $sort_by = 'id ASC';
         }
 
@@ -307,12 +311,12 @@ class complex_select {
 
     public function postProcessing ($dbi) {
         foreach ($dbi as $item) {
-            $rows = [];            
+            $rows = [];
             foreach ($item as $key => $val) {
-                if ($val === '') { 
+                if ($val === '') {
                     $rows[$key] = null;
                 }
-                else if (is_numeric($val)) { 
+                else if (is_numeric($val)) {
                     $rows[$key] = floatval($val);
                 }
                 else if ($key === 'axes') { // Special Treatment for Axes in Types...

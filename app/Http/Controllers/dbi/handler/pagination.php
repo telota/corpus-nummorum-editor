@@ -58,7 +58,7 @@ class pagination {
             'next'      => $next,
             'last'      => $last
         ];
-    }    
+    }
 
 
     function finalize ($pagination, $where) {
@@ -67,8 +67,8 @@ class pagination {
         $params = [];
 
         // Flat Single-Entry-Arrays for better Readability
-        foreach ($where['accepted'] as $key => $val) {
-            $params[$key] = isset($val[1]) ? $val : $val[0];
+        foreach ((isset($where['accepted']) ? $where['accepted'] : $where) as $key => $val) {
+            $params[$key] = is_array($val) ? $val[0] : $val;
         }
 
         // Return Response
@@ -86,7 +86,7 @@ class pagination {
             'lastPage'          => $pagination['last']     === null ? null : $this -> offset($params, $pagination['limit'], $pagination['last'], $sort_by)
         ];
     }
-    
+
 
     function offset ($parameters, $limit, $offset, $sort_by) {
 

@@ -54,7 +54,8 @@ class APIController extends Controller {
 
                 // AcceptedKeys
                 unset($dbi['where']['accepted']['state_public']);
-                $dbi['pagination']['acceptedParameters'] = empty($dbi['where']['accepted']) ? [] : $dbi['where']['accepted'];
+                unset($dbi['where']['state_public']);
+                $dbi['pagination']['acceptedParameters'] = isset($dbi['where']['accepted']) ? $dbi['where']['accepted'] : (empty($dbi['where']) ? [] : $dbi['where']);
 
                 // return Response
                 return Response::json([

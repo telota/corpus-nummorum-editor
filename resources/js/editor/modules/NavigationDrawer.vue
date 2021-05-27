@@ -1,9 +1,9 @@
 <template>
-<div>
+<div style="position: fixed; top: 50px; bottom: 30px; z-index: 499">
     <v-navigation-drawer
-        app
         v-model="$root.drawer.active"
         :expand-on-hover="$root.drawer.mini && $vuetify.breakpoint.mdAndUp"
+
     >
         <v-list :dense="dense" class="mt-n1">
 

@@ -52,21 +52,188 @@
 
                 <v-tabs-items v-model="tab" class="pa-5 transparent">
 
+                    <!-- String Search --------------------------------------------------------------------------------------------------------------------------------- -->
+                    <v-tab-item value="tab-0" transition="expand-transition" reverse-transition="expand-transition">
+                        <v-row>
+                            <!-- Search Field -->
+                            <v-col cols=12>
+                                <div class="d-flex mb-n5 mt-4">
+                                    <v-text-field outlined filled clearable dense
+                                        v-model="search.q"
+                                        :label="$root.label('search_strings')"
+                                        prepend-icon="search"
+                                        v-on:keyup.enter="RunSearch()"
+                                        hint="Use AND, OR and NOT to connect search strings, quotation marks to escape phrases, click on question mark right for more information"
+                                    ></v-text-field>
 
-                    <!-- Quick Search --------------------------------------------------------------------------------------------------------------------------------- -->
+                                    <v-menu tile offset-y nudge-left="402" nudge-bottom="5">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn icon v-bind="attrs" v-on="on" class="ml-1">
+                                                <v-icon v-text="'help_outline'" />
+                                            </v-btn>
+                                        </template>
+
+                                        <v-card tile class="grey_sec" width="400">
+                                            <v-card-text>
+                                                <p>
+                                                    Use <b>AND</b>, <b>OR</b> and (<b>AND</b>/<b>OR</b>) <b>NOT</b> to connect several search strings logically.
+                                                    (must be written in upper case and seperated by blanks from search strings), e.g. <i>thrace AND NOT byzantium</i>
+                                                </p>
+                                                <p>
+                                                    Blanks are considered as <b>AND</b> by default. Use double quotation marks (<b>""</b>) to mark two or more strings as connected,
+                                                    e.g. <i>apollo AND "nach rechts"</i>
+                                                </p>
+                                                <p>
+                                                    Search strings can be restricted to a specific field by adding the key followed by two colons (<b>::</b>), e.g. <i>byzantium AND design::bull</i>
+                                                </p>
+                                                <p>
+                                                    The search scope can be narrowed by excluding fields generally (uncheck the keys in the popup menu). Furthermore you can add filters like date, weight etc.
+                                                </p>
+                                                <p>
+                                                    The search is case insensitive by default ("kopf" will match "Kopf"), check "case-sensitive" for strict case matching.
+                                                </p>
+                                                <p>
+                                                    Check "REGEX" when using <a href="https://dev.mysql.com/doc/refman/5.7/en/regexp.html#regexp-syntax" target="_blank">regular expressions</a>
+                                                </p>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-menu>
+                                </div>
+                            </v-col>
+
+                            <!-- Options -->
+                            <v-col cols=12>
+                                <div class="d-flex flex-wrap justify-center align-center mt-n5">
+                                    <v-checkbox
+                                        v-model="search.qre"
+                                        label="REGEX"
+                                        class="mr-9"
+                                    />
+
+                                    <v-checkbox
+                                        v-model="search.qcs"
+                                        label="case-sensitive"
+                                        class="mr-10"
+                                    />
+
+                                    <!-- Excludes -->
+                                    <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <div
+                                                class="d-flex align-center body-1 mr-9"
+                                                style="cursor: pointer"
+                                                v-bind="attrs" v-on="on"
+                                            >
+                                                <v-btn icon class="mr-1"><v-icon v-text="'manage_search'" /></v-btn>
+                                                <div v-text="'Included Fields'" />
+                                            </div>
+                                        </template>
+
+                                        <v-card tile class="grey_sec">
+                                            <v-card-text class="pb-0 pt-6">
+                                                <v-checkbox
+                                                    v-for="(key) in [
+                                                        'mint', 'region',
+                                                        'design_o_de', 'design_r_de', 'design_o_en', 'design_r_en', 'legend_o', 'legend_r',
+                                                        'comment'
+                                                    ]"
+                                                    :key="key"
+                                                    :input-value="search.qex ? !search.qex.includes(key) : true"
+                                                    :label="key"
+                                                    class="mt-n3"
+                                                    @click="searchStringIncludeFiled(key)"
+                                                />
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-menu>
+
+                                    <!-- Filter -->
+                                    <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <div
+                                                class="d-flex align-center body-1"
+                                                style="cursor: pointer"
+                                                v-bind="attrs" v-on="on"
+                                            >
+                                                <v-btn icon class="mr-1"><v-icon v-text="'filter_alt'" /></v-btn>
+                                                <div v-text="'Additional Filters'" />
+                                            </div>
+                                        </template>
+
+                                        <v-card tile class="grey_sec" width="400">
+                                            <v-card-text>
+                                                <v-row>
+                                                    <!-- Date -->
+                                                    <v-col cols=12 v-text="'Date'" class="body-1 mb-n2" />
+                                                    <v-col cols="6">
+                                                        <v-text-field dense outlined filled clearable
+                                                            v-model="search.date_start"
+                                                            label="Min."
+                                                            prepend-icon="last_page"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-text-field>
+                                                    </v-col>
+
+                                                    <v-col cols="6">
+                                                        <v-text-field dense outlined filled clearable
+                                                            v-model="search.date_end"
+                                                            label="Max."
+                                                            append-outer-icon="first_page"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-text-field>
+                                                    </v-col>
+
+                                                    <!-- Weight -->
+                                                    <v-col cols=12 v-text="'Weight'" class="mt-n5 mb-n2 body-1" />
+                                                    <v-col cols="6" v-if="entity == 'coins'">
+                                                        <v-text-field dense outlined filled clearable
+                                                            v-model="search.weight_start"
+                                                            label="Min."
+                                                            prepend-icon="last_page"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-text-field>
+                                                    </v-col>
+
+                                                    <v-col cols="6" v-if="entity == 'coins'">
+                                                        <v-text-field dense outlined filled clearable
+                                                            v-model="search.weight_end"
+                                                            label="Max."
+                                                            append-outer-icon="first_page"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-text-field>
+                                                    </v-col>
+
+                                                    <!-- Diameter -->
+                                                    <v-col cols=12 v-text="'Diameter'" class="mt-n5 mb-n2 body-1" />
+                                                    <v-col cols="6" v-if="entity == 'coins'">
+                                                        <v-text-field dense outlined filled clearable
+                                                            v-model="search.diameter_start"
+                                                            label="Min."
+                                                            prepend-icon="last_page"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-text-field>
+                                                    </v-col>
+
+                                                    <v-col cols="6" v-if="entity == 'coins'">
+                                                        <v-text-field dense outlined filled clearable
+                                                            v-model="search.diameter_end"
+                                                            label="Max."
+                                                            append-outer-icon="first_page"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-text-field>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-menu>
+                                </div>
+                            </v-col>
+                        </v-row>
+                    </v-tab-item>
+
+                    <!-- Frequently used --------------------------------------------------------------------------------------------------------------------------------- -->
                     <v-tab-item value="tab-1" transition="expand-transition" reverse-transition="expand-transition">
                         <v-row>
-                            <!-- String -->
-                            <v-col cols=12>
-                                <v-text-field dense outlined filled clearable
-                                    v-model="search.string"
-                                    :label="$root.label('quick_search')"
-                                    prepend-icon="search"
-                                    class="mt-3"
-                                    hint="Search in Mint, Period, Ruler, Tribe, Design, Public Comment | separate keywords by blanks "
-                                    v-on:keyup.enter="RunSearch()"
-                                ></v-text-field>
-                            </v-col>
 
                             <!-- JK: ID -->
                             <v-col cols="12" sm="6">
@@ -1017,8 +1184,9 @@ export default {
             checked_state:      false,
             checked:            [],
 
-            tab:                'tab-1',
+            tab:                'tab-0',
             tabs:               [
+                {value: 0,  text: 'String Search'},
                 {value: 1,  text: 'Frequently used'},
                 {value: 2,  text: 'General'},
                 {value: 3,  text: 'Production'},
@@ -1322,6 +1490,20 @@ export default {
             this.dbi_params = params
             this.SetItems()
         },
+
+        searchStringIncludeFiled (key) {
+            if (this.search.qex?.[0]) {
+                if (this.search.qex?.includes(key)) {
+                    if (this.search.qex.length > 1) {
+                        const index = this.search.qex.indexOf(key)
+                        this.search.qex.splice(index, 1)
+                    }
+                    else this.search.qex = []
+                }
+                else this.search.qex.push(key)
+            }
+            else this.search.qex = [key]
+        }
     }
 }
 

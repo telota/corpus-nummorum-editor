@@ -153,55 +153,80 @@ class index_handler {
         return true;
     }
 
-    public function handleSearch ($string) {
+    public function handleSearch ($entity, $query, $params) {
 
-        $string = trim(preg_replace('/\s+/', ' ', $string));
-        if (empty($string)) die ("\nNo String given\n");
+        $where = [];
 
-        $query = DB::table(DB::Raw('(
-            SELECT id_coin as id, json_arrayagg(
-                CONCAT_WS("::",
-                    CONCAT_WS("_", data_key, data_language),
-                    REPLACE(data_value, \'"\', "")
-                )
-            ) AS vals
-            FROM '.config('dbi.tablenames.index_coins').'
-            GROUP BY id_coin
-        ) AS concated_index'))
-        ->select(['id', 'vals']);
+        $query->whereIn(substr($entity, 0, 1).'.id', function ($subquery) use ($entity, $params, &$where) {
 
-        // Where Statement
-        $query->where(function ($queryByOr) use ($string) {
+            // Process Parameters
+            $string = $where['q'] = $params['q'];
+            $string = trim(preg_replace('/\s+/', ' ', $string));
 
-            // Split by OR
-            foreach ($this->splitString($string, false) as $byOr) {
-                $queryByOr->orWhere(function ($queryByAnd) use (&$byOr) {
-                    $byOr = trim($byOr);
+            $isRegex = empty($params['qre']) ? false : true;
+            $isCs   = empty($params['qcs']) ? false : true;
 
-                    // Split by AND
-                    foreach ($this->splitString($byOr, true) as $byAnd) {
-                        $byAnd = trim($byAnd);
-
-                        $queryByAnd->where(function ($subQuery) use ($byAnd) {
-                            $this->createWhere($subQuery, $byAnd, false);
-                        });
-                    }
-                });
+            if (empty($params['qex'])) $excluded = null;
+            else{
+                if (is_array($params['qex'])) $excluded = $params['qex'];
+                else $excluded = explode(',', $params['qex']);
             }
 
+            // Set Where for Display
+            if (isset($params['qex'])) $where['qex'] = $excluded;
+            if (isset($params['qcs'])) $where['qcs'] = empty($isCs) ? 0 : 1;
+            if (isset($params['qre'])) $where['qre'] = empty($isRegex) ? 0 : 1;
+
+            // Build Query
+            $subquery->select('id')
+
+            // Arrange Index Table
+            ->from(function ($indexQuery) use ($entity, $excluded) {
+                $table_id = 'id_'.rtrim($entity, 's');
+
+                $indexQuery->select([
+                    $table_id.' AS id',
+                    DB::Raw('json_arrayagg(
+                        CONCAT_WS("::",
+                            CONCAT_WS("_", data_key, data_language),
+                            REPLACE(data_value, \'"\', "")
+                        )
+                    ) AS vals')
+                ])
+                ->from(config('dbi.tablenames.index_coins').' AS concated_index');
+
+                // Add where conditions if keys have to be excluded
+                if (!empty($excluded)) foreach ($excluded as $ex) $indexQuery->where('data_key', '!=', trim($ex));
+
+                $indexQuery->groupBy($table_id);
+            })
+
+            // Add WhereConditions
+            ->where(function ($queryByOr) use ($string, $isRegex, $isCs) {
+
+                // Split by OR
+                foreach ($this->splitString($string, false) as $byOr) {
+                    $queryByOr->orWhere(function ($queryByAnd) use (&$byOr, $isRegex, $isCs) {
+                        $byOr = trim($byOr);
+
+                        // Split by AND
+                        foreach ($this->splitString($byOr, true) as $byAnd) {
+                            $byAnd = trim($byAnd);
+
+                            $queryByAnd->where(function ($subQuery) use ($byAnd, $isRegex, $isCs) {
+                                $this->createWhere($subQuery, $byAnd, $isRegex, $isCs);
+                            });
+                        }
+                    });
+                }
+
+            });
         });
 
-        $data = $query->limit(10)->get();
-        $data = json_decode($data, true);
-
-        foreach ($data as $dat) {
-            echo "\n".$dat['id'];
-        }
-
-        /*return Response::json([
-            'string' => $input,
-            'matches' => $this->recursiveSplit([], $input, 0)
-        ]);*/
+        return [
+            'query' => $query,
+            'where' => $where
+        ];
     }
 
     public function splitString ($string, $isAnd = false) {
@@ -231,14 +256,13 @@ class index_handler {
         else return explode(' OR ', $string);
     }
 
-    public function createWhere ($query, $string, $isRegex = false) {
-        $connector = 'LIKE';
-        $modificator = '';
+    public function createWhere ($query, $string, $isRegex = false, $isCs = false) {
+        $prefix = '';
 
         // Look for NOT in String
         if (substr($string, 0, 4) === 'NOT ') {
             $string = trim(substr($string, 3));
-            $modificator = 'NOT ';
+            $prefix = 'NOT ';
         }
 
         // Look for stated columnnames (column::string)
@@ -253,11 +277,9 @@ class index_handler {
         }
 
         // Add R if REGEX is required
-        if ($isRegex === true) $modificator .= 'R';
+        if ($isRegex === true) $prefix .= 'R';
 
-        //echo "\n".$modificator.$connector.' '.$string;
-
-        $query->where(DB::Raw('vals COLLATE utf8mb4_unicode_ci'), $modificator.$connector, $string);
+        $query->where(DB::Raw('vals COLLATE '.($isCs === true ? 'utf8mb4_bin' : 'utf8mb4_unicode_ci')), $prefix.'LIKE', $string);
     }
 
     // https://www.php.net/manual/de/regexp.reference.recursive.php

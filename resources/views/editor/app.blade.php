@@ -27,7 +27,7 @@
         </div>
 
         <!-- Appbar -->
-        <v-app-bar app clipped-left dense>
+        <v-app-bar app dense  style="height: 50px; z-index: 500">
             <!-- Left Section -->
             <advbtn
                 v-if="user && user.level > 9"
@@ -97,7 +97,7 @@
 
 
         <!-- Routed Component -->
-        <v-main class="app_bg">
+        <v-main class="app_bg" style="margin-left: 55px;">
             <v-fade-transition>
                 <div class="pa-5">
                     <router-view :key="'router-view' + router_view_refresh"></router-view>
@@ -107,7 +107,7 @@
 
 
         <!-- Footer -->
-        <v-footer app fixed class="caption d-flex flex-wrap justify-space-between">
+        <v-footer app fixed class="caption d-flex flex-wrap justify-space-between" style="height: 30px; z-index: 500">
             <div>
                 <a
                     href="https://www.bbaw.de"

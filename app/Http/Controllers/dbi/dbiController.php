@@ -30,10 +30,7 @@ class dbiController extends Controller {
 
                 $response = [
                     'pagination' => isset($dbi['pagination']) ? $dbi['pagination'] : [],
-                    'where' => [
-                        'accepeted' => isset($dbi['where']['accepted']) ? $dbi['where']['accepted'] : [],
-                        'ignored' => isset($dbi['where']['ignored']) ? $dbi['where']['ignored'] : []
-                    ],
+                    'where' => isset($dbi['where']['accepted']) ? $dbi['where']['accepted'] : (empty($dbi['where']) ? [] : $dbi['where']),
                     'contents'  => $dbi['contents']
                 ];
             }
