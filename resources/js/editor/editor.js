@@ -53,6 +53,7 @@ Vue.component('files',              require('./modules/files.vue').default);
 Vue.component('upload',             require('./modules/upload.vue').default);
 Vue.component('subheader',          require('./modules/subheader.vue').default);
 Vue.component('wysiwyg',            require('./modules/wysiwyg.vue').default);
+Vue.component('keyboard',           require('./modules/keyboard.vue').default);
 
 // Elements
 Vue.component('advbtn',             require('./modules/advbtn.vue').default);

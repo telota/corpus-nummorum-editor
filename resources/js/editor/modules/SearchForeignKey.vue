@@ -24,8 +24,8 @@
         <!-- Sticky Dopdown Keyboard -->
         <template v-slot:prepend-item>
             <v-card
-                v-if="!hide_keyboard" 
-                tile 
+                v-if="!hide_keyboard"
+                tile
                 flat
                 style="position: sticky; top: 0; z-index: 10"
             >
@@ -39,7 +39,7 @@
                 ></v-btn>
 
                 <v-divider class="mb-1"></v-divider>
-                
+
                 <v-expand-transition>
                     <div v-if="keyboard">
                         <keyboard
@@ -62,9 +62,9 @@
                 <img :src="$handlers.format.image_link(slot.item.image, 40)">
             </v-list-item-avatar>
             <v-list-item-content>
-                <div 
+                <div
                     class="body-2"
-                    v-text="slot.item.string" 
+                    v-text="slot.item.string"
                 ></div>
                 <div
                     class="caption"
@@ -90,7 +90,7 @@
                 <div
                     class="caption ml-1 mr-1 text-truncate"
                     v-text="printChip(slot.item)"
-                ></div>                
+                ></div>
                 <v-icon small v-text="'clear'"></v-icon>
             </v-card>
         </template>
@@ -103,13 +103,7 @@
 
 <script>
 
-import keyboard from './keyboard.vue'
-
 export default {
-    components: {
-        keyboard
-    },
-
     data () {
         return {
             items:          [],
@@ -137,13 +131,13 @@ export default {
         sk:                 { type: String, default: 'el_uc' },
         hide_keyboard:      { type: Boolean, default: false }
     },
-    
+
     computed: {
         l () { return this.$root.language },
         labels () { return this.$root.labels },
 
-        sync () { 
-            return this.items?.[0]?.search === undefined ? true : false 
+        sync () {
+            return this.items?.[0]?.search === undefined ? true : false
         },
         observe () {
             return JSON.stringify(this.selected)

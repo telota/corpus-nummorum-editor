@@ -15,11 +15,19 @@ class index_create extends Command {
     public function handle() {
         $time = date('U');
 
-        echo(
-            "\n--------------------- Create Index ----------------------\n\n"
-        );
+        echo "\n--------------------- Create Index ----------------------\n\n";
 
-        // Get Entity and check if valid
+        $entity = $this->argument('entity');
+        echo 'Updating "'.$entity.'"';
+        $id = $this->argument('id');
+        echo (empty($id) ? ', all datasets.' : (' ID '.$id))."\n";
+
+        echo "\nStart Processing ...\n";
+        $handler = new index_handler();
+        $handler->updateIndex($entity, empty($id) ? null : $id);
+        echo "done\n";
+
+        /*// Get Entity and check if valid
         echo "Checking given Entity ... ";
         $entity = $this->argument('entity');
         if (!in_array($entity, ['coins', 'types'])) die ('"'.$entity.'" is not supported (only coins and types)!'."\n\n");
@@ -27,32 +35,21 @@ class index_create extends Command {
 
         // Create Array from given ID or get ID of all not deleted datasets in DB
         echo "Checking given ID ... ";
-        if ($given_id = $this->argument('id')) {
-            echo $given_id." was given.\n";
-            $ids = [$given_id];
-        }
-        else {
-            echo "no ID given, query DB for IDs ... ";
-            $ids = DB::table(config('dbi.tablenames.'.$entity))
-                ->select('id')
-                ->where('publication_state', '!=', 3)
-                ->get();
-            $ids = array_map(function ($dataset) { return $dataset['id']; }, json_decode($ids, true));
-            echo "done\n";
-        }
+        $id = $this->argument('id');
+        echo empty($id) ? "no ID given, will process all datasets.\n" : ($id." was given.\n");
 
         // Create Handler Instance
         $handler = new index_handler();
 
         // Loop over IDs Array
-        $count = count($ids);
-        echo "\nStart Processing, ".$count." dataset(s) to handle ...\n";
-        foreach ($ids as $i => $id) {
-            echo "ID ".$id."\t";
-            if ($handler->updateOrInsert($entity, $id)) echo 'ok';
-            else 'error';
-            echo ", remaining: ".($count - $i -1)."\n";
-        }
+        echo "\nStart Processing ...\n";
+        $handler->updateOrInsert($entity, empty($id) ? null : $id);
+        echo "done\n";*/
+
+        // Delete all empty values
+        echo "\nDeleting empty values ... ";
+        DB::table(config('dbi.tablenames.index_coins'))->whereNull('data_value')->delete();
+        DB::table(config('dbi.tablenames.index_types'))->whereNull('data_value')->delete();
         echo "done\n";
 
         echo("\nScript finished\nExecution time: ".(date('U') - $time)." sec\n\n");

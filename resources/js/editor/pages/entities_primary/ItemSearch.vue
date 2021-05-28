@@ -57,58 +57,39 @@
                         <v-row>
                             <!-- Search Field -->
                             <v-col cols=12>
-                                <div class="d-flex mb-n5 mt-4">
-                                    <v-text-field outlined filled clearable dense
-                                        v-model="search.q"
-                                        :label="$root.label('search_strings')"
-                                        prepend-icon="search"
-                                        v-on:keyup.enter="RunSearch()"
-                                        hint="Use AND, OR and NOT to connect search strings, quotation marks to escape phrases, click on question mark right for more information"
-                                    ></v-text-field>
-
-                                    <v-menu tile offset-y nudge-left="402" nudge-bottom="5">
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-btn icon v-bind="attrs" v-on="on" class="ml-1">
-                                                <v-icon v-text="'help_outline'" />
-                                            </v-btn>
-                                        </template>
-
-                                        <v-card tile class="grey_sec" width="400">
-                                            <v-card-text>
-                                                <p>
-                                                    Use <b>AND</b>, <b>OR</b> and (<b>AND</b>/<b>OR</b>) <b>NOT</b> to connect several search strings logically.
-                                                    (must be written in upper case and seperated by blanks from search strings), e.g. <i>thrace AND NOT byzantium</i>
-                                                </p>
-                                                <p>
-                                                    Blanks are considered as <b>AND</b> by default. Use double quotation marks (<b>""</b>) to mark two or more strings as connected,
-                                                    e.g. <i>apollo AND "nach rechts"</i>
-                                                </p>
-                                                <p>
-                                                    Search strings can be restricted to a specific field by adding the key followed by two colons (<b>::</b>), e.g. <i>byzantium AND design::bull</i>
-                                                </p>
-                                                <p>
-                                                    The search scope can be narrowed by excluding fields generally (uncheck the keys in the popup menu). Furthermore you can add filters like date, weight etc.
-                                                </p>
-                                                <p>
-                                                    The search is case insensitive by default ("kopf" will match "Kopf"), check "case-sensitive" for strict case matching.
-                                                </p>
-                                                <p>
-                                                    Check "REGEX" when using <a href="https://dev.mysql.com/doc/refman/5.7/en/regexp.html#regexp-syntax" target="_blank">regular expressions</a>
-                                                </p>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-menu>
-                                </div>
+                                <v-text-field outlined filled clearable dense
+                                    v-model="search.q"
+                                    :label="$root.label('search_strings')"
+                                    prepend-icon="search"
+                                    append-icon="keyboard"
+                                    class="mt-5 mb-n4"
+                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
+                                ></v-text-field>
+                                <v-expand-transition>
+                                    <div v-if="searchStringKeyboard" class="pl-10 d-flex justify-center">
+                                        <keyboard
+                                            :string="search.q"
+                                            layout="el_uc_adv"
+                                            small
+                                            hide_options
+                                            v-on:input="(emit) => { search.q = emit }"
+                                        ></keyboard>
+                                    </div>
+                                </v-expand-transition>
                             </v-col>
 
                             <!-- Options -->
                             <v-col cols=12>
-                                <div class="d-flex flex-wrap justify-center align-center mt-n5">
-                                    <v-checkbox
-                                        v-model="search.qre"
-                                        label="REGEX"
-                                        class="mr-9"
-                                    />
+                                <div class="d-flex flex-wrap justify-center align-center mt-n6">
+                                    <div class="d-flex mr-9 align-center">
+                                        <v-checkbox
+                                            v-model="search.qre"
+                                            label="REGEX"
+                                            class="mr-1"
+                                        />
+                                        <sup class="body-1"><a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank"> *</a></sup>
+                                    </div>
 
                                     <v-checkbox
                                         v-model="search.qcs"
@@ -129,29 +110,49 @@
                                             </div>
                                         </template>
 
-                                        <v-card tile class="grey_sec">
-                                            <v-card-text class="pb-0 pt-6">
+                                        <div style="width: 450px" class="grey_sec d-flex flex-wrap pt-7">
+                                            <div
+                                                v-for="(key, k) in [
+                                                    'period', 'region',
+                                                    null,
+                                                    'coinage', 'mint', 'ruler', 'tribe',
+                                                    null,
+                                                    'standard', 'denomination', 'material',
+                                                    null,
+                                                    'design_o_de', 'design_o_en', 'design_r_de', 'design_r_en',
+                                                    null,
+                                                    'symbol_o_de', 'symbol_o_en', 'symbol_r_de', 'symbol_r_en',
+                                                    null,
+                                                    'legend_o', 'legend_r',
+                                                    null,
+                                                    'persons',
+                                                    null,
+                                                    'literature', 'objectgroups', 'owner',
+                                                    null,
+                                                    'pecularities_de', 'pecularities_en',
+                                                    'comment_de', 'comment_en'
+                                                ]"
+                                                :key="key + k"
+                                                class="pl-5 pr-5"
+                                                :style="'width:' + (key ? 50 : 100) + '%;'"
+                                            >
                                                 <v-checkbox
-                                                    v-for="(key) in [
-                                                        'mint', 'region',
-                                                        'design_o_de', 'design_r_de', 'design_o_en', 'design_r_en', 'legend_o', 'legend_r',
-                                                        'comment'
-                                                    ]"
-                                                    :key="key"
+                                                    v-if="key"
                                                     :input-value="search.qex ? !search.qex.includes(key) : true"
                                                     :label="key"
                                                     class="mt-n3"
                                                     @click="searchStringIncludeFiled(key)"
                                                 />
-                                            </v-card-text>
-                                        </v-card>
+                                                <v-divider v-else class="mb-4 mt-n3" />
+                                            </div>
+                                        </div>
                                     </v-menu>
 
                                     <!-- Filter -->
                                     <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
                                         <template v-slot:activator="{ on, attrs }">
                                             <div
-                                                class="d-flex align-center body-1"
+                                                class="d-flex align-center body-1 mr-9"
                                                 style="cursor: pointer"
                                                 v-bind="attrs" v-on="on"
                                             >
@@ -222,10 +223,63 @@
                                                             v-on:keyup.enter="RunSearch()"
                                                         ></v-text-field>
                                                     </v-col>
+
+                                                    <!-- Public -->
+                                                    <v-col cols=12 class="mt-n5">
+                                                        <div v-text="'Publication State'" class="body-1 mb-3" />
+                                                        <v-select dense outlined filled
+                                                            :items="selects.state_public"
+                                                            v-model="search.state_public"
+                                                            v-on:keyup.enter="RunSearch()"
+                                                        ></v-select>
+                                                    </v-col>
                                                 </v-row>
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
+
+                                    <!-- Instructions -->
+                                    <v-menu tile offset-y nudge-bottom="5">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <div
+                                                class="d-flex align-center body-1"
+                                                style="cursor: pointer"
+                                                v-bind="attrs" v-on="on"
+                                            >
+                                                <v-btn icon class="mr-1"><v-icon v-text="'help_outline'" /></v-btn>
+                                                <div v-text="'Instructions'" />
+                                            </div>
+                                        </template>
+
+                                        <v-card tile class="grey_sec" width="500">
+                                            <v-card-text>
+                                                <p>
+                                                    Use <b>AND</b>, <b>OR</b> and (<b>AND</b>/<b>OR</b>) <b>NOT</b> to connect several search strings logically.
+                                                    (must be written in upper case and seperated by blanks from search strings), e.g. <i>thrace AND NOT byzantium</i>
+                                                </p>
+                                                <p>
+                                                    Blanks are considered as <b>AND</b> by default. Use double quotation marks (<b>""</b>) to mark two or more strings as connected,
+                                                    e.g. <i>apollo AND "nach rechts"</i>
+                                                </p>
+                                                <p>
+                                                    Search strings can be restricted to a specific field by adding the key followed by two colons (<b>::</b>), e.g. <i>byzantium AND design::bull</i>
+                                                </p>
+                                                <p>
+                                                    The search scope can be narrowed by excluding fields generally (uncheck the keys in the popup menu). Furthermore you can add filters like date, weight etc.
+                                                </p>
+                                                <p>
+                                                    The search is case insensitive by default ("kopf" will match "Kopf"), check "case-sensitive" for strict case matching.
+                                                </p>
+                                                <p>
+                                                    Click on the keyboard in the right corner of the search field to expand a Greek keyboard.
+                                                </p>
+                                                <p>
+                                                    Check "REGEX" when using <a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank">regular expressions</a>
+                                                </p>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-menu>
+
                                 </div>
                             </v-col>
                         </v-row>
@@ -1172,7 +1226,8 @@ export default {
 
             search:             {
                 id: null,
-                state_public:   this.publisher ? 0 : null
+                state_public:   this.publisher ? 0 : null,
+                q: null
             },
             //previous_search:    [],
             search_refresh:     0,
@@ -1214,7 +1269,9 @@ export default {
                     { value: 0, text: 'No' },
                     { value: 1, text: 'Yes' }
                 ]
-            }
+            },
+
+            searchStringKeyboard: false
         }
     },
 
