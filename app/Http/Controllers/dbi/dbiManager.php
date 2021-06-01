@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\dbi;
 
 use Request;
-use Auth;
 
 
 class dbiManager {
@@ -48,15 +47,9 @@ class dbiManager {
             $response = $provider->provide_input($user, $input);
 
             if (empty($response['error'])) {
-                if (!empty($response)) {
-                    $id = $response;
-                }
-                else if (!empty($input['id'])) {
-                    $id = $input['id'];
-                }
-                else {
-                    $id = null;
-                }
+                if (!empty($response))          $id = $response;
+                else if (!empty($input['id']))  $id = $input['id'];
+                else                            $id = null;
 
                 return [
                     'success' => $this->successMessage(empty($input['id']) ? 'created' : 'updated', $id),

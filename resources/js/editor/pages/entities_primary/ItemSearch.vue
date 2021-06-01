@@ -97,7 +97,7 @@
                                         class="mr-10"
                                     />
 
-                                    <!-- Excludes -->
+                                    <!-- Excludes
                                     <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
                                         <template v-slot:activator="{ on, attrs }">
                                             <div
@@ -146,7 +146,7 @@
                                                 <v-divider v-else class="mb-4 mt-n3" />
                                             </div>
                                         </div>
-                                    </v-menu>
+                                    </v-menu> -->
 
                                     <!-- Filter -->
                                     <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
@@ -262,10 +262,15 @@
                                                     e.g. <i>apollo AND "nach rechts"</i>
                                                 </p>
                                                 <p>
-                                                    Search strings can be restricted to a specific field by adding the key followed by two colons (<b>::</b>), e.g. <i>byzantium AND design::bull</i>
+                                                    Search strings can be restricted to a specific field by adding the key followed by two colons (<b>::</b>), e.g. <i>byzantium AND design::bull</i>.
+                                                    Please note that adding this parameter might slow down the search engine significantly.
                                                 </p>
-                                                <p>
+                                                <!--<p>
                                                     The search scope can be narrowed by excluding fields generally (uncheck the keys in the popup menu). Furthermore you can add filters like date, weight etc.
+                                                </p>-->
+                                                <p>
+                                                    To add a date, weight or diameter range add an additional filter. You can also restrict the search to (un)published datasets (deleted records are not indexed).
+                                                    Adding a filter might speed up the search engine significantly.
                                                 </p>
                                                 <p>
                                                     The search is case insensitive by default ("kopf" will match "Kopf"), check "case-sensitive" for strict case matching.
@@ -274,7 +279,8 @@
                                                     Click on the keyboard in the right corner of the search field to expand a Greek keyboard.
                                                 </p>
                                                 <p>
-                                                    Check "REGEX" when using <a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank">regular expressions</a>
+                                                    Check "REGEX" when using <a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank">regular expressions</a>.
+                                                    Please note that adding this parameter might slow down the search engine significantly.
                                                 </p>
                                             </v-card-text>
                                         </v-card>

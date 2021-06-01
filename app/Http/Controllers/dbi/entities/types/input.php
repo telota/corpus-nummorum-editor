@@ -4,6 +4,7 @@ namespace App\Http\Controllers\dbi\entities\types;
 
 use DB;
 use App\Http\Controllers\dbi\entities\types\input_definitions;
+use App\Http\Controllers\dbi\handler\index_handler;
 
 
 class input {
@@ -13,7 +14,7 @@ class input {
         $config = new input_definitions;
         $config = $config -> instructions();
         $base   = $config['base'];
-        $ID     = empty($input['id']) ? null : $input['id']; 
+        $ID     = empty($input['id']) ? null : $input['id'];
         /*
         $base = config('dbi.types_input.base');*/
 
@@ -31,12 +32,12 @@ class input {
             foreach ($base['cols'] as $db => $insert) {
                 $base['input'][$db] = $input[$insert];
             }
-            
+
             // Write Input
             if (empty($ID)) {
                 $base['input'][$base['creator']] = $user['id'];
                 $base['input'][$base['public']] = 0;
-        
+
                 $ID = DB::table($base['table']) -> insertGetID($base['input']);
             }
 
@@ -44,9 +45,9 @@ class input {
                 // Set current User as Editor
                 $base['input'][$base['editor']] = $user['id'];
                 $base['input'][$base['public']] = empty($input['public']) ? 0 : $input['public'];
-        
-                DB::table($base['table'])        
-                    -> where($base['id'], $ID) 
+
+                DB::table($base['table'])
+                    -> where($base['id'], $ID)
                     -> update($base['input']);
             }
 
@@ -58,9 +59,15 @@ class input {
             $this -> helpers($config, 'groups',     $ID, $input['groups']);
             $this -> helpers($config, 'persons',    $ID, $input['persons']);
 
-            $this -> helpers($config, 'variations', $ID, $input['variations']);            
-            $this -> helpers($config, 'findspots',  $ID, $input['findspots']);            
+            $this -> helpers($config, 'variations', $ID, $input['variations']);
+            $this -> helpers($config, 'findspots',  $ID, $input['findspots']);
             $this -> helpers($config, 'hoards',     $ID, $input['hoards']);
+        }
+
+        // Update Index
+        if (!empty($input['id'])) {
+            $handler = new index_handler();
+            $handler->updateIndex('types', $ID);
         }
 
         return $ID;
@@ -103,7 +110,7 @@ class input {
                 function() use ($src, $ID, $new)
                 {
                     // Delete old Helper Table Links
-                    DB::table($src['table']) 
+                    DB::table($src['table'])
                         -> where($src['id_base'], $ID)
                         -> delete();
 

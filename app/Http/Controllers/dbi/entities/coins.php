@@ -10,7 +10,7 @@ use App\Http\Controllers\dbi\entities\coins\input;
 use App\Http\Controllers\dbi\entities\coins\connect;
 
 
-class coins implements dbiInterface  { 
+class coins implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ class coins implements dbiInterface  {
     }
 
 
-    public function input ($user, $input) {        
+    public function input ($user, $input) {
         $validation = $input['id'] === 'new' ? ['input' => $input] : $this -> validateInput($input);
 
         if(empty($validation['error'][0])) {
@@ -35,23 +35,24 @@ class coins implements dbiInterface  {
 
     public function delete ($user, $input) {
         DB::transaction(function () use ($input) {
-            DB::table(config('dbi.tablenames.coins')) -> where('id', $input['id']) -> update(['publication_state' => 3]);
+            DB::table(config('dbi.tablenames.coins'))->where('id', $input['id'])->update(['publication_state' => 3]);
+            DB::table(config('dbi.tablenames.index_coins'))->where('id', $input['id'])->delete();
         });
 
         return true;
     }
 
-    public function connect ($user, $input) {        
+    public function connect ($user, $input) {
         $handler = new connect;
 
         if ($input ['mode'] === 'link') {
             return $handler -> link($user, $input);
         }
-        else if ($input ['mode'] === 'unlink') {            
+        else if ($input ['mode'] === 'unlink') {
             return $handler -> unlink($user, $input);
         }
         else {
-            die (abort(404, 'Not supported!')); 
+            die (abort(404, 'Not supported!'));
         }
     }
 

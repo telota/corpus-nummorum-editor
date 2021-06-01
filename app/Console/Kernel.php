@@ -23,8 +23,9 @@ class Kernel extends ConsoleKernel
      * @return void
      */
     protected function schedule(Schedule $schedule) {
-        $schedule->command('cron:statistics')-> dailyAt('04:12');
-        $schedule->command('zotero:import')-> dailyAt('03:12');
+        $schedule->command('cron:statistics')-> dailyAt('03:20');
+        $schedule->command('zotero:import')-> dailyAt('04:20');
+        $schedule->command('index:create')-> dailyAt('05:20');
         $schedule->command('check:references')-> weeklyOn(1, '06:20');
     }
 

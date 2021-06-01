@@ -4,6 +4,7 @@ namespace App\Http\Controllers\dbi\entities\coins;
 
 use DB;
 use App\Http\Controllers\dbi\entities\coins\input_definitions;
+use App\Http\Controllers\dbi\handler\index_handler;
 
 
 class input {
@@ -64,6 +65,12 @@ class input {
             if(!empty($input['inherited']['id_type'])) {
                 $this -> helper_inheritance($config, $ID, $input['inherited']);
             }
+        }
+
+        // Update Index
+        if (!empty($input['id'])) {
+            $handler = new index_handler();
+            $handler->updateIndex('coins', $ID);
         }
 
         return $ID;
