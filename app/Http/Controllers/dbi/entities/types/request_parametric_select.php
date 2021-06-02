@@ -32,6 +32,17 @@ class request_parametric_select {
                     "text",         JSON_OBJECT(
                         "de",       mint.mint,
                         "en",       mint.mint
+                    ),
+                    "region",       (SELECT JSON_OBJECT(
+                        "id",       r.id,
+                        "link",     CONCAT("'.config('dbi.url.nomisma').'", sr.nomisma_id_region),
+                        "text",     JSON_OBJECT(
+                            "de",   r.de,
+                            "en",   r.en
+                        ))
+                        FROM '.config('dbi.tablenames.regions_to_subregions').'     AS sr
+                        LEFT JOIN '.config('dbi.tablenames.regions').'              AS r ON r.id = sr.id_region
+                        WHERE sr.nomisma_id_region = mint.imported_nomisma_subregion
                     )
                 )'],
                 // IFNULL(( SELECT n.mint_name FROM cn_data.nomisma_mints_text AS n WHERE n.nomisma_id_mint = mint.nomisma_id && n.language = "de"), mint.mint)
@@ -77,12 +88,19 @@ class request_parametric_select {
                     "text",         JSON_OBJECT(
                         "en",       null,
                         "de",       t.date_string
-                ))']
+                    ),
+                    "period",       JSON_OBJECT(
+                        "id",       e.id,
+                        "link",     IF(e.nomisma_id > "", CONCAT("'.config('dbi.url.nomisma').'", e.nomisma_id), null),
+                        "text",         JSON_OBJECT(
+                            "en",   e.period_en,
+                            "de",   e.period_de
+                )))']
             ];
 
             // Obverse / Reverse
             foreach (['o', 'r'] AS $side) {
-                if($user['level'] > 9) {
+                //if($user['level'] > 9) {
                     $select[$side === 'o' ? 'obverse' : 'reverse']  = ['raw' => 'JSON_OBJECT(
                         "design", JSON_OBJECT(
                             "id",     d'.$side.'.id,
@@ -136,7 +154,7 @@ class request_parametric_select {
                             tts.side = '.($side === 'o' ? 0 : 1).'
                         )
                     )'];
-                }
+                /*}
                 else {
                     $select[$side === 'o' ? 'obverse' : 'reverse']  = ['raw' => 'JSON_OBJECT(
                         "design", JSON_OBJECT(
@@ -153,7 +171,7 @@ class request_parametric_select {
                             WHERE l.id = t.id_legend_'.$side.'
                         )
                     )'];
-                }
+                }*/
             }
 
             // Images
