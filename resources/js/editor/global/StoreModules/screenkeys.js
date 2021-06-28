@@ -46,6 +46,7 @@ export default ({
             { value: 'Λ', text: 'Lambda' },
             { value: 'Μ', text: 'Mu' },
             { value: 'Ν', text: 'Nu' },
+            { value: 'И', text: 'Nu' },
             { value: 'Ξ', text: 'Xi' },
             { value: 'Ο', text: 'Omicron' },
             { value: 'Π', text: 'Pi' },
@@ -66,7 +67,8 @@ export default ({
         critical: [ // Critical Signs
             { value: '.',       text: 'Dot' },
             //{ value: '·', text: 'Colon' },
-            { value: '•',       text: 'Colon' },
+            { value: '·',       text: 'Dot (middle)' },
+            { value: '·',       text: 'Dot (top)' },
             { value: '*',       text: 'Star' },
             { value: '–',       text: 'Dash' },
             { value: '/',       text: 'Slash' },

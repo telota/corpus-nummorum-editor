@@ -1,27 +1,27 @@
 <template>
 <div>
     <template v-for="(e, i) in entities">
-        <div 
+        <div
             :key="e"
             class="mb-2"
             :class="i === 1 ? 'mt-5' : ''"
         >
             <!-- Header -->
-            <div class="mb-1" style="width: 100%"> 
-                <div 
-                    class="d-flex justify-center" 
+            <div class="mb-1" style="width: 100%">
+                <div
+                    class="d-flex justify-center"
                     :style="($vuetify.breakpoint.mdAndUp ? ' position: absolute; left: 0; right: 0' : '')"
                 >
                     <div :class="color_main" style="z-index:1">
-                        <pagination 
-                            :offset="data[e].offset" 
-                            :limit="limit" 
+                        <pagination
+                            :offset="data[e].offset"
+                            :limit="limit"
                             :count="data[e].count"
                             :color="color_main"
                             v-on:offset="(emit) => { setOffset(e, emit) }"
                         ></pagination>
                     </div>
-                </div>   
+                </div>
                 <div class="d-flex align-center justify-center" style="width: 100%">
                     <!-- Label -->
                     <v-hover>
@@ -46,13 +46,13 @@
                             </div>
                         </template>
                     </v-hover>
-                    <v-divider 
-                        v-if="!data[e].loading" 
+                    <v-divider
+                        v-if="!data[e].loading"
                         class="ml-4 mr-4"
                     ></v-divider>
-                    <v-progress-linear 
-                        v-else 
-                        indeterminate 
+                    <v-progress-linear
+                        v-else
+                        indeterminate
                         class="ml-4"
                     ></v-progress-linear>
                     <!-- Add Button -->
@@ -68,24 +68,24 @@
                     >
                         <v-icon>exposure_plus_1</v-icon>
                     </v-btn>
-                </div>            
+                </div>
             </div>
 
             <!-- Content -->
             <v-expand-transition>
-                <div 
-                    v-if="!data[e].items[0]" 
+                <div
+                    v-if="!data[e].items[0]"
                     v-text="'--'"
                 ></div>
 
                 <v-row v-else-if="data[e].expand">
-                    <v-col 
-                        v-for="(item, i) in data[e].items" 
+                    <v-col
+                        v-for="(item, i) in data[e].items"
                         :key="i"
-                        cols="12" 
-                        :sm="cols.sm" 
-                        :md="cols.md" 
-                        :xl="cols.xl" 
+                        cols="12"
+                        :sm="cols.sm"
+                        :md="cols.md"
+                        :xl="cols.xl"
                     >
                         <v-card tile class="appbar">
                             <!-- Image -->
@@ -102,8 +102,8 @@
                                 <div class="mt-n1 mb-1">
                                     <!-- Name -->
                                     <div class="body-1 font-weight-black d-flex">
-                                        <div 
-                                            class="text-truncate" 
+                                        <div
+                                            class="text-truncate"
                                             v-text="'cn ' + e.slice(0, -1)"
                                         ></div>
                                         <div class="d-flex">
@@ -118,16 +118,16 @@
                                         v-on:details="(emit) => { dialog_details = { entity: emit.entity, id: emit.id, public: 0 }}"
                                     ></linkedInherited>
                                     <!-- Mint -->
-                                    <div 
+                                    <div
                                         v-if="item.mint.text[l]"
-                                        class="text-truncate" 
+                                        class="text-truncate"
                                         v-text="item.mint.text[l]"
                                     ></div>
                                 </div>
 
                                 <!-- Diameter and Weight -->
-                                <div 
-                                    class="caption" 
+                                <div
+                                    class="caption"
                                     v-html="$handlers.show_item_data(l, e, item, 'card_header')"
                                 ></div>
 
@@ -146,16 +146,16 @@
                                     <v-tooltip bottom v-for="(s) in ['obverse', 'reverse']" :key="s">
                                         <template v-slot:activator="{ on }">
                                             <div v-on="on" class="caption mb-2">
-                                                <div 
-                                                    class="font-weight-bold text-uppercase" 
+                                                <div
+                                                    class="font-weight-bold text-uppercase"
                                                     v-text="s.slice(0, 1)"
                                                     style="position: absolute"
                                                 ></div>
-                                                <div 
-                                                    class="pl-4 font-weight-thin text-truncate" 
+                                                <div
+                                                    class="pl-4 font-weight-thin text-truncate"
                                                     v-text="item[s].legend && item[s].legend.string ? item[s].legend.string : '--'"
                                                 ></div>
-                                                <div 
+                                                <div
                                                     class="pl-4 text-truncate"
                                                     v-text="item[s].design && item[s].design.text[l] ? item[s].design.text[l] : '--'"
                                                 ></div>
@@ -163,11 +163,11 @@
                                         </template>
                                         <div>
                                             <div
-                                                class="font-weight-bold" 
+                                                class="font-weight-bold"
                                                 v-text="$root.label(s)"
                                             ></div>
-                                            <div 
-                                                class="font-weight-thin" 
+                                            <div
+                                                class="font-weight-thin"
                                                 v-text="item[s].legend && item[s].legend.string ? item[s].legend.string : '--'"
                                             ></div>
                                             <div v-text="item[s].design && item[s].design.text[l] ? item[s].design.text[l] : '--'"></div>
@@ -180,7 +180,7 @@
                                     <template v-slot:activator="{ on }">
                                         <div
                                             v-on="on"
-                                            class="caption mt-1 text-truncate" 
+                                            class="caption mt-1 text-truncate"
                                             v-html="$handlers.show_item_data(l, e, item, 'card_footer')"
                                         ></div>
                                     </template>
@@ -200,7 +200,7 @@
                                 v-on:unlink="linkItem('unlink', e, { id: item.id })"
                                 v-on:inherit="newInheritingType(item)"
                                 v-on:represent="newRepresentingCoin(item)"
-                            ></commandbar>                    
+                            ></commandbar>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -217,7 +217,7 @@
                 :text="'new link'"
                 v-on:close="dialog_link = { active: false, entity: null, id: null }"
             ></dialogbartop>
-            
+
             <v-card-text class="d-flex component-wrap pt-8">
                 <v-text-field
                     v-if="dialog_link.entity"
@@ -229,8 +229,8 @@
                     :label="'cn ' + dialog_link.entity.slice(0, -1) + ' ID'"
                     :rules="[$handlers.rules.id]"
                 ></v-text-field>
-                <v-btn 
-                    text 
+                <v-btn
+                    text
                     v-text="'OK'"
                     class="ml-3"
                     @click="$emit('link', dialog_link.id); dialog_link = { active: false, entity: null, id: null }"
@@ -245,7 +245,7 @@
         v-if="dialog_details.entity"
         :entity="dialog_details.entity"
         :id="dialog_details.id"
-        :public_state="dialog_details.public"       
+        :public_state="dialog_details.public"
         v-on:close="dialog_details = { entity: null, id: null, public: 0 }"
     ></detailsdialog>
 
@@ -275,20 +275,20 @@
             <!--<div class="ml-n6" style="position: absolute; width: 100%; bottom: 0">
                 <div class="pa-2 d-flex align-center">
                     <v-spacer></v-spacer>
-                    <v-btn 
-                        fab 
-                        x-small 
-                        color="grey_sec" 
-                        class="mr-3" 
+                    <v-btn
+                        fab
+                        x-small
+                        color="grey_sec"
+                        class="mr-3"
                         @click="linkDialog(false)"
                     >
                         <v-icon v-text="'clear'"></v-icon>
                     </v-btn>
-                    <v-btn 
-                        fab 
-                        small 
-                        color="blue_prim" 
-                        class="ml-3" 
+                    <v-btn
+                        fab
+                        small
+                        color="blue_prim"
+                        class="ml-3"
                         @click="linkItem('link', dialog_link.entity, dialog_link.item)"
                     >
                         <v-icon v-text="'done'"></v-icon>
@@ -300,20 +300,20 @@
         <template v-slot:actions>
             <div class="pb-2 d-flex align-center">
                 <v-spacer></v-spacer>
-                <v-btn 
-                    fab 
-                    x-small 
-                    color="grey_sec" 
-                    class="mr-3" 
+                <v-btn
+                    fab
+                    x-small
+                    color="grey_sec"
+                    class="mr-3"
                     @click="linkDialog(false)"
                 >
                     <v-icon v-text="'clear'"></v-icon>
                 </v-btn>
-                <v-btn 
-                    fab 
-                    small 
-                    color="blue_prim" 
-                    class="ml-3" 
+                <v-btn
+                    fab
+                    small
+                    color="blue_prim"
+                    class="ml-3"
                     @click="linkItem('link', dialog_link.entity, dialog_link.item)"
                 >
                     <v-icon v-text="'done'"></v-icon>
@@ -337,11 +337,11 @@ export default {
     components: {
         linkedInherited
     },
-    
+
     data () {
         return {
-            search: { 
-                state_public: [0, 1, 2] 
+            search: {
+                state_public: [0, 1, 2]
             },
 
             data: {
@@ -364,12 +364,12 @@ export default {
 
             /*dialog_options: {
                 active: false,
-                entity: null, 
-                id: null 
+                entity: null,
+                id: null
             },*/
             dialog_details: {
-                entity: null, 
-                id: null, 
+                entity: null,
+                id: null,
                 public: 0
             },
             dialog_link: {
@@ -377,7 +377,7 @@ export default {
                 entity: null,
                 item: {}
             }
-        }        
+        }
     },
 
     props: {
@@ -385,7 +385,7 @@ export default {
         hide:           { type: String, default: null },
         search_key:     { type: String },
         search_val:     { type: [String, Number] },
-        color_main:     { type: String, default: 'appbar' }, 
+        color_main:     { type: String, default: 'appbar' },
         color_hover:    { type: String, default: 'sysbar' },
         limit:          { type: [String, Number], default: 12 },
         tiles:          { type: [String, Number], default: 6 },
@@ -400,16 +400,16 @@ export default {
         // Localization
         l () { return this.$root.language },
         labels () { return this.$root.labels },
-        
+
         entities () {
             const entities = []
             if (![this.entity, this.hide].includes('types')) { entities.push('types') }
             if (![this.entity, this.hide].includes('coins')) { entities.push('coins') }
             return entities
-        },        
+        },
 
-        cols () { 
-            return this.tiles === 4 ? { sm: 6, md: 3, xl: 2 } : { sm: 4, md: 2, xl: 2 } 
+        cols () {
+            return this.tiles === 4 ? { sm: 6, md: 3, xl: 3 } : { sm: 4, md: 2, xl: 2 }
         },
 
         counter () {
@@ -478,15 +478,15 @@ export default {
                 offset: this.data[entity].offset,
                 limit:  this.limit
             }
-            
+
             const dbi = await this.$root.DBI_SELECT_POST(entity, params, this.search)
-            
+
             if (dbi.contents !== undefined) {
                 this.data[entity].offset = dbi.pagination.offset
                 this.data[entity].count = dbi.pagination.count
                 this.data[entity].items = dbi.contents
             }
-            
+
             this.data[entity].loading = false;
         },
 
@@ -507,7 +507,7 @@ export default {
         linkDialog (active, entity, data) {
             const item = {}
             Object.keys(this.dialog_link.item).forEach((key) => {
-                item[key] = data?.[key] === undefined ? null : data[key] 
+                item[key] = data?.[key] === undefined ? null : data[key]
             })
             this.dialog_link = {
                 active: active,
@@ -528,8 +528,8 @@ export default {
                     if (![undefined, null].includes(item[key])) { input[key] = item[key] }
                 })
                 let confirmed = true
-                if (mode === 'unlink') { 
-                    confirmed = confirm('Are you sure you want to unlink ' + this.$handlers.format.cn_entity(this.entity, this.search_val) + ' and ' + this.$handlers.format.cn_entity(input.entity, input.id) + '?') 
+                if (mode === 'unlink') {
+                    confirmed = confirm('Are you sure you want to unlink ' + this.$handlers.format.cn_entity(this.entity, this.search_val) + ' and ' + this.$handlers.format.cn_entity(input.entity, input.id) + '?')
                 }
                 if (confirmed) {
                     console.log(input)

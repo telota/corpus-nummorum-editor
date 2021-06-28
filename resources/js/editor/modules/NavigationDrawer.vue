@@ -124,6 +124,7 @@ export default {
                 { text: this.$root.label('Features'),         icon: 'info',               children: [
                     { text: this.$root.label('designs'),          icon: 'notes',              name: 'designs' },
                     { text: this.$root.label('legends'),          icon: 'translate',          name: 'legends' },
+                    { text: this.$root.label('legends_index'),    icon: 'translate',          name: 'legends-index' },
                     { text: this.$root.label('dies'),             icon: 'gavel',              name: 'dies' },
                     { text: this.$root.label('materials'),        icon: 'palette',            name: 'materials' },
                     { text: this.$root.label('denominations'),    icon: 'bubble_chart',       name: 'denominations' },

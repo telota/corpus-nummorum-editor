@@ -6,7 +6,7 @@ Vue.use(Router);
 
 const router = new Router (
 {
-    routes: 
+    routes:
     [
         { path: '/', redirect: '/dashboard', },
 
@@ -161,6 +161,11 @@ const router = new Router (
             path: '/legends/:id?',
             name: 'legends',
             component: require ('./../pages/entities_secondary/legends').default,
+        },
+        {
+            path: '/legends-index',
+            name: 'legends-index',
+            component: require ('./../pages/entities_secondary/legendsIndex').default,
         },
         {
             path: '/materials/:id?',

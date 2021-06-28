@@ -19,6 +19,7 @@ return [
     'findspots'     => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'hoards'        => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'legends'       => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
+    'legends_index' => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'materials'     => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'monograms'     => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'mints'         => ['read' => 2,    'write_own' => 11,  'write_all' => 12],

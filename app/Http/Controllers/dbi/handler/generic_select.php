@@ -22,13 +22,19 @@ class generic_select {
         // Set basic variables
         $pagination = $where = $where_keys = $selection = [];
 
+        $whereIn = [];
+
         // Where Conditions
         foreach ($input as $key => $value) {
             if (in_array($key, array_keys($allowed_where)) && ($value !== null && $value !== '')) {
 
-                if(!is_array($allowed_where[$key]) || isset($allowed_where[$key]['raw'])) {
+                if ($key === 'id' && !empty($value[1])) {
+                    $whereIn['id'] = $value;
+                }
+
+                else if (!is_array($allowed_where[$key]) || isset($allowed_where[$key]['raw'])) {
                     foreach ((is_array($value) ? $value : [$value]) AS $val) {
-                        $where[] = [isset($allowed_where[$key]['raw']) ? DB::raw($allowed_where[$key]['raw']) : $allowed_where[$key], $val];                        
+                        $where[] = [isset($allowed_where[$key]['raw']) ? DB::raw($allowed_where[$key]['raw']) : $allowed_where[$key], $val];
                         $where_keys['accepted'][$key][] = $val;
                     }
                 }
@@ -40,8 +46,8 @@ class generic_select {
 
                     foreach ((is_array($value) ? $value : [$value]) AS $val) {
                         $where[] = [
-                            isset($column['raw']) ? DB::raw($column['raw']) : $column, 
-                            $operator, 
+                            isset($column['raw']) ? DB::raw($column['raw']) : $column,
+                            $operator,
                             $wc_start.$val.$wc_end
                         ];
                         $where_keys['accepted'][$key][] = $val;
@@ -70,7 +76,7 @@ class generic_select {
                 $pagination['sort_by'] = 'id DESC';
                 $ob_op = 'DESC';
             }
-        } 
+        }
         else {
             $ob_col = 'id';
             $pagination['sort_by'] = 'id DESC';
@@ -87,12 +93,14 @@ class generic_select {
             }
         };
 
-        // Execute Query
-        $dbi = $query -> select($table['as'].'id') 
-            -> where($where) 
-            -> orderBy($ob_col, $ob_op)
-            -> get();
+        $query->select($table['as'].'id');
 
+        if (!empty($whereIn)) {
+            foreach($whereIn as $inKey => $inVals) $dbi = $query->whereIntegerInRaw($table['as'].$inKey, $inVals);
+        }
+        if (!empty($where)) $dbi = $query->where($where);
+
+        $dbi = $query->orderBy($ob_col, $ob_op)->get();
         $dbi = json_decode ($dbi, TRUE);
 
         // count records
@@ -110,7 +118,7 @@ class generic_select {
         for ($i = $offset; $i <= $offset + $limit -1; $i++) {
             if ($i >= $count) { break; }
             $selection[] = $dbi[$i]['id'];
-        }        
+        }
 
         return [
             'pagination'    => $pagination,
