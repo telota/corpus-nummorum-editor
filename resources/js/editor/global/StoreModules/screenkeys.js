@@ -68,7 +68,7 @@ export default ({
             { value: '.',       text: 'Dot' },
             //{ value: '·', text: 'Colon' },
             { value: '·',       text: 'Dot (middle)' },
-            { value: '·',       text: 'Dot (top)' },
+            { value: '⠁',       text: 'Dot (top)' },
             { value: '*',       text: 'Star' },
             { value: '–',       text: 'Dash' },
             { value: '/',       text: 'Slash' },
