@@ -74,6 +74,7 @@ class request_parametric_select {
                 )'],
 
                 'material'          =>  ['raw' => 'JSON_OBJECT(
+                    "abbreviation", UPPER(IF(mat.nomisma_id > "", mat.nomisma_id, SUBSTRING(mat.nomisma_id, 0, 2))),
                     "text",         JSON_OBJECT(
                         "en",       mat.material_en,
                         "de",       mat.material_de

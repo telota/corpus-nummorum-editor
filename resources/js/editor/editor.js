@@ -59,6 +59,7 @@ Vue.component('keyboard',           require('./modules/keyboard.vue').default);
 Vue.component('advbtn',             require('./modules/advbtn.vue').default);
 Vue.component('pagination',         require('./modules/element_pagination.vue').default);
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
+Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
 
 // Primary Entities
 Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);

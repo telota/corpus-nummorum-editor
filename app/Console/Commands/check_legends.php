@@ -47,8 +47,10 @@ class check_legends extends Command {
         $dbi = DB::table(config('dbi.tablenames.legends'))->get();
         $dbi = json_decode($dbi, true);
 
-        $legends = [];
-        foreach ($dbi as $d) {
+        $legends = $dbi;
+
+        //$legends = [];
+        /*foreach ($dbi as $d) {
             $d['coins'] = 0;
             $d['types'] = 0;
             $d['dies'] = 0;
@@ -72,11 +74,11 @@ class check_legends extends Command {
                     }
                 }
             }
-        }
+        }*/
 
         echo count($legends)." items\nIterating ... \n";
 
-        $csv = fopen('/opt/projects/corpus-nummorum/output/legends_'.date('Y-m-d').'.csv', 'w');
+        /*$csv = fopen('/opt/projects/corpus-nummorum/output/legends_'.date('Y-m-d').'.csv', 'w');
         fputcsv($csv, [
             'ID',
             'LANGUAGE',
@@ -92,7 +94,7 @@ class check_legends extends Command {
             'DIES'
         ]);
 
-        $not_linked = 0;
+        $not_linked = 0;*/
 
         foreach ($legends as $d) {
             $legend = $d['legend'];
@@ -122,7 +124,7 @@ class check_legends extends Command {
             $legend = trim(preg_replace('/\s+/', ' ', $legend));
 
             // monograms
-            $monograms = '';
+            /*$monograms = '';
             if (strpos($d['legend'], 'mon.') !== false) {
                 $monograms = explode('mon', $d['legend']);
                 array_shift($monograms);
@@ -134,7 +136,7 @@ class check_legends extends Command {
                 $monograms = array_map(function ($match) { return trim(str_replace('*', '', $match)); }, $matches[1]);
                 $monograms = implode(', ', $monograms);
                 echo "\n".$d['legend'].' >>> '.$monograms;
-            }
+            }*/
 
             // Create Sort Legend
             $handler = new handler();
@@ -142,7 +144,7 @@ class check_legends extends Command {
 
             //echo $index."\n";
 
-            fputcsv($csv, [
+            /*fputcsv($csv, [
                 $d['id'],
                 $d['legend_language'],
                 $d['id_legend_direction'].', https://data.corpus-nummorum.eu/storage/legend-directions/'.substr('000'.$d['id_legend_direction'], -3).'.svg',
@@ -155,17 +157,17 @@ class check_legends extends Command {
                 $d['coins'],
                 $d['types'],
                 $d['dies']
-            ]);
+            ]);*/
 
-            if ($d['total'] === 0) ++$not_linked;
+            //if ($d['total'] === 0) ++$not_linked;
 
-            /*DB::table(config('dbi.tablenames.legends'))->where('id', $d['id'])->update([
+            DB::table(config('dbi.tablenames.legends'))->where('id', $d['id'])->update([
                 'legend' => $legend,
                 'legend_sort_basis' => $index
-            ]);*/
+            ]);
         }
 
-        echo "\nNot in Use: ".$not_linked."\n";
+        //echo "\nNot in Use: ".$not_linked."\n";
         echo "\nFINISHED\n";
 
     }

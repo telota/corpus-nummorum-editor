@@ -59,7 +59,7 @@
                     <v-icon small class="mr-1">person</v-icon> {{ $data['user']['fullname'] }}
                 </a>
             </div>
-            <div class="sysbar" style="height: 100%; width: 2.0px;"></div>
+            <vertdivider></vertdivider>
             <advbtn
                 icon="help_outline"
                 tooltip="Wiki"
@@ -77,7 +77,7 @@
                 :key="language"
                 v-on:click="changePresets('language', language === 'de' ? 'en' : 'de')"
             ></advbtn>
-            <div class="sysbar" style="height: 100%; width: 0.2px;"></div>
+            <vertdivider></vertdivider>
             <advbtn
                 icon="power_settings_new"
                 tooltip="Logout"

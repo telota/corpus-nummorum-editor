@@ -28,7 +28,7 @@ class legend_handler {
                     else if (in_array($char, ['И'])) $index[] = 'Ν';
 
                     // Replace Omega
-                    else if (in_array($char, ['W'])) $index[] = 'Ω';
+                    else if (in_array($char, ['W', 'ω'])) $index[] = 'Ω';
 
                     else $index[] = $char;
                 }
