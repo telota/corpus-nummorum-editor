@@ -100,7 +100,7 @@
         <v-main class="app_bg" style="margin-left: 55px;">
             <v-fade-transition>
                 <div class="pa-5">
-                    <router-view :key="'router-view' + router_view_refresh"></router-view>
+                    <router-view id="router-space" :key="'router-view' + router_view_refresh"></router-view>
                 </div>
             </v-fade-transition>
         </v-main>

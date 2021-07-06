@@ -19,6 +19,7 @@ import Vuex from 'vuex';
 //import attributes   from './StoreModules/entityattributes';
 import lists        from './StoreModules/entitylists';
 import screenkeys   from './StoreModules/screenkeys';
+import storage      from './StoreModules/storage';
 //import objects      from './StoreModules/objects';
 
 Vue.use(Vuex);
@@ -26,16 +27,35 @@ Vue.use(Vuex);
 
 export default new Vuex.Store ({
 
-    modules: 
-    {
+    modules: {
         //attributes,
         lists,
         screenkeys,
+        storage
         //objects
     },
 
-    state: 
-    {        
+    state: {
+        appName: 'CN Editor',
+        baseURL: null,
+        language: 'de',
+
+        user: {},
+        log: {},
+        settings: {},
+        system: {},
+
+        snack: {
+            message: null,
+            color: null
+        },
+
+        showAbout: false,
+
+
+
+
+
         // basic form
         ItemsPerPage:           [6, 12, 18, 24, 36, 48],    // JK: Limit of Items in "DataItems"
         ItemsScales:            [                           // JK: Grid of Cards in "DataItems"
@@ -67,10 +87,37 @@ export default new Vuex.Store ({
         showLoader:             false,
     },
 
-    actions: {},
+    actions: {
+        showSnack ({ commit }, payload) {
+            if (payload?.message) {
+                commit('setSnack', { message: payload.message, color: payload?.color ?? null })
+                setTimeout (() => { commit('setSnack', {}) }, 5000)
+            }
+        }
+    },
 
-    mutations: 
-    {
+    mutations: {
+        setAppName (state, input) { state.appName = input },
+        setBaseURL (state, input) { state.baseURL = input },
+        setLanguage (state, input) { state.language = input },
+
+        setUser (state, input) { state.User = input },
+        setLog (state, input) { state.Log = input },
+        setSettings (state, input) { state.settings = input },
+        setSystem (state, input) { state.System = input },
+
+        setSnack (state, input) {
+            state.snack = {
+                message: input?.message ? (typeof input.message === 'string' ? input.message : (input.message[state.language] ? message[state.language] : message.en)) : null,
+                color: input?.color ?? null
+            }
+        },
+
+        setAbout (state, input) { state.showAbout = input ?? false },
+
+
+
+
         set_display_mode (state, input) {
             state.displayMode = input
         },
@@ -100,9 +147,8 @@ export default new Vuex.Store ({
             state.showLoader = false
         },
     },
-    
-    getters: 
-    {
+
+    getters: {
         // Starterkit Defaults --------------------------------------
         getBreadcrumbs: state => { // get breadcrumbs
             return state.breadcrumbs

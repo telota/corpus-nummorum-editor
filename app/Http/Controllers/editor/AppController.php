@@ -62,13 +62,28 @@ class AppController extends Controller {
 
             $user['fullname'] = empty ($user['firstname']) || empty ($user['lastname']) ? $user['name'] : ($user['firstname'].' '.$user['lastname']);
 
+            // Git Status
+            $git = trim(shell_exec('git log -1 --pretty=\'format:%h||%cN||%cd\' --date=format:\'%Y-%m-%d\''));
+            if (!empty($git)) {
+                $git = explode('||', $git);
+                if (!empty($git[0])) array_unshift($git, 'https://github.com/telota/corpus-nummorum-editor/commit/'.$git[0]);
+            }
+
+            $system = [
+                'git' => $git,
+                'maxUpload' => (int)(ini_get('upload_max_filesize')),
+                'maxPost' => (int)(ini_get('post_max_size')),
+                'memoryLimit' => (int)(ini_get('memory_limit'))
+            ];
+
             // Log
             $log = [];
 
             return view('editor.app', ['data' => [
                 'user'      => $user,
                 'presets'   => $presets,
-                'log'       => $log
+                'baseURL'   => rtrim(env('APP_URL'), '/'),
+                'system'    => $system
             ]]);
         }
     }

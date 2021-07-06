@@ -194,16 +194,30 @@ const editor = new Vue({
             language: 'en',
             user: {},
             log: {},
-            presets: {}
+            presets: {},
+
+            position: {
+                totalWidth: 0,
+                totalHeight: 0,
+                top: 0,
+                left: 0,
+                width: 0,
+                height: 0
+            },
+
+            // Settings
+            baseURL: null,
+            system: {}
         }
     },
 
     created () {
-        this.drawer.active = this.$vuetify.breakpoint.mdAndUp;
+        this.drawer.active = this.$vuetify.breakpoint.mdAndUp
     },
 
     mounted () {
-        const self = this
+        this.onResize()
+        window.addEventListener('resize', this.onResize)
 
         // progress bar top
         /*AxiosAjaxDetct.init(
@@ -213,20 +227,9 @@ const editor = new Vue({
     },
 
     computed: {
-        getBreadcrumbs() {
-            return store.getters.getBreadcrumbs
-        },
-
         labels() {
             return this.$localization[this.language]
-        },
-
-        // Map VueX Store State
-        ...mapState ({
-            snackbarMessage:    state => state.snackbarMessage,
-            snackbarColor:      state => state.snackbarColor,
-            snackbarDuration:   state => state.snackbarDuration
-        })
+        }
     },
 
     methods: {
@@ -240,6 +243,15 @@ const editor = new Vue({
 
             // set dark mode
             this.$vuetify.theme.dark = this.presets.color_theme === 1 ? true : false
+
+            this.$root.baseURL  = data.baseURL
+            this.$root.system   = data.system
+
+            this.$store.commit('setBaseURL', this.$root.baseURL)
+            this.$store.commit('setLanguage', this.$root.language)
+
+            this.$store.commit('setUser', this.$root.user)
+            this.$store.commit('setSystem', this.$root.system)
 
             console.log('SESSION: initialized.')
             this.greeting();
@@ -301,6 +313,27 @@ const editor = new Vue({
             }
             else {
                 return 'NONE'
+            }
+        },
+
+        onResize () {
+            const win = window
+            const totalWidth = win.innerWidth
+            const totalHeight = win.innerHeight
+
+            const el = document.getElementById('router-space')
+            const bounds = el?.getBoundingClientRect()
+            const top = bounds?.top ?? 0
+            const left = bounds?.left ?? 0
+            const width = bounds?.width ?? 0
+
+            this.position = {
+                totalWidth,
+                totalHeight,
+                top,
+                left,
+                width,
+                height: (totalHeight - top - 30)
             }
         },
 

@@ -241,6 +241,11 @@ const router = new Router (
             name: 'files',
             component: require ('./../modules/files').default,
         },
+        {
+            path: '/storage*',
+            name: 'storage',
+            component: require ('./../pages/storage/index').default,
+        },
 
 
         // ----------------------------------------------------------------------------------------------
