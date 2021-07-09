@@ -21,7 +21,7 @@ class logs implements dbiInterface  {
         foreach ($roots as $name => $root) {
             $year = date('Y');
             $log = null;
-            $log = @file_get_contents($root.'/storage/logs/'.($name === 'cn_website' ? ('laravel-'.date('Y-m-d').'.log') : 'laravel.log'));
+            $log = @file_get_contents($root.'/storage/logs/'.($name === 'cn_website' ? ('laravel-'.date('Y-m-d').'.logl') : 'laravel.log'));
             $items[$name] = [];
 
             if (!empty($log)) {
