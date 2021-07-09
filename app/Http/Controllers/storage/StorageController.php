@@ -4,6 +4,7 @@ namespace App\Http\Controllers\storage;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\storage\StorageActions;
+use App\Http\Controllers\storage\DirectoriesHandler;
 use Storage;
 use Response;
 use Request;
@@ -22,18 +23,30 @@ class StorageController extends Controller {
 
     public function index ($directory = null) {
         $this->authCheck(10);
+
         $list = [];
+        $handler = new DirectoriesHandler();
 
         // No Directory given, provide Directory Index
         if (empty($directory)) {
 
-            $list = Storage::allDirectories();
+            $list = []; //$handler->indexCoinImages();
+
+            foreach (config('dbi.files.root_directories') AS $root => $name) {
+                $list[] = $root;
+                foreach (Storage::allDirectories($root) as $subdir) {
+                    $list[] = $subdir;
+                }
+            }
+
             return Response::json(['directories' => $list]);
         }
 
         // Directory given, provide File Index
         else {
-            $this->authCheck(10);
+
+            $directory = trim($directory, '/');
+            if (substr($directory, 0, 11) === 'coin-images') $directory = $handler->redirectCoinImages($directory);
             $this->directoryCheck($directory);
 
             $list = Storage::files($directory);

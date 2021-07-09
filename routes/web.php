@@ -116,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Storage Namespace
-    Route::prefix('storage-api')->namespace('App\Http\Controllers\storage')->group(function() {
+    /*Route::prefix('storage-api')->namespace('App\Http\Controllers\storage')->group(function() {
 
         Route::get  ('/search',                     'SearchController@select');
         Route::get  ('/index/{directory?}',         'StorageController@index')->where('directory', '.+');
@@ -125,7 +125,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get  ('/meta/{root}/{path}.json',    'StorageController@fileMeta')->where('path', '.+');
         Route::get  ('/meta/{root}/{path}.META',    'StorageController@fileMeta')->where('path', '.+');
-    });
+    });*/
 });
 
 

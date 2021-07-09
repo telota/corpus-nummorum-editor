@@ -57,6 +57,7 @@ Vue.component('keyboard',           require('./modules/keyboard.vue').default);
 
 // Elements
 Vue.component('advbtn',             require('./modules/advbtn.vue').default);
+Vue.component('adv-btn',            require('./modules/btnAdv.vue').default);
 Vue.component('pagination',         require('./modules/element_pagination.vue').default);
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
 Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
@@ -207,6 +208,7 @@ const editor = new Vue({
 
             // Settings
             baseURL: null,
+            sparql: null,
             system: {}
         }
     },
@@ -245,6 +247,7 @@ const editor = new Vue({
             this.$vuetify.theme.dark = this.presets.color_theme === 1 ? true : false
 
             this.$root.baseURL  = data.baseURL
+            this.$root.sparql   = data.sparql
             this.$root.system   = data.system
 
             this.$store.commit('setBaseURL', this.$root.baseURL)

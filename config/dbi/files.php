@@ -1,6 +1,6 @@
 <?php
 
-return [    
+return [
 
     'directories' => [
         'storage/uploads',
@@ -16,10 +16,23 @@ return [
         'storage/test',
         'storage/website',
         'storage/website/team',
-        
+
         'storage/CoinOfMonth',
         'storage/db1995',
         'storage/Monograms',
         'storage/Symbols',
+    ],
+
+    'root_directories' => [
+        'coin-images' => 'Coin Images (CN)',
+        'coin-images-ext' => 'Coin Images (external Users)',
+        'CoinOfMonth' => 'Coin of the Month',
+        'db1995' => 'DB (1995)',
+        'legend-directions' => 'Legend Directions',
+        'Monograms' => 'Monograms',
+        'news' => 'News',
+        'Symbols' => 'Symbols',
+        'team' => 'Team',
+        'uploads' => 'Uploads'
     ]
 ];

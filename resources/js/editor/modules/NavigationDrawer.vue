@@ -148,7 +148,8 @@ export default {
                     { text: this.$root.label('object_groups'),    icon: 'control_camera',     name: 'objectgroups' },
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          name: 'bibliography' },
                     { text: this.$root.label('file_browser'),     icon: 'folder_open',        name: 'files' },
-                    { text: this.$root.label('storage_browser'),     icon: 'folder_open',        name: 'storage' },
+                    //{ text: this.$root.label('storage_browser'),     icon: 'folder_open',        name: 'storage' },
+                    { text: this.$root.label('SPARQL'),     icon: 'auto_awesome',        name: 'sparql' },
                     //{ text: this.$root.label('broken_links'),     icon: 'link_off',           name: 'brokenlinks' }
                 ]}
             ]
@@ -171,9 +172,9 @@ export default {
             if (this.rank >= 31) {
                 routes.push(null)
                 routes.push({ text: this.$root.label('administrator'),  icon: 'font_download',  children: [
-                    { text: 'Gitlab',   icon: 'pending_actions',  link: 'https://gitup.uni-potsdam.de/TELOTA/cluster-alte-welt/corpus-nummorum/cn-dokumentation/issues' },
                     { text: 'Users',    icon: 'people',     name: 'users' },
-                 // { text: 'Errorlog', icon: 'bug_report', name: 'errors' }
+                    { text: 'Logs',     icon: 'format_list_bulleted', name: 'logs' },
+                    { text: 'Gitlab',   icon: 'pending_actions',  link: 'https://gitup.uni-potsdam.de/TELOTA/cluster-alte-welt/corpus-nummorum/cn-dokumentation/issues' }
                 ]})
             }
 

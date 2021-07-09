@@ -36,6 +36,7 @@ return [
     'publish'       => ['read' => 99,   'write_own' => 18,  'write_all' => 18],
     'link'          => ['read' => 99,   'write_own' => 11,  'write_all' => 12],
     'brokenlinks'   => ['read' => 2,    'write_own' => 99,  'write_all' => 99],
+    'logs'          => ['read' => 31,   'write_own' => 99,  'write_all' => 99],
 
     'coinofthemonth'=> ['read' => 2,    'write_own' => 21,  'write_all' => 21],
     'news'          => ['read' => 2,    'write_own' => 21,  'write_all' => 21],

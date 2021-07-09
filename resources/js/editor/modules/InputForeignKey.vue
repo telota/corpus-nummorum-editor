@@ -320,7 +320,8 @@ export default {
         },
 
         selectItem (input) {
-            this.$emit('select', input !== undefined ? input : null)
+            if (!['number', 'string'].includes(typeof input)) input = null
+            this.$emit('select', input)
             this.search = ''
         },
 

@@ -1,37 +1,31 @@
 <template>
-<div id="browser-menu">
-
-    <v-card
-        tile
+    <v-navigation-drawer
+        id="directories-menu"
+        expand-on-hover
+        :mini-variant-width="200"
+        :width="400"
+        class="grey_trip"
         :style="[
             'position: fixed',
             'top:' + position.top + 'px',
             'left:' + position.left + 'px',
-            'height:' + (position.height - 15)+ 'px',
-            'width: 200px'
+            'height:' + (position.height - 15)+ 'px'
         ].join(';\n')"
     >
 
         <!-- Header -->
         <div :style="'height:' + (showSearch ? 90 : 50) + 'px;'">
-            <div class="d-flex align-center justify-space-between">
-                <!-- Collapse -->
-                <advbtn
+            <div class="d-flex align-center">
+                <!-- Collapse
+                <adv-btn
                     icon="arrow_back_ios"
                     tooltip="hide_menu"
                     v-on:click="toggleMenu()"
                 />
-                <v-spacer />
+                <v-spacer /> -->
 
-                    <!-- Filter -->
-                <advbtn
-                    :icon="showSearch ? 'search_off' : 'search'"
-                    :tooltip="(showSearch ? 'Hide' : 'Show') + ' Search'"
-                    v-on:click="toggleSearch"
-                />
-
-                    <!-- Refresh -->
-                <advbtn
+                <!-- Refresh -->
+                <adv-btn
                     icon="sync"
                     tooltip="Refresh List"
                     :loading="loading"
@@ -40,10 +34,17 @@
                 />
 
                 <!-- Expand all -->
-                <advbtn
+                <adv-btn
                     :icon="expandAll ? 'unfold_less' : 'unfold_more'"
                     :tooltip="expandAll ? 'expand_less' : 'expand_more'"
                     v-on:click="$store.commit('setDirectoryExpandedAll', !expandAll)"
+                />
+
+                <!-- Filter -->
+                <adv-btn
+                    :icon="showSearch ? 'search_off' : 'search'"
+                    :tooltip="(showSearch ? 'Hide' : 'Show') + ' Search'"
+                    v-on:click="toggleSearch"
                 />
             </div>
 
@@ -55,9 +56,10 @@
                         v-text="'search'"
                     />
                     <input
+                        id="directories-search"
                         v-model="search"
-                        style="border: 0; outline: none; height: 40px; width: 100%;"
-                        placeholder="Verzeichnisnamen filtern"
+                        style="border: 0; outline: none; height: 40px; width: 100%; color: grey;"
+                        placeholder="Verzeichnisse filtern"
                     />
                     <v-fade-transition>
                         <v-icon
@@ -75,22 +77,29 @@
         </div>
 
         <!-- Directory Items -->
-        <div id="browser-directories" :style="'height:' + (position.height - 65)+ 'px'">
+        <div
+            style="width: 100%; overflow: auto; padding-bottom: 10px;"
+            :style="'height:' + (position.height - (showSearch ? 105 : 65))+ 'px'"
+        >
 
             <!-- Nodes -->
             <v-expand-transition>
                 <div v-if="Object.keys(items)[0]" class="mt-2">
 
-                    <!-- List -->
-                    <div v-if="search">
-                        <div v-if="!Object.keys(filteredItems)[0]" v-text="'keine Treffer'" />
+                    <!-- List (showSearch) -->
+                    <div v-if="search" class="caption pl-3 pr-4 pt-1">
+                        <div
+                            v-if="!Object.keys(filteredItems)[0]"
+                            class="text-center"
+                            v-text="'KEINE TREFFER'"
+                        />
                         <template v-else>
                             <template v-for="(item, path) in filteredItems">
                                 <v-expand-transition :key="path">
                                     <v-hover v-slot="{ hover }">
                                         <div
                                             :ref="'node:' + path"
-                                            class="d-flex align-center pa-1 pl-3 pr-4"
+                                            class="d-flex align-center pb-2"
                                             :class="(hover ? 'grey lighten-3 ' : '') + (path === currentDir ? 'font-weight-medium' : '')"
                                             :style="'cursor:' + (path === currentDir ? 'default' : 'pointer')"
                                             @click="setPath(path)"
@@ -109,65 +118,60 @@
                         <v-expand-transition>
                             <div>
                         <template v-for="(item, path) in items">
-                            <!--<v-expand-transition :key="path">-->
-                                <v-hover
-                                    v-if="item.depth === 0 || item.show || expandAll"
-                                    v-slot="{ hover }"
-                                    :key="path"
-                                ><!-- || ($root.contextMenu.show && $root.contextMenu.item.path === path)-->
-                                    <div
-                                        :ref="'node:' + path"
-                                        class="d-flex align-center pa-1"
-                                        :class="hover  ? 'grey lighten-3' : ''"
-                                        style="cursor: pointer"
-                                        @contextmenu="(element) => showContextMenu(element, item)"
+                            <v-hover
+                                v-if="item.depth === 0 || item.show || expandAll"
+                                v-slot="{ hover }"
+                                :key="path"
+                            ><!-- || ($root.contextMenu.show && $root.contextMenu.item.path === path)-->
+                                <div
+                                    :ref="'node:' + path"
+                                    class="d-flex align-center pa-1"
+                                    :class="hover  ? 'grey_prim' : ''"
+                                    style="cursor: pointer"
+                                >
+                                    <!-- Indentation -->
+                                    <div :style="'padding-left:' + (item.depth * indentation) + 'em'" />
+
+                                    <!-- Icon -->
+                                    <v-btn
+                                        icon
+                                        x-small
+                                        :disabled="!item.expandable || expandAll"
+                                        :style="!item.expandable && !item.current ? 'opacity: 0' : ''"
+                                        @click="toggleExpansion(item.path)"
                                     >
-                                        <!-- Indentation -->
-                                        <div :style="'padding-left:' + (item.depth * indentation) + 'em'" />
+                                        <v-icon small v-text="expandIcon(item)" />
+                                    </v-btn>
 
-                                        <!-- Icon -->
-                                        <v-btn
-                                            icon
-                                            small
-                                            :disabled="!item.expandable || expandAll"
-                                            :style="!item.expandable && !item.current ? 'opacity: 0' : ''"
-                                            @click="toggleExpansion(item.path)"
-                                        >
-                                            <v-icon v-text="expandIcon(item)" />
-                                        </v-btn>
+                                    <!-- Label -->
+                                    <div
+                                        v-text="item.label.replaceAll('_', ' ')"
+                                        class="pl-1 caption pr-2 text-truncate"
+                                        :class="item.current ? 'font-weight-bold' : ''"
+                                        style="width: 100%"
+                                        @click="setPath(path)"
+                                    />
 
-                                        <!-- Label -->
-                                        <div
-                                            v-text="item.label.replaceAll('_', ' ')"
-                                            class="pl-1 body-1 pr-2 text-truncate"
-                                            :class="[item.depth === 0 ? 'text-uppercase' : '', item.current ? 'font-weight-bold' : ''].join(' ')"
-                                            style="width: 100%"
-                                            @click="setPath(path)"
-                                        />
-
-                                        <!-- Options
-                                        <v-spacer />
-                                        <v-btn
-                                            icon
-                                            small
-                                            @click="(element) => showContextMenu(element, item)"
-                                        >
-                                            <v-icon small v-text="'more_vert'" />
-                                        </v-btn>-->
-                                    </div>
-                                </v-hover>
-                            <!--</v-expand-transition>-->
+                                    <!-- Options
+                                    <v-spacer />
+                                    <v-btn
+                                        icon
+                                        small
+                                        @click="(element) => showContextMenu(element, item)"
+                                    >
+                                        <v-icon small v-text="'more_vert'" />
+                                    </v-btn>-->
+                                </div>
+                            </v-hover>
                         </template>
                         </div>
                         </v-expand-transition>
                     </div>
                 </div>
             </v-expand-transition>
-
         </div>
 
-    </v-card>
-</div>
+    </v-navigation-drawer>
 </template>
 
 <script>
@@ -305,11 +309,6 @@ export default {
 
         toggleExpansion (path) {
             this.$store.dispatch('toggleDirectoryExpansion', { path })
-            /*const index = this.expand.indexOf(path)
-
-            if (index < 0) this.expand.push(path)
-            else if (this.expand.length > 1) this.expand.splice(index, 1)
-            else this.expand = []*/
         },
 
         expandIcon (item) {
@@ -319,23 +318,19 @@ export default {
             return 'expand_more'
         },
 
-        showContextMenu (element, item) {
-            this.$root.showContextMenu('directory', element, item)
-        },
-
         toggleSearch () {
-            if (this.showSearch) this.search = null
             this.showSearch = !this.showSearch
+            if (this.showSearch) {
+                this.$nextTick(() => {
+                    const el = document.getElementById('directories-search')
+                    el.focus()
+                })
+            }
+            else {
+                this.search = null
+            }
         }
     }
 }
 
 </script>
-
-<style scoped>
-    #browser-directories {
-        width: 100%;
-        overflow: auto;
-        padding-bottom: 10px;
-    }
-</style>

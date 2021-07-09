@@ -83,6 +83,7 @@ class AppController extends Controller {
                 'user'      => $user,
                 'presets'   => $presets,
                 'baseURL'   => rtrim(env('APP_URL'), '/'),
+                'sparql'    => config('dbi.url.sparql'),
                 'system'    => $system
             ]]);
         }

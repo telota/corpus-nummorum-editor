@@ -237,6 +237,7 @@ export default {
         },
 
         selectItem (input) {
+            if (!['number', 'string'].includes(typeof input)) input = null
             this.$emit('select', input)
             this.search = ''
         },

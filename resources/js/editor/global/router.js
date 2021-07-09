@@ -246,6 +246,11 @@ const router = new Router (
             name: 'storage',
             component: require ('./../pages/storage/index').default,
         },
+        {
+            path: '/sparql',
+            name: 'sparql',
+            component: require ('./../pages/tools/sparql').default,
+        },
 
 
         // ----------------------------------------------------------------------------------------------
@@ -284,9 +289,9 @@ const router = new Router (
             component: require ('./../pages/administrator/users').default,
         },
         {
-            path: '/errors',
-            name: 'errors',
-            component: require ('./../pages/administrator/errors').default,
+            path: '/logs',
+            name: 'logs',
+            component: require ('./../pages/administrator/logs').default,
         },
 
         // Administrator
