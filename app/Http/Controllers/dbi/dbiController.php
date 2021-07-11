@@ -115,7 +115,7 @@ class dbiController extends Controller {
     public function identitifyUser () {
         return [
             'id' => Auth::user()->id,
-            'level' => Auth::user()->access_level
+            'level' => Auth::user()->level
         ];
     }
 }

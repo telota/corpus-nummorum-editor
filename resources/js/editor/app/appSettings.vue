@@ -27,6 +27,7 @@ export default {
                 console.log('New App instance of ' + this.$root.appName + ' created:', data)
 
                 this.$root.baseURL  = data.baseURL
+                this.$root.sparql   = data.sparql
                 this.$root.language = Object.keys(this.$localization).includes(data.language) ? data.language : 'en'
 
                 this.$root.user     = data.user
@@ -36,6 +37,7 @@ export default {
 
                 this.$store.commit('setAppName', this.$root.appName)
                 this.$store.commit('setBaseURL', this.$root.baseURL)
+                this.$store.commit('setSparql', this.$root.sparql)
                 this.$store.commit('setLanguage', this.$root.language)
 
                 this.$store.commit('setUser', this.$root.user)

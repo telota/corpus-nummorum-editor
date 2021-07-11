@@ -18,7 +18,7 @@ class AccountController extends Controller {
 
         // Authenticated: show account data
         else {
-            $level = $user->access_level;
+            $level = $user->level;
 
             if ($level < 2) {
                 $role = 'Registered';
@@ -34,7 +34,7 @@ class AccountController extends Controller {
             }
 
             return view('base.account', [
-                'level' => $user->access_level,
+                'level' => $user->level,
                 'user' => [
                     'ID' => $user->id,
                     'username' => $user->name,

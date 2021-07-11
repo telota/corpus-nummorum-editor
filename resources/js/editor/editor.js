@@ -34,11 +34,24 @@ Vue.use(Vuetify);
 // global component registrations here
 //Vue.component("sessioninfo",        () => import("./modules/sessioninfo.vue")); // Async Load (creates seperate File!!!)
 
-Vue.component('sessioninfo',        require('./modules/sessioninfo.vue').default);
-Vue.component('NavigationDrawer',   require('./modules/NavigationDrawer.vue').default);
+//Vue.component('sessioninfo',        require('./modules/sessioninfo.vue').default);
+//Vue.component('NavigationDrawer',   require('./modules/NavigationDrawer.vue').default);
+
+// App Components
+Vue.component('app-settings',       require('./app/appSettings.vue').default);
+Vue.component('app-snack',          require('./app/appSnack.vue').default);
+Vue.component('app-header',         require('./app/appHeader.vue').default);
+//Vue.component('app-footer',         require('./app/appFooter.vue').default);
+Vue.component('app-loader',         require('./app/appLoader.vue').default);
+Vue.component('app-dialog',         require('./app/appDialog.vue').default);
+//Vue.component('app-navigation',     require('./app/appNavigation.vue').default);
+//Vue.component('app-context-menu',   require('./app/appContextMenu.vue').default);
+Vue.component('app-about',          require('./app/appAbout.vue').default);
 
 Vue.component('simpleDataTemplate', require('./templates/simpleDataTemplate.vue').default);
 Vue.component('simpleSelectDialog', require('./templates/simpleDataSelectDialog.vue').default);
+Vue.component('component-toolbar',  require('./templates/componentToolbar.vue').default);
+Vue.component('component-content',  require('./templates/componentContent.vue').default);
 
 Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').default);
 Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
@@ -114,7 +127,6 @@ const editor = new Vue({
             dark: true,
             themes: {
                 light: {
-                    app_bg:     '#eeeeee',
                     primary:    '#757575',
                     //secondary:  '#666666',
                     accent:     '#666666',
@@ -130,7 +142,12 @@ const editor = new Vue({
 
                     grey_prim:  '#d8d8d8',
                     grey_sec:   '#f5f5f5',
-                    grey_trip:  '#e1e1e1'
+                    grey_trip:  '#e1e1e1',
+
+                    app_bg:     '#717171',
+                    header_bg:  '#e6e6e6',
+                    header_hover:'#d2d2d2',
+                    header_marked:'#0099cc',
                 },
                 dark: {
                     app_bg:     '#181818',
@@ -149,7 +166,12 @@ const editor = new Vue({
 
                     grey_prim:  '#363636',
                     grey_sec:   '#272727',
-                    grey_trip:  '#1e1e1e'
+                    grey_trip:  '#1e1e1e',
+
+                    app_bg:     '#181818',
+                    header_bg:  '#363636',
+                    header_hover:'#666666',
+                    header_marked:'#0099cc',
                 },
             },
         },
@@ -193,10 +215,6 @@ const editor = new Vue({
             preferences: {
                 show_filters: false,
             },
-            language: 'en',
-            user: {},
-            log: {},
-            presets: {},
 
             position: {
                 totalWidth: 0,
@@ -208,9 +226,14 @@ const editor = new Vue({
             },
 
             // Settings
+            appName: 'CN Editor',
             baseURL: null,
             sparql: null,
-            system: {}
+            system: {},
+            language: 'en',
+            user: {},
+            log: {},
+            settings: {},
         }
     },
 
@@ -219,6 +242,8 @@ const editor = new Vue({
     },
 
     mounted () {
+        let elHtml = document.getElementsByTagName('html')[0]
+        elHtml.style.overflowY = 'hidden'
         this.onResize()
         window.addEventListener('resize', this.onResize)
         //window.addEventListener('error', this.errorHandler)
@@ -238,7 +263,7 @@ const editor = new Vue({
     },
 
     methods: {
-        async InitializeSession (data) {
+        /*async InitializeSession (data) {
             this.user = data.user
             this.log = data.log
             this.presets = data.presets
@@ -261,7 +286,7 @@ const editor = new Vue({
 
             console.log('SESSION: initialized.')
             this.greeting();
-        },
+        },*/
 
         async changePresets (key, value) {
             this.loading = true

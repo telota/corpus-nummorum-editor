@@ -30,12 +30,12 @@ class owners implements listsInterface  {
                     country
                 )) AS search')
             ]);
-        
+
         // Where
         if(!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('owner', 'LIKE', '%'.$search.'%')
                         -> orWhere('owner_type', 'LIKE', '%'.$search.'%')
@@ -46,7 +46,7 @@ class owners implements listsInterface  {
         }
 
         // Hide non public user for average user
-        if(empty(Auth::user()) || Auth::user()->access_level < config('dbi.permissions.owners.read')) {
+        if(empty(Auth::user()) || Auth::user()->level < config('dbi.permissions.owners.read')) {
             $query -> where('is_name_public', 1);
         }
 

@@ -14,7 +14,7 @@ use Auth;
 class StorageController extends Controller {
 
     public function authCheck ($level = 1) {
-        if (Auth::user()->access_level < $level) die (abort(403));
+        if (Auth::user()->level < $level) die (abort(403));
     }
 
     public function directoryCheck ($directory = null) {

@@ -34,7 +34,10 @@ class User extends Authenticatable
         'activation_key',
         'firstname',
         'lastname',
-        'country'
+        'country',
+        'level',
+        'language',
+        'settings'
     ];
 
     /**

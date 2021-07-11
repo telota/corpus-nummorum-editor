@@ -38,7 +38,8 @@ export default new Vuex.Store ({
     state: {
         appName: 'CN Editor',
         baseURL: null,
-        language: 'de',
+        sparql: null,
+        language: 'en',
 
         user: {},
         log: {},
@@ -99,6 +100,7 @@ export default new Vuex.Store ({
     mutations: {
         setAppName (state, input) { state.appName = input },
         setBaseURL (state, input) { state.baseURL = input },
+        setSparql (state, input) { state.sparql = input },
         setLanguage (state, input) { state.language = input },
 
         setUser (state, input) { state.User = input },

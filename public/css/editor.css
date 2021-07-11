@@ -3,6 +3,7 @@ html, body {
     color: #eee;
     font-weight: 100;
     height: 100vh;
+    width: 100%;
     margin: 0;
 }
 
@@ -10,101 +11,32 @@ a {
     text-decoration: none;
 }
 
-.loader {
-    position: fixed;
+#routed-component {
+    position:fixed;
+    top: 40px;
+    height: calc(100vh - 40px);
     width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
 }
 
-.loader-half-transparent {
-    background: rgba(24,24,24,0.5);
-    z-index: 501;
+.component-toolbar {
+    position:fixed;
+    top: 40px;
+    height: 50px;
+    width: 100%;
+    z-index: 100;
 }
 
-.loader-footer {
-    display: block;
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    width: 500px;
-    height: 54px;
-    margin: -100px 0 0 -250px;
-    color: #e0e0e0;
-    text-align: center;
-    font-family: sans-serif;
-    font-size: 12px;
-    line-height: 1.5;
+.component-toolbar-shadow {
+    z-index: 99;
+    width: 120%;
+    left: -20px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.75);
 }
 
-.loader-background {
-    position: fixed;
-    width: 500px;
-    height: 500px;
-    margin: -250px 0 0 -250px;
-    top: 50%;
-    left: 50%;
-}
-
-.loader-background-gradient {
-    position: fixed;
-    width: 500px;
-    height: 500px;
-    margin: -250px 0 0 -250px;
-    top: 50%;
-    left: 50%;
-    background: -moz-radial-gradient(circle, rgba(35,35,35,1) 20%, rgba(24,24,24,0) 50%);
-    background: -webkit-radial-gradient(circle, rgba(35,35,35,1) 20%, rgba(24,24,24,0) 50%);
-    background: radial-gradient(circle, rgba(35,35,35,1) 20%, rgba(24,24,24,0) 50%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#232323",endColorstr="#181818",GradientType=1);
-}
-
-.loader-text {
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 350px;
-    height: 60px;
-    margin: -30px 0 0 -175px;
-    color: #e0e0e0;
-    text-align: center;
-    font-family: sans-serif;
-    font-size: 60px;
-}
-
-.loader-spinner {
-    display: block;
-    position: relative;
-    left: 50%;
-    top: 50%;
-    width: 350px;
-    height: 350px;
-    margin: -175px 0 0 -175px;
-}
-
-.loader-spinner {
-    border: 8px solid transparent;
-    border-top-color: #e0e0e0;
-    border-bottom-color: #e0e0e0;
-    border-radius: 50%;
-    -webkit-animation: loader 3s linear infinite;
-    -moz-animation: loader 3s linear infinite;
-    -o-animation: loader 3s linear infinite;
-    animation: loader 3s linear infinite;
-}
-
-@keyframes loader {
-    0% {
-        -webkit-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-
-    100% {
-        -webkit-transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        transform: rotate(360deg);
-    }
+.component-content {
+    position:fixed;
+    top: 90px;
+    height: calc(100vh - 90px);
+    width: 100%;
+    overflow-y: auto;
 }

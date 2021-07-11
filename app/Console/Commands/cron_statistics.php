@@ -72,7 +72,7 @@ class cron_statistics extends Command {
         DB::table($db_app.'app_daily_statistics') -> insert(['data' => DB::raw(
             '(SELECT JSON_OBJECT(
                 \'all\', JSON_OBJECT(
-                    \'team\',           ('.$count.' '.$db_app.'app_editor_users WHERE access_level > 9),
+                    \'team\',           ('.$count.' '.$db_app.'app_editor_users WHERE level > 9),
                     \'bibliography\',   ('.$count.' '.$db_data.'zotero_import),
                     \'mints\',          ('.$count.' '.$db_data.'data_mints),
                     '.implode(",\n", $select_all).'

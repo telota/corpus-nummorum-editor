@@ -11,7 +11,7 @@ class users implements listsInterface  {
 
     public function select ($user, $input, $language) {
         // Hide non public user for average user
-        if(empty(Auth::user()) || Auth::user()->access_level < config('dbi.permissions.users_list.read')) {
+        if(empty(Auth::user()) || Auth::user()->level < config('dbi.permissions.users_list.read')) {
             die(abort(403, 'Insufficient Permissions.'));
         }
 
@@ -35,12 +35,12 @@ class users implements listsInterface  {
                     firstname
                 )) AS search')
             ]);
-        
+
         // Where
         if(!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('name', 'LIKE', '%'.$search.'%')
                         -> orWhere('lastname', 'LIKE', '%'.$search.'%')
@@ -51,7 +51,7 @@ class users implements listsInterface  {
 
         // Get only Users who can insert data or who were admintool users once
         $query -> where(function ($subquery) {
-            $subquery -> orWhere('access_level', '>', 1) -> orWhere([['firstname', 'Admintooluser'], ['name', 'LIKE', 'old_%']]);
+            $subquery -> orWhere('level', '>', 1) -> orWhere([['firstname', 'Admintooluser'], ['name', 'LIKE', 'old_%']]);
         });
 
         // ORDER BY

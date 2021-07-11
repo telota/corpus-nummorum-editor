@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Request;
 
 class RegisterController extends Controller
 {
@@ -84,10 +85,11 @@ class RegisterController extends Controller
             'firstname' => $data['firstname'],
             'lastname'  => $data['lastname'],
             'country'   => $data['country'],
+            'language'  => substr(Request::server('HTTP_ACCEPT_LANGUAGE'), 0, 2) === 'de' ? 'de' : 'en'
         ]);
 
         // Get Email-Adresses of Admins
-        $admins = json_decode(DB::table(config('dbi.tablenames.users')) -> select('email') -> where('access_level', '>', 30) -> get(), true);
+        $admins = json_decode(DB::table(config('dbi.tablenames.users')) -> select('email') -> where('level', '>', 30) -> get(), true);
         if (!empty($admins[0])) {
             $admins = array_map(function ($item) { return $item['email']; }, $admins);
 

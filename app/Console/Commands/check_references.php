@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\standardMail;
 
 class check_references extends Command {
-    
+
     protected $signature = 'check:references {no_mail?}';
-    protected $description = 'Check references for inconsistencies';    
+    protected $description = 'Check references for inconsistencies';
 
     public function __construct(){
         parent::__construct();
@@ -60,7 +60,7 @@ class check_references extends Command {
                     }
 
                     $issues[$item['cn_id']] .= "\n".'<a href="'.$item['zotero_link'].'">'.$item['zotero_id'].'</a>';
-                }  
+                }
             }
         }
 
@@ -68,10 +68,10 @@ class check_references extends Command {
         if (empty($this->argument('no_mail')) && count($issues) > 1) {
 
             // Get Email-Adresses of Admins
-            $admins = json_decode(DB::table(config('dbi.tablenames.users')) -> select('email') -> where('access_level', '>', 30) -> get(), true);
+            $admins = json_decode(DB::table(config('dbi.tablenames.users')) -> select('email') -> where('level', '>', 30) -> get(), true);
             if (!empty($admins[0])) {
                 $admins = array_map(function ($item) { return $item['email']; }, $admins);
-    
+
                 $content = count($issues).' CN-Datensätze sind mit Zotero-Titeln verknüpft, die in Zotero als "<b>gelöscht</b>" markiert wurden.'."\n".
                 '<br/>Bitte entfernen Sie die betroffenen Referenzen oder passen Sie sie an.'."\n".
                 '<br/><br/>'."\n".

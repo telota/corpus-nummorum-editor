@@ -12,7 +12,7 @@ class numismaticsorg implements ImportInterface {
     public function coins ($url) {
 
         // Check Auth
-        if (Auth::user()->access_level < 10) { die(abort(403)); }
+        if (Auth::user()->level < 10) { die(abort(403)); }
 
         $explode = explode('?', $url);
         $url = $explode[0];
@@ -218,7 +218,7 @@ class numismaticsorg implements ImportInterface {
     public function types ($url) {
 
         // Check Auth
-        if (Auth::user()->access_level < 10) { die(abort(403)); }
+        if (Auth::user()->level < 10) { die(abort(403)); }
 
         $explode = explode('?', $url);
         $url = $explode[0];

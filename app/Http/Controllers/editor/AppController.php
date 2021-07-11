@@ -10,6 +10,66 @@ use Request;
 class AppController extends Controller {
 
     public function initiate () {
+        $auth = Auth::user();
+
+        // Not authenticated: show login form
+        if (empty($auth)) {
+            return view('auth.login', ['showRedirect' => true]);
+        }
+
+        // Level is insufficent: show status
+        else if ($auth->level < 2) {
+            return redirect('/account');
+        }
+
+        // Level is sufficient: get Data and return SPA
+        else {
+            // User
+            $user = [
+                'id'        => $auth->id,
+                'email'     => $auth->email,
+                'name'      => $auth->name,
+                'role'      => 'TEST',
+                'level'     => $auth->level,
+                'lastname'  => $auth->lastname,
+                'firstname' => $auth->firstname,
+                'fullname'  => empty($auth->firstname) || empty($auth->lastname) ? $auth->name : ($auth->firstname.' '.$auth->lastname),
+                'verified'  => empty($auth->email_verified_at) ? 0 : 1,
+                'agreed'    => empty($auth->terms_agreed) ? 0 : 1
+            ];
+
+            // Git Status
+            $git = trim(shell_exec('git log -1 --pretty=\'format:%h||%cN||%cd\' --date=format:\'%Y-%m-%d\''));
+            if (!empty($git)) {
+                $git = explode('||', $git);
+                if (!empty($git[0])) array_unshift($git, config('dbi.url.github_repo').'/commit/'.$git[0]);
+            }
+
+            // System
+            $system = [
+                'git' => $git,
+                'maxUpload' => (int)(ini_get('upload_max_filesize')),
+                'maxPost' => (int)(ini_get('post_max_size')),
+                'memoryLimit' => (int)(ini_get('memory_limit'))
+            ];
+
+            // Log
+            $log = [];
+
+            return view('editor.app', ['data' => [
+                'appName'   => 'CN Editor',
+                'baseURL'   => rtrim(env('APP_URL'), '/'),
+                'sparql'    => config('dbi.url.sparql'),
+                'language'  => $auth->language ?? (substr(Request::server('HTTP_ACCEPT_LANGUAGE'), 0, 2) === 'de' ? 'de' : 'en'),
+                'user'      => $user,
+                'settings'  => $auth->settings ?? [],
+                'log'       => $log,
+                'system'    => $system
+            ]]);
+        }
+    }
+
+    public function initiate2 () {
 
         $user = Auth::user();
 
@@ -19,7 +79,7 @@ class AppController extends Controller {
         }
 
         // Level is insufficent: show status
-        else if ($user->access_level < 2) {
+        else if ($user->level < 2) {
             return redirect('/account');
         }
 
@@ -29,7 +89,7 @@ class AppController extends Controller {
             $default_language = substr(Request::server('HTTP_ACCEPT_LANGUAGE'), 0, 2) === 'de' ? 'de' : 'en';
 
             // Presets
-            $presets = DB::table('cn_app.app_editor_users AS u')
+            /*$presets = DB::table('cn_app.app_editor_users AS u')
                 -> leftJoin('cn_app.app_editor_users_presets AS p AS p', 'p.id', '=', 'u.id')
                 -> select([
                         DB::raw('IFNULL(p.language, \''.$default_language.'\') AS language'),
@@ -38,11 +98,11 @@ class AppController extends Controller {
                     ])
                 -> where('u.id', $id_user)
                 -> get ();
-            $presets = json_decode($presets, true)[0];
+            $presets = json_decode($presets, true)[0];*/
 
             // User
             $user = DB::table('cn_app.app_editor_users AS u')
-                -> leftJoin('cn_app.app_editor_users_ranks AS r', 'r.id', '=', 'u.access_level')
+                -> leftJoin('cn_app.app_editor_users_ranks AS r', 'r.id', '=', 'u.level')
                 -> select([
                         'u.id AS id',
                         'u.name AS name',
@@ -53,7 +113,7 @@ class AppController extends Controller {
                         DB::raw('IF( u.last_login is null, null, CAST( u.last_login AS DATETIME)) AS last_login'),
                         DB::raw('IF( u.email_verified_at is null, 0, 1) AS verified'),
                         DB::raw('IF( u.terms_agreed = 1, 1, 0 ) AS agreed'),
-                        'u.access_level AS level',
+                        'u.level AS level',
                         'r.role_en AS role'
                     ])
                 -> where('u.id', $id_user)
@@ -86,6 +146,8 @@ class AppController extends Controller {
                 'sparql'    => config('dbi.url.sparql'),
                 'system'    => $system
             ]]);
+
+
         }
     }
 }

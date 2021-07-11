@@ -17,7 +17,7 @@ class FileController extends Controller {
     public function index () {
 
         // Check Auth
-        if (Auth::user()->access_level < 10) { die(abort(403)); }
+        if (Auth::user()->level < 10) { die(abort(403)); }
 
         foreach (config('dbi.files.directories') as $directory) {
             // Ensure directory exists
@@ -32,7 +32,7 @@ class FileController extends Controller {
     // Get all files in given directory
     public function browse ($directory) {
 
-        if (Auth::user()->access_level < 10 || !in_array('storage/'.$directory, config('dbi.files.directories'))) {
+        if (Auth::user()->level < 10 || !in_array('storage/'.$directory, config('dbi.files.directories'))) {
             die(abort(403));
         }
         else if (!Storage::disk('data')->exists($directory)) {
@@ -60,7 +60,7 @@ class FileController extends Controller {
     public function upload ($directory) {
 
         // Check Auth
-        if (Auth::user()->access_level < 11) { die(abort(403)); }
+        if (Auth::user()->level < 11) { die(abort(403)); }
 
         $request = Request::all();
 
@@ -115,7 +115,7 @@ class FileController extends Controller {
     public function delete () {
 
         // Check Auth
-        if (Auth::user()->access_level < 12) { die(abort(403)); }
+        if (Auth::user()->level < 12) { die(abort(403)); }
 
         $file = Request::post()['file'];
 
