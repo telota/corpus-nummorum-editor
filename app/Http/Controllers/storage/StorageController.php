@@ -112,9 +112,9 @@ class StorageController extends Controller {
 
             // Store File (check existence if required)
             if (empty($request['override'])) {
-                $existing = Storage::files('storage/'.$directory);
+                $existing = Storage::files($directory);
                 $ei = 1;
-                while (in_array('storage/'.$directory.$file_name, $existing)) {
+                while (in_array($directory.$file_name, $existing)) {
                     $file_name = $name.'_copy'.$ei.$extension;
                     ++$ei;
                 }
@@ -122,13 +122,13 @@ class StorageController extends Controller {
 
             //$response = ['error' => json_decode($request['meta'.$fi], true)];
 
-            $success = Storage::putFileAs('storage/'.$directory, $file, $file_name);
+            $success = Storage::putFileAs($directory, $file, $file_name);
 
             // Store Meta
-            if (!empty($success) && !empty($request['meta'.$fi])) {
+            /*if (!empty($success) && !empty($request['meta'.$fi])) {
                 $meta_data = json_decode($request['meta'.$fi], true);
                 $meta_name = $handler->createMetaForUpload($directory.$file_name, $file, $meta_data);
-            }
+            }*/
 
             $response[] = [
                 'success'       => empty($success) || empty($meta_name) ? false : true,
@@ -136,7 +136,7 @@ class StorageController extends Controller {
                 'directory'     => $directory,
                 'name'          => $file_name,
                 'originalName'  => $name_original,
-                'meta'          => empty($meta_name) ? null : $meta_name
+                //'meta'          => empty($meta_name) ? null : $meta_name
             ];
 
             ++$fi;

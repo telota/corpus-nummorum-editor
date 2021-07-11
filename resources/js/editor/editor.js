@@ -7,10 +7,10 @@ window.axios = require('axios');
 import 'vuetify/dist/vuetify.min.css';
 import Vue from 'vue';
 import Vuetify from 'vuetify';
-import router from './global/router';
-import store from './global/Store';
+import router from './plugins/router';
+import store from './plugins/Store';
 //import VueProgressBar from 'vue-progressbar'
-import AxiosAjaxDetct from './global/AxiosAjaxDetect';
+import AxiosAjaxDetct from './plugins/AxiosAjaxDetect';
 import { mapState } from 'vuex';
 
 // this is the vuetify theming options
@@ -44,6 +44,7 @@ Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').defau
 Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
 
 Vue.component('Imager',             require('./modules/Imager.vue').default);
+Vue.component('adv-img',             require('./modules/advImg.vue').default);
 Vue.component('InputForeignKey',    require('./modules/InputForeignKey.vue').default);
 Vue.component('SearchForeignKey',   require('./modules/SearchForeignKey.vue').default);
 Vue.component('ErrorDialog',        require('./modules/ErrorDialog.vue').default);
@@ -96,9 +97,9 @@ Vue.component('objectgroups',       require('./pages/tools/objectgroups.vue').de
 
 
 // Own global JS variables/functions
-import editor_format from './global/format';
-import handlers from './global/handlers';
-import localization from './global/localization';
+import editor_format from './plugins/format';
+import handlers from './plugins/handlers';
+import localization from './plugins/localization';
 
 Vue.use(editor_format);
 Vue.use(handlers);
@@ -220,6 +221,8 @@ const editor = new Vue({
     mounted () {
         this.onResize()
         window.addEventListener('resize', this.onResize)
+        //window.addEventListener('error', this.errorHandler)
+
 
         // progress bar top
         /*AxiosAjaxDetct.init(
@@ -343,6 +346,11 @@ const editor = new Vue({
         openInNewTab (link) {
             if (link) { window.open(link) }
         },
+
+        /*errorHandler (error) {
+            console.log('HALLO!!!')
+            console.log('TEST:' + JSON.stringify(error))
+        },*/
 
         // JK: DBI-API-AXIOS Functions ----------------------------------------------------------------------------------
         async DBI_SELECT_GET (entity, id) {

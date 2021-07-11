@@ -16,12 +16,12 @@
             <div
                 v-if="item.text"
                 v-text="item.text"
-                class="text-truncate"
+                class="text-truncate font-weight-medium"
                 :style="'max-width:' + getNodeWidth(i) + 'px'"
             />
             <v-icon
                 v-else
-                :class="boxed ? 'ml-2' : ''"
+                class="ml-2"
                 v-text="item.icon"
             />
         </div>
@@ -37,16 +37,28 @@
         >
             <!-- Activator -->
             <template v-slot:activator="{ on, attrs }">
-                <v-btn
+                <v-hover v-slot="{ hover }" :disabled="disabled || !Object.keys(item.nodes)[0]">
+                    <div
+                        v-bind="hover ? attrs : null"
+                        v-on="hover ? on : null"
+                    >
+                        <v-icon
+                            v-text="dividerBtn"
+                            :color="hover ? 'blue_sec' : ''"
+                            class="ml-2 mr-2"
+                        />
+                    </div>
+                </v-hover>
+                <!--<v-btn
                     small
                     icon
                     class="ml-1 mr-1"
                     v-bind="attrs"
                     v-on="on"
-                    :disabled="disabled || !Object.keys(item.nodes)[0]"
+
                 >
-                    <v-icon v-text="dividerBtn" class="mr-n1" />
-                </v-btn>
+                    <v-icon v-text="dividerBtn" />
+                </v-btn>-->
             </template>
 
             <v-card tile>
@@ -57,7 +69,7 @@
                 >
                     <div
                         class="pa-2 caption"
-                        :class="hover ? 'grey lighten-3' : (item.disabled ? 'grey--text' : '')"
+                        :class="hover ? 'grey_prim' : (item.disabled ? 'grey--text' : '')"
                         :style="'cursor:' + (hover ? 'pointer' : 'default')"
                         v-text="node"
                         @click="setPath(nodepath)"

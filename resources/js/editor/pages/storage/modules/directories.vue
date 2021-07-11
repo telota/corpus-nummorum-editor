@@ -4,7 +4,7 @@
         expand-on-hover
         :mini-variant-width="200"
         :width="400"
-        class="grey_trip"
+        class="grey_sec"
         :style="[
             'position: fixed',
             'top:' + position.top + 'px',
@@ -24,6 +24,13 @@
                 />
                 <v-spacer /> -->
 
+                <!-- Filter -->
+                <adv-btn
+                    :icon="showSearch ? 'search_off' : 'search'"
+                    :tooltip="(showSearch ? 'Hide' : 'Show') + ' Search'"
+                    v-on:click="toggleSearch"
+                />
+
                 <!-- Refresh -->
                 <adv-btn
                     icon="sync"
@@ -38,13 +45,6 @@
                     :icon="expandAll ? 'unfold_less' : 'unfold_more'"
                     :tooltip="expandAll ? 'expand_less' : 'expand_more'"
                     v-on:click="$store.commit('setDirectoryExpandedAll', !expandAll)"
-                />
-
-                <!-- Filter -->
-                <adv-btn
-                    :icon="showSearch ? 'search_off' : 'search'"
-                    :tooltip="(showSearch ? 'Hide' : 'Show') + ' Search'"
-                    v-on:click="toggleSearch"
                 />
             </div>
 

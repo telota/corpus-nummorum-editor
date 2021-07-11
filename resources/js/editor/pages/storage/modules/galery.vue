@@ -25,7 +25,7 @@
                 :dis-bench="3"
             >
                 <template v-slot:default="{ item }">
-                    <div style="padding: 10px">
+                    <div style="padding-top: 15px;">
                         <div
                             class="d-flex justify-space-between"
                             style="width: 100%;"
@@ -52,7 +52,7 @@
                                         @contextmenu="(element) => showContextMenu(element, path)"
                                     >
                                         <!-- Img -->
-                                        <advImg contain :height="grid.dimensions - 80" :src="path" />
+                                        <adv-img contain :height="grid.dimensions - 80" :src="path" />
 
                                         <!-- Tooltip / Name -->
                                         <v-tooltip top>
@@ -83,7 +83,7 @@
                             :cols="cols"
                         >
                             <v-card tile class="pa-2">
-                                <advImg contain :src="path" />
+                                <adv-img contain :src="path" />
                             </v-card>
                         </v-col>
                     </v-row>
@@ -114,7 +114,7 @@
                         @click.ctrl="select(item, true)"
                         @contextmenu="(element) => showContextMenu(element, item)"
                     >
-                        <advImg contain :src="item" />
+                        <adv-img contain :src="item" />
                     </div>
                 </v-col>
             </v-row>
@@ -203,8 +203,8 @@ export default {
             return remapped
         },
 
-        left () { return this.$store.state.storage.directory.width },
-        right () { return this.$store.state.storage.editor.width },
+        left () { return 280 /*this.$store.state.storage.directory.width*/ },
+        right () { return 0 /*this.$store.state.storage.editor.width*/ },
         width () {
             return window.innerWidth - this.left - this.right
         },

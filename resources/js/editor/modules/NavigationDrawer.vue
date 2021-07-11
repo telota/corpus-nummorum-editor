@@ -148,7 +148,7 @@ export default {
                     { text: this.$root.label('object_groups'),    icon: 'control_camera',     name: 'objectgroups' },
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          name: 'bibliography' },
                     { text: this.$root.label('file_browser'),     icon: 'folder_open',        name: 'files' },
-                    //{ text: this.$root.label('storage_browser'),     icon: 'folder_open',        name: 'storage' },
+                    { text: this.$root.label('storage_browser'),     icon: 'folder_open',        name: 'storage' },
                     { text: this.$root.label('SPARQL'),     icon: 'auto_awesome',        name: 'sparql' },
                     //{ text: this.$root.label('broken_links'),     icon: 'link_off',           name: 'brokenlinks' }
                 ]}

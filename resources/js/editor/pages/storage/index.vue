@@ -1,104 +1,108 @@
 <template>
-    <div>
+<div class="d-flex">
 
-        <!-- Header -->
-        <div id="browser-header">
-            <v-card tile raised class="pl-2 d-flex align-center" height="70px">
+    <!-- Tree -->
+    <div style="width: 220px; z-index: 101" class="mr-5">
+        <directories
+            :currentDir="currentDir"
+            v-on:setPath="setCurrentPath"
+        />
+    </div>
 
-                <!-- Breadcrumbs
-                <breadcrumbs
-                    :directory="currentDir"
-                    boxed
-                    :height="50"
-                    v-on:setPath="setCurrentPath"
-                />-->
+    <div style="width: 100%">
 
-                <!-- Search -->
-                <div
-                    class="d-flex align-center pa-2 ml-2 innerShadow"
-                    style="border: 1px solid black; height: 50px;"
-                    :style="'width:' + searchInputWidth + 'px'"
-                >
-                    <v-icon v-text="'search'" />
-                    <input
-                        id="galery-filter"
-                        name="galery-filter"
-                        v-model="searchFile"
-                        placeholder="Dateinamen filtern"
-                        class="ml-1"
-                        style="border: 0; outline: none; width: 100%;"
-                    />
-                    <v-fade-transition>
-                        <v-icon
-                            v-if="searchFile"
-                            v-text="'clear'"
-                            @click="searchFile = null"
-                        />
-                    </v-fade-transition>
-                </div>
+        <!-- Toolbar -->
+        <v-card tile raised class="pl-2 d-flex align-center grey_sec" :height="50" style="z-index:100">
 
-                <!-- Global Search
-                <globalsearch v-on:setPath="setCurrentPath">
-                    <template v-slot:activator="slot">
-                        <advbtn
-                            icon="travel_explore"
-                            :disabled="directoryLoading"
-                            tooltip="Globale Suche"
-                            large
-                            v-on:click="slot.controls.active = true"
-                        />
-                    </template>
-                </globalsearch> -->
-
-                <!-- Upload
-                <upload :directory="currentDir" v-on:update="setFileIndex">
-                    <template v-slot:activator="slot">
-                        <advbtn
-                            icon="cloud_upload"
-                            :tooltip="'upload Files to current Directory (/' + currentDir + ')'"
-                            :disabled="!currentDir || directoryLoading"
-                            large
-                            v-on:click="slot.controls.active = true"
-                        />
-                    </template>
-                </upload> -->
-
-                <!-- Refresh -->
-                <advbtn
-                    icon="sync"
-                    :loading="$store.state.storage.files.loading"
-                    :disabled="!currentDir || directoryLoading"
-                    tooltip="Refresh File Index"
-                    large
-                    v-on:click="setFileIndex()"
-                />
-
-            </v-card>
-        </div>
-
-
-        <!-- Window -->
-        <div id="browser-container">
-            <directories
-                :currentDir="currentDir"
+            <!-- Breadcrumbs-->
+            <breadcrumbs
+                :directory="currentDir"
+                :height="50"
                 v-on:setPath="setCurrentPath"
             />
+            <v-spacer />
 
-            <!--<v-fade-transition>
+            <!-- Upload -->
+            <upload :directory="currentDir" v-on:update="setFileIndex">
+                <template v-slot:activator="slot">
+                    <adv-btn
+                        icon="cloud_upload"
+                        :tooltip="'upload Files to current Directory (/' + currentDir + ')'"
+                        :disabled="!currentDir || directoryLoading"
+                        v-on:click="slot.controls.active = true"
+                    />
+                </template>
+            </upload>
 
-                <galery
-                    :currentDir="currentDir"
-                    :currentFile="currentFile"
-                    :search="searchFile"
-                    :selected="selectedFiles"
-                    v-on:setPath="setCurrentPath"
-                    v-on:selectFile="selectFile"
+            <!-- Refresh -->
+            <adv-btn
+                icon="sync"
+                :loading="$store.state.storage.files.loading"
+                :disabled="!currentDir || directoryLoading"
+                tooltip="Refresh File Index"
+                v-on:click="setFileIndex()"
+            />
+
+            <!-- Search -->
+            <div class="pl-2 pr-3" :style="'width:' + searchInputWidth + 'px'">
+                <v-text-field
+                    dense clearable
+                    v-model="searchFile"
+                    placeholder="Dateien filtern"
+                    class="mb-n3"
                 />
+            </div>
+            <!--<v-icon v-text="'search'" />
+            <div
+                class="d-flex align-center pa-2 ml-2"
+                style="height: 44px;"
+                :style="'width:' + searchInputWidth + 'px; border-bottom: 1px solid ' + ($vuetify.theme.dark ? 'white' : 'black')"
+            >
+                <input
+                    id="galery-filter"
+                    name="galery-filter"
+                    v-model="searchFile"
+                    placeholder="Dateinamen filtern"
+                    class="ml-1"
+                    style="border: 0; outline: none; width: 100%; padding: 5px; line-height: 20px;"
+                />
+                <v-fade-transition>
+                    <v-icon
+                        v-if="searchFile"
+                        v-text="'clear'"
+                        @click="searchFile = null"
+                    />
+                </v-fade-transition>
+            </div>-->
 
-            </v-fade-transition>-->
+            <!-- Global Search
+            <globalsearch v-on:setPath="setCurrentPath">
+                <template v-slot:activator="slot">
+                    <advbtn
+                        icon="travel_explore"
+                        :disabled="directoryLoading"
+                        tooltip="Globale Suche"
+                        large
+                        v-on:click="slot.controls.active = true"
+                    />
+                </template>
+            </globalsearch> -->
+
+        </v-card>
+
+        <div style="width: 100%">
+            <galery
+                :currentDir="currentDir"
+                :currentFile="currentFile"
+                :search="searchFile"
+                :selected="selectedFiles"
+                v-on:setPath="setCurrentPath"
+                v-on:selectFile="selectFile"
+            />
         </div>
-
     </div>
+
+</div>
 </template>
 
 
@@ -132,7 +136,7 @@ export default {
         directoryLoading () { return this.$store.state.storage.directory?.loading },
         directories ()      { return this.$store.state.storage.directory?.items },
         searchInputWidth () {
-            if (this.$vuetify.breakpoint.lgAndUp) return 300
+            if (this.$vuetify.breakpoint.lgAndUp) return 250
             if (this.$vuetify.breakpoint.mdAndUp) return 200
             return 100
         },

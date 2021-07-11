@@ -9,7 +9,7 @@
         tile
         width="800px"
     >
-        <v-card tile class="grey lighten-1" height="75vH">
+        <v-card tile height="75vH">
             <!-- Sysbar -->
             <dialogbartop
                 icon="cloud_upload"
@@ -20,7 +20,7 @@
             ></dialogbartop>
 
             <!-- Toolbar -->
-            <v-card tile class="d-flex align-center">
+            <v-card tile class="grey_sec d-flex align-center">
 
                 <!-- File Browser -->
                 <v-btn
@@ -196,7 +196,7 @@
                     :dis-bench="3"
                 >
                     <template v-slot:default="{ item, index }">
-                        <v-card tile style="padding:10px; margin: 10px 15px 10px 15px">
+                        <v-card tile class="grey_sec" style="padding:10px; margin: 10px 15px 10px 15px">
                             <div class="d-flex">
                                 <v-responsive class="grey lighten-3 d-flex align-center" width="90" aspect-ratio="1">
                                     <v-img
@@ -239,7 +239,7 @@
             <!-- Footer -->
             <div>
                 <!-- Upload Options -->
-                <div class="pa-2 white">
+                <div class="pa-2 grey_prim">
                     <!-- Remarks -->
                     <div class="caption">
                         Maximale Größe pro Datei: <b>{{ maxSize.value }}&nbsp;MB</b>.
@@ -377,12 +377,20 @@ export default {
     },
 
     methods: {
+        constructAxiosURL (path, id = null) {
+            path = path.trim()
+            if (path.slice(0, 4) !== 'http') path = this.$root.baseURL + (path.slice(0, 1) === '/' ? '' : '/') + path
+            if (path.slice(-1) === '/') path = path.slice(0, -1)
+            if (id) path += (path.slice(0, 1) === '/' ? '' : '/' ? '/' : '') + id
+            return path
+        },
+
         async uploadData () {
             const self = this
             const files = this.files?.[0] ? this.files : []
 
             if (files[0]) {
-                const url = this.$root.constructAxiosURL('storage-api/action/upload')
+                const url = this.constructAxiosURL('storage-api/action/upload')
                 let count = 0
                 let size = this.uploadStats.total.size = this.uploadStats.done.size = 0
 
@@ -524,7 +532,7 @@ export default {
                         originalFileName: file.name,
                         size: file.size,
                         type: file.type,
-                        modified: this.$f.format.date(null, file.lastModified),
+                        modified: null,
                         email: this.$root.user.email,
                         public: this.dirIsPublic
                     }
