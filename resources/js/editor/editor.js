@@ -288,17 +288,17 @@ const editor = new Vue({
             this.greeting();
         },*/
 
-        async changePresets (key, value) {
+        async changeSettings (key, value) {
             this.loading = true
 
-            console.log('PRESETS: update \'' + key + '\' (' + value + ')')
-            this.presets[key] = value
+            console.log('Settings: updating "' + key + '" => "' + value + '"')
+            this.settings[key] = value
 
-            if (key === 'color_theme') { this.$vuetify.theme.dark = this.presets.color_theme === 1 ? true : false }
-            else if (key === 'language') { this.language = this.presets.language}
+            if (key === 'color_theme') { this.$vuetify.theme.dark = this.settings.color_theme === 1 ? true : false }
+            else if (key === 'language') { this.language = this.settings.language}
 
-            const response = await this.DBI_INPUT_POST('dashboard', 'input', this.presets);
-            if (response.success) { this.snackbar('Presets updated!', 'success'); }
+            const response = await this.DBI_INPUT_POST('dashboard', 'input', this.settings);
+            if (response.success) { this.snackbar('Settings updated!', 'success'); }
 
             this.loading = false
         },

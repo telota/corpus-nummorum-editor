@@ -62,7 +62,7 @@ class AppController extends Controller {
                 'sparql'    => config('dbi.url.sparql'),
                 'language'  => $auth->language ?? (substr(Request::server('HTTP_ACCEPT_LANGUAGE'), 0, 2) === 'de' ? 'de' : 'en'),
                 'user'      => $user,
-                'settings'  => $auth->settings ?? [],
+                'settings'  => empty($auth->settings) ? [] : json_decode($auth->settings, true),
                 'log'       => $log,
                 'system'    => $system
             ]]);

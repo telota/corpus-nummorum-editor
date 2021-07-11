@@ -1,17 +1,16 @@
 <template>
 <div id="app-header">
-    <!-- Snack
-    <v-card tile raised height="">
-    <div class="d-flex justify-center align-center" style="height: 40px">
-        <v-fade-transition>
-            <div
-                v-if="snackMessage"
-                class="pl-2 pr-2 caption font-weight-medium text-truncate"
-                v-text="snackMessage"
-                :class="snackColor"
-            />
-        </v-fade-transition>
-    </div>-->
+    <!-- Snack -->
+    <v-fade-transition>
+        <div
+            v-if="snackMessage"
+            class="pl-2 pr-2 d-flex align-center justify-center"
+            :class="snackColor"
+            style="position: fixed; left: 50%; margin-left: -150px; z-index: 102; height: 40px; width: 300px;"
+        >
+            <div class="caption font-weight-medium text-truncate" v-html="snackMessage" />
+        </div>
+    </v-fade-transition>
 
     <div class="header_bg d-flex align-end" style="height: 40px">
 
@@ -29,66 +28,67 @@
         </a>
 
         <!-- Navigation -->
-        <v-menu
-            v-for="(route, r) in routes"
-            :key="'route' + r"
-            offset-y
-            open-on-hover
-            tile
-        >
-            <template v-slot:activator="{ on, attrs }">
-                <v-hover v-slot="{ hover }">
-                    <div
-                        v-bind="attrs"
-                        v-on="on"
-                        class="pr-2 pl-2 d-flex align-end"
-                        :class="hover ? 'header_hover' : ''"
-                        style="height: 40px; padding-bottom: 3px"
-                    >
-                        <div v-text="route.text" />
-                    </div>
-                </v-hover>
-            </template>
-
-            <v-card
+        <template v-for="(route, r) in routes">
+            <v-menu
+                :key="'route' + r"
+                offset-y
+                open-on-hover
                 tile
-                class="header_bg"
-                :max-width="400"
-                :min-width="200"
             >
-                <v-hover
-                    v-for="(item, i) in route.children"
-                    :key="'route' + r + '.' + i"
-                    v-slot="{ hover }"
+                <template v-slot:activator="{ on, attrs }">
+                    <v-hover v-slot="{ hover }">
+                        <div
+                            v-bind="attrs"
+                            v-on="on"
+                            class="pr-2 pl-2 d-flex align-end"
+                            :class="hover ? 'header_hover' : ''"
+                            style="height: 40px; padding-bottom: 3px"
+                        >
+                            <div v-text="route.text" />
+                        </div>
+                    </v-hover>
+                </template>
+
+                <v-card
+                    tile
+                    class="header_bg"
+                    :max-width="400"
+                    :min-width="200"
                 >
-                    <a
-                        v-if="item.link"
-                        :href="item.link.startsWith('http') ? item.link : ('/editor#/' + item.link)"
-                        :target="item.link.startsWith('http') ? '_blank' : ''"
+                    <v-hover
+                        v-for="(item, i) in route.children"
+                        :key="'route' + r + '.' + i"
+                        v-slot="{ hover }"
                     >
-                        <div
-                            class="d-flex align-center pa-2 invert--text"
-                            :class="(hover ? 'header_hover' : '') + ($route.name === item.link ? ' blue_sec--text' : '')"
-                            :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                        <a
+                            v-if="item.link"
+                            :href="item.link.startsWith('http') ? item.link : ('/editor#/' + item.link)"
+                            :target="item.link.startsWith('http') ? '_blank' : ''"
                         >
-                            <v-icon class="mr-2" v-text="item.icon" :color="$route.name === item.link ? 'blue_sec' : ''" />
-                            <div v-text="item.text" />
+                            <div
+                                class="d-flex align-center pa-2 invert--text"
+                                :class="(hover ? 'header_hover' : '') + ($route.name === item.link ? ' blue_sec--text' : '')"
+                                :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                            >
+                                <v-icon class="mr-2" v-text="item.icon" :color="$route.name === item.link ? 'blue_sec' : ''" />
+                                <div v-text="item.text" />
+                            </div>
+                        </a>
+                        <div v-else-if="item.action">
+                            <div
+                                class="d-flex align-center pa-2 invert--text"
+                                :class="(hover ? 'header_hover' : '')"
+                                :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                                @click="item.action"
+                            >
+                                <v-icon class="mr-2" v-text="item.icon" />
+                                <div v-text="item.text" />
+                            </div>
                         </div>
-                    </a>
-                    <div v-else-if="item.action">
-                        <div
-                            class="d-flex align-center pa-2 invert--text"
-                            :class="(hover ? 'header_hover' : '')"
-                            :style="'cursor:' + (hover ? 'pointer' : 'default')"
-                            @click="item.action"
-                        >
-                            <v-icon class="mr-2" v-text="item.icon" />
-                            <div v-text="item.text" />
-                        </div>
-                    </div>
-                </v-hover>
-            </v-card>
-        </v-menu>
+                    </v-hover>
+                </v-card>
+            </v-menu>
+        </template>
 
 
         <v-spacer />
@@ -119,8 +119,6 @@
 
     </div>
     <v-progress-linear :indeterminate="$root.loading" height="1" />
-
-    <!--<v-card tile style="position: fixed; top: 0; width: 100%; height: 50px;" />-->
 </div>
 </template>
 
@@ -136,12 +134,23 @@ export default {
     computed: {
         user () { return this.$root.user },
         snackMessage () { return this.$store.state.snack?.message ?? null },
-        snackColor () { return this.$store.state.snack?.color ? (this.$store.state.snack.color + '--text') : '' },
+        snackColor () { return this.$store.state.snack?.color ? (this.$store.state.snack.color) : 'header_bg' },
         rank () {
             return this.$root.user?.level ? this.$root.user.level : 10
         },
         routes (){
             const routes = [
+                { text: this.$root.label('types'),         icon: 'blur_circular',               children: [
+                    { text: this.$root.label('types_search'),     icon: 'search',             link: 'types/search' },
+                    { text: this.$root.label('types_new'),        icon: 'add_circle_outline', link: 'types/edit' },
+                    { text: this.$root.label('types_import'),     icon: 'arrow_circle_down',  link: 'types/import' }
+                ]},
+                { text: this.$root.label('coins'),         icon: 'copyright',               children: [
+                    { text: this.$root.label('coins_search'),     icon: 'search',             link: 'coins/search' },
+                    { text: this.$root.label('coins_new'),        icon: 'add_circle_outline', link: 'coins/edit' },
+                    { text: this.$root.label('coins_upload'),     icon: 'drive_folder_upload',link: 'storage/coin-images' },
+                    { text: this.$root.label('coins_import'),     icon: 'arrow_circle_down',  link: 'coins/import' }
+                ]},
                 //null,
                 { text: this.$root.label('Features'),         icon: 'info',               children: [
                     { text: this.$root.label('designs'),          icon: 'notes',              link: 'designs' },
@@ -167,9 +176,10 @@ export default {
                     { text: this.$root.label('hoards'),           icon: 'grain',              link: 'hoards' }
                 ]},
                 { text: this.$root.label('tools'),            icon: 'build_circle',       children: [
-                    { text: this.$root.label('file_browser'),     icon: 'folder_open',        link: 'files' },
+                    //{ text: this.$root.label('file_browser'),     icon: 'folder_open',        link: 'files' },
                     { text: this.$root.label('file_manager'),     icon: 'folder_open',        link: 'storage' },
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          link: 'bibliography' },
+                    { text: this.$root.label('zotero'),           icon: 'auto_stories',       link: 'https://www.zotero.org/groups/163139/thrakien/library' },
                     { text: this.$root.label('object_groups'),    icon: 'control_camera',     link: 'objectgroups' },
                     { text: this.$root.label('SPARQL'),           icon: 'auto_awesome',       link: 'sparql' },
                 ]}
@@ -199,6 +209,7 @@ export default {
                 ]})
             }
 
+            //routes.push(null)
             routes.push({ text: 'Hilfe',  icon: 'info',  children: [
                 { text: 'Wiki',         icon: 'help_outline',           link: this.$root.baseURL + '/wiki' },
                 { text: 'Nomisma',      icon: 'monetization_on',        link: 'http://nomisma.org' },

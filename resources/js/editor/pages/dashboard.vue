@@ -14,7 +14,7 @@
             <v-row class="pa-0 ma-0">
 
                 <!-- Entities -->
-                <v-col v-for="resource in ['types', 'coins']" :key="resource" cols="12" sm="6" md="3">
+                <v-col v-for="resource in ['types', 'coins']" :key="resource" cols="12" sm="6" md="4">
                     <!-- Quicksearch -->
                     <v-card tile class="appbar mb-5">
                         <v-card-title class="mb-1">
@@ -89,8 +89,35 @@
                     </v-card>
                 </v-col>
 
-                <!-- CN -->
-                <v-col cols="12" sm="6" md="3">
+                <!-- Statistics -->
+                <v-col cols="12" sm="6" md="4">
+                    <v-card tile class="mb-5">
+                        <v-card-title class="ma-0 component-wrap d-flex align-end">
+                            <div v-text="labels['statistics_personal']"></div>
+                            <v-spacer></v-spacer>
+                            <div class="caption" v-html="'(up-to-date)'"></div>
+                        </v-card-title>
+
+                        <v-expand-transition>
+                            <v-card-text v-if="data.statistics">
+                                <v-simple-table dense>
+                                    <template v-for="(e) in ['types', 'coins']">
+                                        <tr :key="'all' + e">
+                                            <td :class="td_key" v-text="labels[e]"></td>
+                                            <td :class="td_val" v-text="num(data.statistics.user[e + '_all'])" :title="$root.label('all')"></td>
+                                            <td :class="td_val" v-text="num(data.statistics.user[e + '_pub'])" :title="$root.label('published')"></td>
+                                            <td :class="td_val" v-html="percentage(data.statistics.user[e + '_pub'], data.statistics.user[e + '_all'])"></td>
+                                        </tr>
+                                        <tr :key="'increase' + e">
+                                            <td v-text="labels['increase'] + ' (30d)'"></td>
+                                            <td :class="td_val" v-text="data.statistics.user[e + '_trend']"></td>
+                                        </tr>
+                                    </template>
+                                </v-simple-table>
+                            </v-card-text>
+                        </v-expand-transition>
+                    </v-card>
+
                     <v-card tile>
                         <v-card-title class="ma-0 component-wrap d-flex align-end">
                             <div v-text="labels['statistics_general']"></div>
@@ -160,43 +187,9 @@
                     </v-card>
                 </v-col>
 
-                <!-- About you -->
-                <v-col cols="12" sm="6" md="3">
-                    <v-card tile class="mb-5">
-                        <v-card-title class="ma-0 component-wrap d-flex align-end">
-                            <div v-text="labels['statistics_personal']"></div>
-                        </v-card-title>
+                <!-- About you
+                <v-col cols="12" sm="6" md="4">
 
-                        <v-expand-transition>
-                            <v-card-text v-if="data.statistics">
-                                <v-simple-table dense>
-                                    <tr>
-                                        <td :class="td_key" v-text="labels['joined_at']"></td>
-                                        <td :class="td_val" v-text="$editor_format.date(l, data_user.created_at, true)" colspan="3"></td>
-                                    </tr>
-                                    <tr>
-                                        <td :class="td_key" v-text="labels['login_last']"></td>
-                                        <td :class="td_val" v-text="data_user.last_login ? $editor_format.date(l, data_user.last_login, true) : 'newly registered'" colspan="3"></td>
-                                    </tr>
-                                    <tr>
-                                        <td>&ensp;</td>
-                                    </tr>
-                                    <template v-for="(e) in ['types', 'coins']">
-                                        <tr :key="'all' + e">
-                                            <td :class="td_key" v-text="labels[e]"></td>
-                                            <td :class="td_val" v-text="num(data.statistics.user[e + '_all'])" :title="$root.label('all')"></td>
-                                            <td :class="td_val" v-text="num(data.statistics.user[e + '_pub'])" :title="$root.label('published')"></td>
-                                            <td :class="td_val" v-html="percentage(data.statistics.user[e + '_pub'], data.statistics.user[e + '_all'])"></td>
-                                        </tr>
-                                        <tr :key="'increase' + e">
-                                            <td v-text="labels['increase'] + ' (30d)'"></td>
-                                            <td :class="td_val" v-text="data.statistics.user[e + '_trend']"></td>
-                                        </tr>
-                                    </template>
-                                </v-simple-table>
-                            </v-card-text>
-                        </v-expand-transition>
-                    </v-card>
 
                     <v-card tile>
                         <v-card-title>
@@ -244,7 +237,7 @@
                             </v-card-text>
                         </v-expand-transition>
                     </v-card>
-                </v-col>
+                </v-col>-->
 
             </v-row>
         </template>

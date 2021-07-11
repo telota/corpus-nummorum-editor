@@ -93,7 +93,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Dashboard
         Route::get  ('/dashboard',          'DashboardController@data');
-        Route::post ('/dashboard/input',    'DashboardController@update_presets');
+        Route::post ('/dashboard/input',    'DashboardController@updateSettings');
 
         // Import
         Route::post ('/import/{entity}',    'import\ImportController@parse');

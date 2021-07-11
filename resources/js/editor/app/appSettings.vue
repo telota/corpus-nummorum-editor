@@ -32,6 +32,7 @@ export default {
 
                 this.$root.user     = data.user
                 this.$root.settings = data.settings
+                if (this.$root.settings?.color_theme === 0) this.$vuetify.theme.dark = false
                 this.$root.log      = data.log
                 this.$root.system   = data.system
 
@@ -53,10 +54,10 @@ export default {
             const currentdate = new Date()
             const hour        = currentdate.getHours()
 
-            if      ( hour > 4 && hour < 12)    { message = 'Good Morning!' }
-            else if ( hour > 11 && hour < 17)   { message = 'Good Afternoon!' }
-            else if ( hour > 16 && hour < 23)   { message = 'Good Evening!' }
-            else                                { message = 'Pretty late, isn\'t it?'}
+            if      ( hour > 4 && hour < 12)    { message = 'Good Morning, ' + this.$root.user.fullname + '!' }
+            else if ( hour > 11 && hour < 17)   { message = 'Good Afternoon, ' + this.$root.user.fullname + '!' }
+            else if ( hour > 16 && hour < 23)   { message = 'Good Evening, ' + this.$root.user.fullname + '!' }
+            else                                { message = 'Pretty late, isn\'t it, ' + this.$root.user.fullname + '?'}
 
             if (message) this.$store.dispatch('showSnack', { message })
         }

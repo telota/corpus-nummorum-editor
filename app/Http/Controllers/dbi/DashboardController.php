@@ -7,6 +7,7 @@ use Response;
 use Request;
 use DB;
 use Auth;
+use App\Models\User;
 
 
 class DashboardController extends Controller {
@@ -15,9 +16,9 @@ class DashboardController extends Controller {
 
         $date_30    = date('Y-m-d H:i:s', strtotime('-30 days') );
         $id_user    = Auth::user()->id;
-        
+
         $publication_state = [
-            'all' => '!= 3', 
+            'all' => '!= 3',
             'pub' => '= 1'
         ];
 
@@ -25,20 +26,20 @@ class DashboardController extends Controller {
         foreach (['types', 'coins'] AS $entity) {
             foreach ($publication_state AS $key => $val) {
                 $select_user[] = '\''.$entity.'_'.$key.'\',  (
-                    SELECT COUNT(id) 
-                    FROM cn_data.data_'.$entity.' 
+                    SELECT COUNT(id)
+                    FROM cn_data.data_'.$entity.'
                     WHERE publication_state '.$val.' && id_creator = '.$id_user.'
                 )';
             }
             $select_user[] = '\''.$entity.'_trend\',  (
-                SELECT COUNT(id) 
-                FROM cn_data.data_'.$entity.' 
+                SELECT COUNT(id)
+                FROM cn_data.data_'.$entity.'
                 WHERE publication_state != 3 && id_creator = '.$id_user.' && created_at > \''.$date_30.'\'
             )';
         }
 
         // Get statistics
-        $statistics = DB::table ('cn_app.app_daily_statistics') 
+        $statistics = DB::table ('cn_app.app_daily_statistics')
             -> select([
                 DB::raw('(SELECT JSON_OBJECT(\'user\', JSON_OBJECT( '.implode(",\n", $select_user).' ))) AS user'),
                 'data AS data',
@@ -57,7 +58,7 @@ class DashboardController extends Controller {
         $dbi['statistics'] = array_merge($statistics1, $statistics2);
         $dbi['statistics_date'] = $statistics['date'];
 
-        
+
         // Get latest coins, types edited by User
         foreach (['coins', 'types'] AS $resource) {
             $query = DB::table ('cn_data.data_'.$resource.' AS b')
@@ -69,7 +70,7 @@ class DashboardController extends Controller {
                     'b.updated_at AS updated_at'
                 ])
                 -> where([['b.id_editor', $id_user]])
-                -> where([['b.publication_state', 0]])                   
+                -> where([['b.publication_state', 0]])
                 -> orWhere(function ($subquery) use ($id_user) {
                     $subquery -> where([['b.id_creator', $id_user], ['b.id_editor', null]]);
                 })
@@ -79,7 +80,7 @@ class DashboardController extends Controller {
                 -> offset(0)
                 -> limit(10)
                 -> get();
-            
+
             $dbi['activities']['latest_'.$resource] = json_decode($query, true);
         }
 
@@ -87,22 +88,18 @@ class DashboardController extends Controller {
     }
 
 
-    public function update_presets () {
+    public function updateSettings () {
 
-        $id_user    = Auth::user() ->id;
-        $input      = Request::post();
+        $user   = Auth::user();
+        $input  = Request::post();
+        $language = empty($input['language']) ? $user->language : $input['language'];
+        unset($input['language']);
 
-        DB::table ('cn_app.app_editor_users_presets')
-            -> updateOrInsert(
-                ['id' => $id_user],
-                [
-                    'language'      => $input ['language'],
-                    'color_theme'   => $input ['color_theme']
-                ]
-            );
+        User::where('id', $user->id)->update([
+            'language' => $language,
+            'settings' => $input
+        ]);
 
-        $feedback = 'Your Presets have been updated.';
-        
-        return ( Response::json (array ('success' => config ('cn_admin_feedback.ok_updated') . $feedback)) );
+        return Response::json(['success' => 'Settings updated.']);
     }
 }
