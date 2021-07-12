@@ -11,6 +11,22 @@ a {
     text-decoration: none;
 }
 
+#app-snack {
+    position: fixed;
+    left: 50%;
+    margin-left: -200px;
+    z-index: 102;
+    height: 40px;
+    width: 400px;
+    background: linear-gradient(
+        to right,
+        rgba(0,0,0,0) 0%,
+        rgba(255, 255, 255, 1) 12.5%,
+        rgba(255, 255, 255, 1) 87.5%,
+        rgba(0,0,0,0) 100%
+    );
+}
+
 #routed-component {
     position:fixed;
     top: 40px;

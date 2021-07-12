@@ -60,25 +60,25 @@ class DashboardController extends Controller {
 
 
         // Get latest coins, types edited by User
+        date_default_timezone_set('Europe/Berlin');
+        $offset = date('P');
+
         foreach (['coins', 'types'] AS $resource) {
             $query = DB::table ('cn_data.data_'.$resource.' AS b')
                 -> leftJoin ('cn_data.data_mints AS m', 'm.id', '=', 'b.id_mint')
                 -> select ([
                     'b.id AS id',
                     'm.nomisma_id as mint',
-                    'b.created_at AS created_at',
-                    'b.updated_at AS updated_at'
+                    DB::Raw('CONVERT_TZ(IFNULL(b.updated_at, b.created_at), "+00:00", "'.$offset.'") AS date')
                 ])
-                -> where([['b.id_editor', $id_user]])
-                -> where([['b.publication_state', 0]])
-                -> orWhere(function ($subquery) use ($id_user) {
-                    $subquery -> where([['b.id_creator', $id_user], ['b.id_editor', null]]);
+                -> whereIn('b.publication_state', [0, 2])
+                -> where(function ($subquery) use ($id_user) {
+                    $subquery -> orWhere([['b.id_editor', $id_user]]);
+                    $subquery -> orWhere([['b.id_creator', $id_user], ['b.id_editor', null]]);
                 })
-                -> orderBy(DB::RAW('b.updated_at IS NULL'), 'DESC')
-                -> orderBy('b.updated_at', 'DESC')
-                -> orderBy('b.created_at', 'DESC')
+                -> orderByRaw('b.updated_at IS NULL DESC, b.updated_at DESC, b.created_at DESC')
                 -> offset(0)
-                -> limit(10)
+                -> limit(20)
                 -> get();
 
             $dbi['activities']['latest_'.$resource] = json_decode($query, true);

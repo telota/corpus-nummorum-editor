@@ -298,7 +298,7 @@ const editor = new Vue({
             else if (key === 'language') { this.language = this.settings.language}
 
             const response = await this.DBI_INPUT_POST('dashboard', 'input', this.settings);
-            if (response.success) { this.snackbar('Settings updated!', 'success'); }
+            if (response.success) { this.$store.dispatch('showSnack', { message: 'Presets updated', color: 'success' }) }
 
             this.loading = false
         },

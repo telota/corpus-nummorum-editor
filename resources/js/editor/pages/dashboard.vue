@@ -2,21 +2,19 @@
 <div>
     <component-toolbar>
         <template v-slot:toolbar>
-                <div
-                    class="pa-4 d-flex justify-center title"
-                    v-text="labels['welcome' + (data_user.last_login ? '_back' : '')] + ', ' + data_user.fullname + '!'"
-                ></div>
+            <div v-text="'test'" />
+            <div v-text="'test'" />
         </template>
     </component-toolbar>
 
     <component-content>
         <template v-slot:content>
-            <v-row class="pa-0 ma-0">
+            <v-row class="pa-0 ma-0 mt-2">
 
                 <!-- Entities -->
                 <v-col v-for="resource in ['types', 'coins']" :key="resource" cols="12" sm="6" md="4">
                     <!-- Quicksearch -->
-                    <v-card tile class="appbar mb-5">
+                    <v-card tile class="appbar mb-5" height="160">
                         <v-card-title class="mb-1">
                             <div v-text="labels[resource]"></div>
                             <v-spacer></v-spacer>
@@ -32,22 +30,22 @@
                             </a>
                         </v-card-title>
 
-                        <v-card-text class="d-flex component-wrap">
+                        <v-card-text class="d-flex">
                             <v-text-field dense filled outlined clearable
                                 v-model="search[resource]"
                                 :label="'cn ' + resource.slice(0, -1) + ' ID quick search'"
-                                :rules="[$handlers.rules.numeric]"
+                                hint="Number only"
                                 :prepend-icon="resource === 'coins' ? 'copyright' : 'blur_circular'"
                                 class="mr-1"
                             ></v-text-field>
-                            <div v-if="parseInt(search[resource])" class="d-flex component-wrap">
+                            <div v-if="parseInt(search[resource])" class="d-flex">
                                 <a v-for="(icon, link) in search_buttons" :key="link" :href="'/editor#/' + resource + '/' + link + '/' + search[resource]" class="ml-1">
                                     <v-btn icon>
                                         <v-icon v-text="icon"></v-icon>
                                     </v-btn>
                                 </a>
                             </div>
-                            <div v-else class="d-flex component-wrap">
+                            <div v-else class="d-flex">
                                 <v-btn v-for="(icon, link) in search_buttons" :key="link" icon disabled class="ml-1">
                                     <v-icon v-text="icon"></v-icon>
                                 </v-btn>
@@ -63,11 +61,11 @@
                             <v-card-text v-if="data.activities">
                                 <div v-if="data.activities['latest_' + resource].length < 1" v-text="'No unpublished ' + resource + ' edited by you.'"></div>
                                 <div v-else>
-                                    <div v-for="(v) in data.activities['latest_' + resource]" :key="v.id" class="mb-2 d-flex component-wrap align-start">
+                                    <div v-for="(v) in data.activities['latest_' + resource]" :key="v.id" class="mb-2 d-flex   align-start">
                                         <div
                                             class="caption mr-5 mt-1"
                                             style="white-space: nowrap"
-                                            v-text="$editor_format.date(l, (v.updated_at ? v.updated_at : v.created_at), true)"
+                                            v-text="$editor_format.date(l, v.date, true)"
                                         ></div>
                                         <div>
                                             <a
@@ -79,7 +77,7 @@
                                             <span
                                                 v-if="v.mint"
                                                 class="caption"
-                                                v-html="'(' + v.mint.replace('_', ' ') + ')'"
+                                                v-html="'(' + v.mint.replaceAll('_', ' ') + ')'"
                                             ></span>
                                         </div>
                                     </div>
@@ -91,15 +89,15 @@
 
                 <!-- Statistics -->
                 <v-col cols="12" sm="6" md="4">
-                    <v-card tile class="mb-5">
-                        <v-card-title class="ma-0 component-wrap d-flex align-end">
+                    <v-card tile class="mb-5" height="160">
+                        <v-card-title class="ma-0   d-flex align-end">
                             <div v-text="labels['statistics_personal']"></div>
                             <v-spacer></v-spacer>
                             <div class="caption" v-html="'(up-to-date)'"></div>
                         </v-card-title>
 
                         <v-expand-transition>
-                            <v-card-text v-if="data.statistics">
+                            <v-card-text v-if="data.statistics" class="mt-n1">
                                 <v-simple-table dense>
                                     <template v-for="(e) in ['types', 'coins']">
                                         <tr :key="'all' + e">
@@ -119,7 +117,7 @@
                     </v-card>
 
                     <v-card tile>
-                        <v-card-title class="ma-0 component-wrap d-flex align-end">
+                        <v-card-title class="ma-0   d-flex align-end">
                             <div v-text="labels['statistics_general']"></div>
                             <v-spacer></v-spacer>
                             <div class="caption" v-html="'(' + $editor_format.date(l, data.statistics_date) + ')'"></div>
@@ -284,9 +282,9 @@ export default {
 
     methods: {
         async getData () {
-            this.loading    = true
+            this.$root.loading    = true
             this.data       = await this.$root.DBI_SELECT_GET('dashboard')
-            this.loading    = false
+            this.$root.loading    = false
         },
 
         num (number) {

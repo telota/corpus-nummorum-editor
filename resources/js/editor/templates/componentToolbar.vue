@@ -1,10 +1,9 @@
 <template>
 <div class="component-toolbar header_bg">
     <div v-if="!flat" class="component-toolbar component-toolbar-shadow" />
-    <slot
-        name="toolbar"
-        dis-v-bind:item="item"
-    />
+    <div :class="styling" style="width: 100%; height: 50px;">
+        <slot name="toolbar" />
+    </div>
 </div>
 </template>
 
@@ -12,27 +11,30 @@
 <script>
 
 export default {
-    data () {
+    /* data () {
         return {
-            item: {}
         }
-    },
+    },*/
 
     props: {
-        flat: { type: Boolean, default: false }
+        flat: { type: Boolean, default: false },
+        noFlex: { type: Boolean, default: false }
     },
 
     computed: {
-    },
-
-    watch: {
-        $route (to, from) {
-            if (this.$route.params.id) { this.getSingleItem(this.$route.params.id) }
+        styling () {
+            return this.noFlex ? '' : 'd-flex align-center'
         }
     },
 
-    methods: {
-    }
+    watch: {
+        /*$route (to, from) {
+            if (this.$route.params.id) { this.getSingleItem(this.$route.params.id) }
+        }*/
+    },
+
+    /*methods: {
+    }*/
 }
 
 </script>

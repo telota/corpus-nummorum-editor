@@ -4,25 +4,41 @@
     <v-fade-transition>
         <div
             v-if="snackMessage"
-            class="pl-2 pr-2 d-flex align-center justify-center"
-            :class="snackColor"
-            style="position: fixed; left: 50%; margin-left: -150px; z-index: 102; height: 40px; width: 300px;"
+            class=" d-flex align-center justify-center"
+            :style="[
+                'position: fixed',
+                'left: 50%',
+                'margin-left: -250px',
+                'z-index: 102',
+                'height: 40px',
+                'width: 500px',
+                'background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(' + snackBg + ',1) 20%, rgba(' + snackBg + ',1) 80%, rgba(0,0,0,0) 100%)'
+            ].join(';\n')"
         >
-            <div class="caption font-weight-medium text-truncate" v-html="snackMessage" />
+            <div
+                :class="snackColor"
+                class="pl-2 pr-2 caption font-weight-medium text-truncate text-center"
+                v-html="snackMessage"
+                style="width: 300px;"
+            />
         </div>
     </v-fade-transition>
 
-    <div class="header_bg d-flex align-end" style="height: 40px">
+    <div class="header_bg d-flex align-center" style="height: 40px; width: 100%;">
 
         <!-- App Name -->
         <a href="/editor#/dashboard" class="invert--text">
             <v-hover v-slot="{ hover }">
                 <div
-                    class="pl-3 pr-3 d-flex align-end"
+                    class="pl-3 pr-3 d-flex align-center"
                     :class="hover ? 'header_hover' : ''"
-                    style="height: 40px; cursor: pointer; padding-bottom: 3px"
+                    style="height: 40px; cursor: pointer;"
+
                 >
-                    <div v-text="'CN'" style="font-size: 30px; line-height: 30px" />
+                    <div
+                        :class="($vuetify.theme.dark ? 'white' : 'black') + '--text'"
+                        style="font-size: 24px; line-height: 24px;" v-text="'CN'"
+                    />
                 </div>
             </v-hover>
         </a>
@@ -40,11 +56,12 @@
                         <div
                             v-bind="attrs"
                             v-on="on"
-                            class="pr-2 pl-2 d-flex align-end"
+                            class="pr-2 pl-2 d-flex align-center"
                             :class="hover ? 'header_hover' : ''"
-                            style="height: 40px; padding-bottom: 3px"
+                            style="height: 40px;"
                         >
-                            <div v-text="route.text" />
+                            <div v-if="$vuetify.breakpoint.mdAndUp" v-text="route.text" />
+                            <v-icon v-else :small="$vuetify.breakpoint.xsOnly" v-text="route.icon" />
                         </div>
                     </v-hover>
                 </template>
@@ -118,6 +135,8 @@
         />
 
     </div>
+
+    <!-- Loading -->
     <v-progress-linear :indeterminate="$root.loading" height="1" />
 </div>
 </template>
@@ -132,9 +151,18 @@ export default {
         }
     },
     computed: {
-        user () { return this.$root.user },
-        snackMessage () { return this.$store.state.snack?.message ?? null },
-        snackColor () { return this.$store.state.snack?.color ? (this.$store.state.snack.color) : 'header_bg' },
+        user () {
+            return this.$root.user
+        },
+        snackMessage () {
+            return this.$store.state.snack?.message ?? null
+        },
+        snackColor () {
+            return (this.$store.state.snack?.color ? this.$store.state.snack.color : 'invert') + '--text'
+        },
+        snackBg () {
+            return this.$vuetify.theme.dark ? '54,54,54' : '230,230,230'
+        },
         rank () {
             return this.$root.user?.level ? this.$root.user.level : 10
         },

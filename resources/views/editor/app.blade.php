@@ -32,22 +32,27 @@
 <body>
 
     <!-- Initial Loading Screen -->
-    <div class="loader">
-        <div class="loader-background-gradient">
-            <div class="loader-text"><b>CN</b> Editor</div>
-            <div class="loader-spinner"></div>
+    <div id="initial-loader">
+        <div class="loader-symbol">
+            <div class="loader-circle"></div>
+            <div class="loader-mask"></div>
+            <div class="loader-text">
+                <span class="loader-text-main">CN</span><br/>
+                <span class="loader-text-sub">Editor</span>
+            </div>
         </div>
+        <div class="loader-shine"></div>
         <div class="loader-footer">
             <p>
                 CORPUS NUMMORUM&ensp;|&ensp;TELOTA - IT/DH<br/>
-                Berlin-Brandenburg Academy of Sciences and Humanities<br/>
-                2020{!! date('y') > 20 ? ('&ndash;'.date('y')) : ('') !!}
+                Berlin-Brandenburg Academy of Sciences and Humanities, Germany<br/>
+                2020&ndash;{{ date('Y') }}
             </p>
         </div>
     </div>
 
     <!-- Vue SPA -->
-    <div id="editor">
+    <div id="editor2">
 
         <app-settings :data='{!! json_encode($data) !!}'></app-settings>
 
@@ -65,7 +70,7 @@
                     <!--</v-main>-->
                 </div>
 
-                <app-loader></app-loader>
+                <!--<app-loader></app-loader>-->
                 <!--<app-dialog></app-dialog>-->
                 <app-about></app-about>
                 <!--<app-context-menu></app-context-menu>-->
