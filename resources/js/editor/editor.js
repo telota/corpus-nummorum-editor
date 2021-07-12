@@ -75,6 +75,7 @@ Vue.component('adv-btn',            require('./modules/btnAdv.vue').default);
 Vue.component('pagination',         require('./modules/element_pagination.vue').default);
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
 Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
+Vue.component('drawer',             require('./modules/drawer.vue').default);
 
 // Primary Entities
 Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);

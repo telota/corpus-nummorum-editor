@@ -1,143 +1,204 @@
 <template>
-<div id="app-header">
-    <!-- Snack -->
-    <v-fade-transition>
-        <div
-            v-if="snackMessage"
-            class=" d-flex align-center justify-center"
-            :style="[
-                'position: fixed',
-                'left: 50%',
-                'margin-left: -250px',
-                'z-index: 102',
-                'height: 40px',
-                'width: 500px',
-                'background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(' + snackBg + ',1) 20%, rgba(' + snackBg + ',1) 80%, rgba(0,0,0,0) 100%)'
-            ].join(';\n')"
-        >
+<div>
+
+    <!-- Header -->
+    <div id="app-header">
+        <!-- Snack -->
+        <v-fade-transition>
             <div
-                :class="snackColor"
-                class="pl-2 pr-2 caption font-weight-medium text-truncate text-center"
-                v-html="snackMessage"
-                style="width: 300px;"
-            />
-        </div>
-    </v-fade-transition>
-
-    <div class="header_bg d-flex align-center" style="height: 40px; width: 100%;">
-
-        <!-- App Name -->
-        <a href="/editor#/dashboard" class="invert--text">
-            <v-hover v-slot="{ hover }">
-                <div
-                    class="pl-2 pr-2 d-flex align-center"
-                    :class="hover ? 'header_hover' : ''"
-                    style="height: 40px; cursor: pointer;"
-
-                >
-                    <div
-                        :class="($vuetify.theme.dark ? 'white' : 'black') + '--text'"
-                        style="font-size: 24px; line-height: 24px;" v-text="'CNe'"
-                    />
-                </div>
-            </v-hover>
-        </a>
-
-        <!-- Navigation -->
-        <template v-for="(route, r) in routes">
-            <v-menu
-                :key="'route' + r"
-                offset-y
-                open-on-hover
-                tile
+                v-if="snackMessage"
+                class=" d-flex align-center justify-center"
+                :style="[
+                    'position: fixed',
+                    'left: 50%',
+                    'margin-left: -250px',
+                    'z-index: 102',
+                    'height: 40px',
+                    'width: 500px',
+                    'background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(' + snackBg + ',1) 20%, rgba(' + snackBg + ',1) 80%, rgba(0,0,0,0) 100%)'
+                ].join(';\n')"
             >
-                <template v-slot:activator="{ on, attrs }">
-                    <v-hover v-slot="{ hover }">
-                        <div
-                            v-bind="attrs"
-                            v-on="on"
-                            class="pr-2 pl-2 d-flex align-center"
-                            :class="hover ? 'header_hover' : ''"
-                            style="height: 40px;"
-                        >
-                            <div v-if="$vuetify.breakpoint.mdAndUp" v-text="route.text" />
-                            <v-icon v-else :small="$vuetify.breakpoint.xsOnly" v-text="route.icon" />
-                        </div>
-                    </v-hover>
-                </template>
+                <div
+                    :class="snackColor"
+                    class="pl-2 pr-2 caption font-weight-medium text-truncate text-center"
+                    v-html="snackMessage"
+                    style="width: 300px;"
+                />
+            </div>
+        </v-fade-transition>
 
-                <v-card
-                    tile
-                    class="header_bg"
-                    :max-width="400"
-                    :min-width="200"
-                >
-                    <v-hover
-                        v-for="(item, i) in route.children"
-                        :key="'route' + r + '.' + i"
-                        v-slot="{ hover }"
+        <div class="header_bg d-flex align-center" style="height: 40px; width: 100%;">
+
+            <!-- App Name -->
+            <a href="/editor#/dashboard" class="invert--text">
+                <v-hover v-slot="{ hover }">
+                    <div
+                        class="pl-2 pr-2 d-flex align-center"
+                        :class="hover ? 'header_hover' : ''"
+                        style="height: 40px; cursor: pointer;"
                     >
-                        <a
-                            v-if="item.link"
-                            :href="item.link.startsWith('http') ? item.link : ('/editor#/' + item.link)"
-                            :target="item.link.startsWith('http') ? '_blank' : ''"
-                        >
+                        <div
+                            class="font-weight-bold blue_sec--text"
+                            style="font-size: 24px; line-height: 24px;" v-text="'CN'"
+                        />
+                    </div>
+                </v-hover>
+            </a>
+
+            <!-- Navigation -->
+            <template v-for="(route, r) in routes">
+                <v-menu
+                    :key="'route' + r"
+                    offset-y
+                    open-on-hover
+                    tile
+                >
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-hover v-slot="{ hover }">
                             <div
-                                class="d-flex align-center pa-2 invert--text"
-                                :class="(hover ? 'header_hover' : '') + ($route.name === item.link ? ' blue_sec--text' : '')"
-                                :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                                v-bind="attrs"
+                                v-on="on"
+                                class="pr-2 pl-2 d-flex align-center"
+                                :class="hover ? 'header_hover' : ''"
+                                style="height: 40px;"
                             >
-                                <v-icon class="mr-2" v-text="item.icon" :color="$route.name === item.link ? 'blue_sec' : ''" />
-                                <div v-text="item.text" />
+                                <div v-if="$vuetify.breakpoint.mdAndUp" v-text="route.text" />
+                                <v-icon v-else :small="$vuetify.breakpoint.xsOnly" v-text="route.icon" />
                             </div>
-                        </a>
-                        <div v-else-if="item.action">
-                            <div
-                                class="d-flex align-center pa-2 invert--text"
-                                :class="(hover ? 'header_hover' : '')"
-                                :style="'cursor:' + (hover ? 'pointer' : 'default')"
-                                @click="item.action"
+                        </v-hover>
+                    </template>
+
+                    <v-card
+                        tile
+                        class="header_bg"
+                        :max-width="400"
+                        :min-width="200"
+                    >
+                        <template v-for="(item, i) in route.children">
+                            <v-divider v-if="!item" :key="'route' + r + '.' + i" />
+
+                            <v-hover
+                                v-else
+                                :key="'route' + r + '.' + i"
+                                v-slot="{ hover }"
                             >
-                                <v-icon class="mr-2" v-text="item.icon" />
-                                <div v-text="item.text" />
-                            </div>
-                        </div>
-                    </v-hover>
-                </v-card>
-            </v-menu>
-        </template>
+                                <a
+                                    v-if="item.link"
+                                    :href="item.link.startsWith('http') ? item.link : ('/editor#/' + item.link)"
+                                    :target="item.link.startsWith('http') ? '_blank' : ''"
+                                >
+                                    <div
+                                        class="d-flex align-center pa-2 invert--text"
+                                        :class="(hover ? 'header_hover' : '') + ($route.name === item.link ? ' blue_sec--text' : '')"
+                                        :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                                    >
+                                        <v-icon class="mr-2" v-text="item.icon" :color="$route.name === item.link ? 'blue_sec' : ''" />
+                                        <div v-text="item.text" />
+                                    </div>
+                                </a>
+                                <div v-else-if="item.action">
+                                    <div
+                                        class="d-flex align-center pa-2 invert--text"
+                                        :class="(hover ? 'header_hover' : '')"
+                                        :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                                        @click="item.action"
+                                    >
+                                        <v-icon class="mr-2" v-text="item.icon" />
+                                        <div v-text="item.text" />
+                                    </div>
+                                </div>
+                            </v-hover>
+                        </template>
+                    </v-card>
+                </v-menu>
+            </template>
 
+            <v-spacer />
 
-        <v-spacer />
+            <!-- Controls -->
+            <adv-btn
+                :text="$root.language.toUpperCase()"
+                :tooltip="$root.language === 'de' ? 'Switch to English' : 'Zu Deutsch wechseln'"
+                medium
+                colorHover="marked"
+                v-on:click="$root.changeSettings('language', $root.language === 'de' ? 'en' : 'de')"
+            />
+            <adv-btn
+                :icon="$vuetify.theme.dark ? 'invert_colors' : 'invert_colors_off'"
+                :tooltip="$vuetify.theme.dark ? 'Switch to light Theme' : 'Switch to dark Theme'"
+                medium
+                colorHover="marked"
+                v-on:click="$root.changeSettings('color_theme', $vuetify.theme.dark === true ? 0 : 1)"
+            />
+            <!-- Logout -->
+            <adv-btn
+                icon="power_settings_new"
+                tooltip="Logout"
+                medium
+                colorHover="marked"
+                v-on:click="logout()"
+                class="mr-n4"
+            />
 
-        <adv-btn
-            :text="$root.language.toUpperCase()"
-            :tooltip="$root.language === 'de' ? 'Switch to English' : 'Zu Deutsch wechseln'"
-            medium
-            colorHover="marked"
-            v-on:click="$root.changeSettings('language', $root.language === 'de' ? 'en' : 'de')"
-        />
-        <adv-btn
-            :icon="$vuetify.theme.dark ? 'invert_colors' : 'invert_colors_off'"
-            :tooltip="$vuetify.theme.dark ? 'Switch to light Theme' : 'Switch to dark Theme'"
-            medium
-            colorHover="marked"
-            v-on:click="$root.changeSettings('color_theme', $vuetify.theme.dark === true ? 0 : 1)"
-        />
-        <!-- Logout -->
-        <adv-btn
-            icon="power_settings_new"
-            tooltip="Logout"
-            medium
-            colorHover="marked"
-            v-on:click="logout()"
-            class="mr-n4"
-        />
+        </div>
 
+        <!-- Loading -->
+        <v-progress-linear :indeterminate="$root.loading" height="1" />
     </div>
 
-    <!-- Loading -->
-    <v-progress-linear :indeterminate="$root.loading" height="1" />
+    <!-- Manage Favorites -->
+    <v-dialog
+        tile
+        persistent
+        scrollable
+        v-model="showFavorites"
+        width="500px"
+    >
+        <v-card tile>
+            <dialogbartop
+                icon="star"
+                text="Dashboard Favorites"
+                :fullscreen="null"
+                v-on:close="manageFavorites(false)"
+            ></dialogbartop>
+
+            <div class="pa-3 caption text-center">
+                Click on a link in the left column to add it to the active favorites.<br/>Use the arrows to manage the order of your active favorites.
+            </div>
+
+            <v-card-text>
+                <v-row>
+                    <!-- Available -->
+                    <v-col cols=6>
+                        <div class="font-weight-bold pb-1 text-center" v-text="'Available'" />
+                        <div v-for="(fav, f) in availableFavs" :key="'favAv' + f" class="d-flex align-center mt-1" style="cursor: pointer" @click="selectedFavs.push(fav)">
+                            <div v-text="fav.text" />
+                            <v-spacer />
+                            <v-icon small v-text="'arrow_forward'" class="pa-1 mr-5" />
+                        </div>
+                    </v-col>
+                    <!-- Active -->
+                    <v-col cols=6>
+                        <div class="font-weight-bold pb-1 text-center" v-text="'Active'" />
+                        <div v-for="(fav, f) in selectedFavs" :key="'favSe' + f"  class="d-flex align-center mt-1">
+                            <div v-text="fav.text" />
+                            <v-spacer />
+                            <v-icon small v-text="'arrow_upward'" :disabled="f < 1" class="pa-1" @click="shiftFav(f, -1)" />
+                            <v-icon small v-text="'arrow_downward'" :disabled="f > (selectedFavs.length - 2)" class="pa-1" @click="shiftFav(f, 1)" />
+                            <v-icon small v-text="'clear'" class="pa-1" @click="shiftFav(f, 0)" />
+                        </div>
+                    </v-col>
+                </v-row>
+            </v-card-text>
+
+            <div class="d-flex justify-center mb-2" >
+                <v-btn text v-text="'cancel'" @click="manageFavorites(false)" class="mr-1" />
+                <v-btn text v-text="'save'" @click="saveFavorites()" class="ml-1" />
+            </div>
+        </v-card>
+    </v-dialog>
+
+
 </div>
 </template>
 
@@ -147,7 +208,15 @@
 export default {
     data () {
         return {
-            showAccount: false
+            showAccount: false,
+
+            favorites:      [],
+            selectedFavs: [],
+            showFavorites: false,
+            additionalFavs: [
+                { text: 'CN Website', icon: 'language', link: 'https://www.corpus-nummorum.eu'},
+                { text: 'IKMK', icon: 'language', link: 'https://ikmk.smb.museum/home?lang=de' }
+            ]
         }
     },
     computed: {
@@ -167,7 +236,12 @@ export default {
             return this.$root.user?.level ? this.$root.user.level : 10
         },
         routes (){
+            const favorites = this.favorites.slice(0)
+            favorites.push(null)
+            favorites.push({ text: 'Manage Favorites', icon: 'star', action: () => { this.manageFavorites(true) } })
+
             const routes = [
+                { text: this.$root.label('favorites'),         icon: 'star',               children: favorites},
                 { text: this.$root.label('types'),         icon: 'blur_circular',               children: [
                     { text: this.$root.label('types_search'),     icon: 'search',             link: 'types/search' },
                     { text: this.$root.label('types_new'),        icon: 'add_circle_outline', link: 'types/edit' },
@@ -175,11 +249,10 @@ export default {
                 ]},
                 { text: this.$root.label('coins'),         icon: 'copyright',               children: [
                     { text: this.$root.label('coins_search'),     icon: 'search',             link: 'coins/search' },
-                    { text: this.$root.label('coins_new'),        icon: 'add_circle_outline', link: 'coins/edit' },
+                    { text: this.$root.label('coins_new'),        icon: 'add_circle',         link: 'coins/edit' },
                     { text: this.$root.label('coins_upload'),     icon: 'drive_folder_upload',link: 'storage/coin-images' },
                     { text: this.$root.label('coins_import'),     icon: 'arrow_circle_down',  link: 'coins/import' }
                 ]},
-                //null,
                 { text: this.$root.label('Features'),         icon: 'info',               children: [
                     { text: this.$root.label('designs'),          icon: 'notes',              link: 'designs' },
                     { text: this.$root.label('legends'),          icon: 'translate',          link: 'legends' },
@@ -195,7 +268,7 @@ export default {
                 { text: this.$root.label('individuals'),      icon: 'supervised_user_circle', children: [
                     { text: this.$root.label('persons'),          icon: 'emoji_people',       link: 'persons' },
                     { text: this.$root.label('owners'),           icon: 'account_circle',     link: 'owners' },
-                    { text: this.$root.label('tribes'),           icon: 'groups',     link: 'tribes' }
+                    { text: this.$root.label('tribes'),           icon: 'groups',             link: 'tribes' }
                 ]},
                 { text: this.$root.label('locations'),         icon: 'explore',           children: [
                     { text: this.$root.label('mints'),            icon: 'museum',             link: 'mints' },
@@ -214,7 +287,6 @@ export default {
             ]
             // PR
             if (this.rank >= 21) {
-                //routes.push(null)
                 routes.push({ text: 'Website',  icon: 'wifi_tethering',  children: [
                     { text: this.$root.label('coin_of_the_month'),  icon: 'stars',      link: 'coin-of-the-month' },
                     { text: this.$root.label('news'),               icon: 'comment',    link: 'news' }
@@ -229,7 +301,6 @@ export default {
             }*/
             // Admin
             if (this.rank >= 31) {
-                //routes.push(null)
                 routes.push({ text: 'Admin',  icon: 'font_download',  children: [
                     { text: 'Users',    icon: 'people',                 link: 'users' },
                     { text: 'Logs',     icon: 'format_list_bulleted',   link: 'logs' },
@@ -237,14 +308,38 @@ export default {
                 ]})
             }
 
-            //routes.push(null)
             routes.push({ text: 'Hilfe',  icon: 'info',  children: [
                 { text: 'Wiki',         icon: 'help_outline',           link: this.$root.baseURL + '/wiki' },
                 { text: 'Nomisma',      icon: 'monetization_on',        link: 'http://nomisma.org' },
+                null,
                 { text: 'About',        icon: 'info',                   action: () => { this.$store.commit('setAbout', true) } }
             ]})
 
             return routes
+        },
+        availableFavs () {
+            const available = []
+            this.routes.forEach((obj, index) => {
+                if (index > 0) obj.children.forEach((route) => {
+                    if (route?.link && !this.selectedFavs.find((fav) => fav.link === route.link)) available.push(route)
+                })
+            })
+            this.additionalFavs.forEach((route) => {
+                if (!this.selectedFavs.find((fav) => fav.link === route.link)) available.push(route)
+            })
+            return available.sort((a, b) => { return a.text.localeCompare(b.text) })
+        }
+    },
+
+    mounted () {
+        if (this.$root.settings?.dashboardFavorites) {
+            const favorites = []
+
+            JSON.parse(this.$root.settings.dashboardFavorites).forEach((link) => {
+                const found = this.availableFavs.find((listed) => listed.link === link)
+                if (found) favorites.push(found)
+            })
+            this.favorites = favorites
         }
     },
 
@@ -256,6 +351,49 @@ export default {
             if (link.startsWith('http')) this.openInNewTab('link')
             else if (this.$route.name !== link) this.$router.push('/' + link)
             //else window.location.reload()
+        },
+
+        manageFavorites (toggle) {
+            if (toggle) {
+                this.selectedFavs = this.favorites.slice(0)
+                this.showFavorites = true
+            }
+            else {
+                this.showFavorites = false
+            }
+        },
+
+        shiftFav (index, step) {
+            if (step === 0) {
+                if (this.selectedFavs.length > 1) this.selectedFavs.splice(index, 1)
+                else this.selectedFavs = []
+            }
+            else {
+                const newFavs = []
+                for (let i = 0; i < this.selectedFavs.length; ++i) {
+                    if (step > 0) {
+                        if (i === index) {
+                            newFavs.push(this.selectedFavs[index + step])
+                            newFavs.push(this.selectedFavs[index])
+                        }
+                        else if (i !== index + 1) newFavs.push(this.selectedFavs[i])
+                    }
+                    else {
+                        if (i === index - 1) {
+                            newFavs.push(this.selectedFavs[index])
+                            newFavs.push(this.selectedFavs[i])
+                        }
+                        else if (i !== index - 1 && i !== index) newFavs.push(this.selectedFavs[i])
+                    }
+                }
+                this.selectedFavs = newFavs
+            }
+        },
+
+        async saveFavorites () {
+            await this.$root.changeSettings('dashboardFavorites', JSON.stringify(this.selectedFavs.map((fav) => { return fav.link })))
+            this.favorites = this.selectedFavs
+            this.manageFavorites (false)
         }
     }
 }

@@ -3,14 +3,35 @@
     <!-- Toolbar -->
     <component-toolbar>
         <template v-slot:toolbar>
-            <adv-btn
-                tooltip="Manage Dashboard Favorites"
-                icon="star"
-                colorHover="header_hover"
-                @click="manageFavorites(true)"
-            />
-            <a v-for="(item, i) in favorites" :key="'fav' + i" :href="item.link" :target="item.link.startsWith('http') ? '_blank' : ''">
-                <v-btn tile depressed class="header_bg" v-html="item.text" :height="50" />
+            <a href="/editor#/types/edit">
+                <v-btn tile depressed :height="50" class="header_bg">
+                    <v-icon v-text="'add_circle_outline'" />
+                    <div v-text="'Add Type'" class="ml-2" />
+                </v-btn>
+            </a>
+            <a href="/editor#/coins/edit">
+                <v-btn tile depressed :height="50" class="header_bg">
+                    <v-icon v-text="'add_circle'" />
+                    <div v-text="'Add coin'" class="ml-2" />
+                </v-btn>
+            </a>
+            <a href="/editor#/storage">
+                <v-btn tile depressed :height="50" class="header_bg">
+                    <v-icon v-text="'folder'" />
+                    <div v-text="'File Manager'" class="ml-2" />
+                </v-btn>
+            </a>
+            <a href="/wiki" target="_blank">
+                <v-btn tile depressed :height="50" class="header_bg">
+                    <v-icon v-text="'help_outline'" />
+                    <div v-text="'Wiki'" class="ml-2" />
+                </v-btn>
+            </a>
+            <a href="https://www.corpus-nummorum.eu/" target="_blank">
+                <v-btn tile depressed :height="50" class="header_bg">
+                    <v-icon v-text="'public'" />
+                    <div v-text="'CN Website'" class="ml-2" />
+                </v-btn>
             </a>
         </template>
     </component-toolbar>
@@ -249,58 +270,6 @@
             </v-row>
         </template>
     </component-content>
-
-    <!-- Manage Favorites -->
-    <v-dialog
-        tile
-        persistent
-        scrollable
-        v-model="showFavorites"
-        width="500px"
-    >
-        <v-card tile>
-            <dialogbartop
-                icon="star"
-                text="Dashboard Favorites"
-                :fullscreen="null"
-                v-on:close="manageFavorites(false)"
-            ></dialogbartop>
-
-            <div class="pa-3 caption text-center">
-                Click on a link in the left column to add it to the active favorites.<br/>Use the arrows to manage the order of your active favorites.
-            </div>
-
-            <v-card-text>
-                <v-row>
-                    <!-- Available -->
-                    <v-col cols=6>
-                        <div class="font-weight-bold pb-1 text-center" v-text="'Available'" />
-                        <div v-for="(fav, f) in availableFavs" :key="'favAv' + f" class="d-flex align-center mt-1" style="cursor: pointer" @click="selectedFavs.push(fav)">
-                            <div v-text="fav.text" />
-                            <v-spacer />
-                            <v-icon small v-text="'arrow_forward'" class="pa-1 mr-5" />
-                        </div>
-                    </v-col>
-                    <!-- Active -->
-                    <v-col cols=6>
-                        <div class="font-weight-bold pb-1 text-center" v-text="'Active'" />
-                        <div v-for="(fav, f) in selectedFavs" :key="'favSe' + f"  class="d-flex align-center mt-1">
-                            <div v-text="fav.text" />
-                            <v-spacer />
-                            <v-icon small v-text="'arrow_upward'" :disabled="f < 1" class="pa-1" @click="shiftFav(f, -1)" />
-                            <v-icon small v-text="'arrow_downward'" :disabled="f > (selectedFavs.length - 2)" class="pa-1" @click="shiftFav(f, 1)" />
-                            <v-icon small v-text="'clear'" class="pa-1" @click="shiftFav(f, 0)" />
-                        </div>
-                    </v-col>
-                </v-row>
-            </v-card-text>
-
-            <div class="d-flex justify-center mb-2" >
-                <v-btn text v-text="'cancel'" @click="manageFavorites(false)" class="mr-1" />
-                <v-btn text v-text="'save'" @click="saveFavorites()" class="ml-1" />
-            </div>
-        </v-card>
-    </v-dialog>
 </div>
 </template>
 
@@ -323,28 +292,6 @@ export default {
             },
             td_key:     'caption font-weight-thin text-uppercase',
             td_val:     'text-right',
-
-            favorites:      [
-                { link: '/editor#/types/edit', text: 'Add Type'},
-                { link: '/editor#/coins/edit', text: 'Add Coin'}
-            ],
-            selectedFavs: [],
-            showFavorites: false,
-            favList: [
-                { link: '/editor#/types/edit', text: 'Add Type'},
-                { link: '/editor#/coins/edit', text: 'Add Coin'},
-                { link: 'https://www.corpus-nummorum.eu/', text: 'CN Website'},
-                { link: '/editor#/designs', text: 'Designs'},
-                { link: 'https://ikmk.smb.museum/home?lang=de', text: 'IKMK'},
-                { link: '/editor#/storage/coin-images', text: 'Image Upload'},
-                { link: '/editor#/legends-index', text: 'Legends'},
-                { link: '/editor#/monograms', text: 'Monograms'},
-                { link: 'http://nomisma.org/', text: 'Nomisma'},
-                { link: '/editor#/coins/search', text: 'Search Coins'},
-                { link: '/editor#/types/search', text: 'Search Types'},
-                { link: 'https://www.zotero.org/groups/163139/thrakien/library', text: 'Zotero'}
-            ]
-
         }
     },
 
@@ -353,30 +300,13 @@ export default {
     },
 
     mounted () {
-        if (this.$root.settings?.dashboardFavorites) {
-            const favorites = []
-            JSON.parse(this.$root.settings.dashboardFavorites).forEach((link) => {
-                const found = this.favList.find((listed) => listed.link === link)
-                if (found) favorites.push(found)
-            })
-            this.favorites = favorites
-        }
     },
 
     computed: {
         // Localization
         l () { return this.$root.language },
         labels () { return this.$root.labels },
-        data_user () { return this.$root.user },
-        availableFavs () {
-            const available = []
-
-            this.favList.forEach((fav) => {
-                if (!this.selectedFavs.find((select) => select.link === fav.link)) available.push(fav)
-            })
-
-            return available
-        }
+        data_user () { return this.$root.user }
     },
 
     methods: {
@@ -393,49 +323,6 @@ export default {
         percentage (part, sum) {
             return part && sum ? '~&nbsp;' + Math.ceil(part / sum * 100) + '&nbsp;%' : ''
         },
-
-        manageFavorites (toggle) {
-            if (toggle) {
-                this.selectedFavs = this.favorites.slice(0)
-                this.showFavorites = true
-            }
-            else {
-                this.showFavorites = false
-            }
-        },
-
-        shiftFav (index, step) {
-            if (step === 0) {
-                if (this.selectedFavs.length > 1) this.selectedFavs.splice(index, 1)
-                else this.selectedFavs = []
-            }
-            else {
-                const newFavs = []
-                for (let i = 0; i < this.selectedFavs.length; ++i) {
-                    if (step > 0) {
-                        if (i === index) {
-                            newFavs.push(this.selectedFavs[index + step])
-                            newFavs.push(this.selectedFavs[index])
-                        }
-                        else if (i !== index + 1) newFavs.push(this.selectedFavs[i])
-                    }
-                    else {
-                        if (i === index - 1) {
-                            newFavs.push(this.selectedFavs[index])
-                            newFavs.push(this.selectedFavs[i])
-                        }
-                        else if (i !== index - 1 && i !== index) newFavs.push(this.selectedFavs[i])
-                    }
-                }
-                this.selectedFavs = newFavs
-            }
-        },
-
-        async saveFavorites () {
-            await this.$root.changeSettings('dashboardFavorites', JSON.stringify(this.selectedFavs.map((fav) => { return fav.link })))
-            this.favorites = this.selectedFavs
-            this.manageFavorites (false)
-        }
     }
 }
 </script>
