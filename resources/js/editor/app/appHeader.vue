@@ -30,14 +30,14 @@
         <a href="/editor#/dashboard" class="invert--text">
             <v-hover v-slot="{ hover }">
                 <div
-                    class="pl-3 pr-3 d-flex align-center"
+                    class="pl-2 pr-2 d-flex align-center"
                     :class="hover ? 'header_hover' : ''"
                     style="height: 40px; cursor: pointer;"
 
                 >
                     <div
                         :class="($vuetify.theme.dark ? 'white' : 'black') + '--text'"
-                        style="font-size: 24px; line-height: 24px;" v-text="'CN'"
+                        style="font-size: 24px; line-height: 24px;" v-text="'CNe'"
                     />
                 </div>
             </v-hover>

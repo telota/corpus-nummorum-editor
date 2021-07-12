@@ -1,8 +1,10 @@
 <template>
-<div class="component-toolbar header_bg">
+<div class="component-tb">
     <div v-if="!flat" class="component-toolbar component-toolbar-shadow" />
-    <div :class="styling" style="width: 100%; height: 50px;">
-        <slot name="toolbar" />
+    <div class="component-toolbar header_bg">
+        <div :class="styling" style="width: 100%; height: 50px;">
+            <slot name="toolbar" />
+        </div>
     </div>
 </div>
 </template>

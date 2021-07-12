@@ -57,8 +57,8 @@
     height: 400px;
     background: linear-gradient(to top,
         rgba(0,0,0,0) 5%,
-        rgba(24,24,24,1) 30%,
-        rgba(24,24,24,1) 70%,
+        rgba(24,24,24,1) 20%,
+        rgba(24,24,24,1) 80%,
         rgba(0,0,0,0) 95%
     );
     -webkit-animation: loader-spinner 3s linear infinite;

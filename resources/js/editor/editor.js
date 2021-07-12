@@ -242,12 +242,25 @@ const editor = new Vue({
     },
 
     mounted () {
-        let elHtml = document.getElementsByTagName('html')[0]
-        elHtml.style.overflowY = 'hidden'
+
+        // Remove Scrollbar (Vuetify Default)
+        let el = document.getElementsByTagName('html')[0]
+        el.style.overflowY = 'hidden'
+
+        // Add Resize-Watcher to get client size
         this.onResize()
         window.addEventListener('resize', this.onResize)
         //window.addEventListener('error', this.errorHandler)
 
+        // Remove initial Loader
+        el = document.getElementById('initial-loader')
+        el.style.opacity = 1
+        el.style['-webkit-transition'] = 'opacity 500ms ease-out'
+        el.style['-moz-transition'] = 'opacity 500ms ease-out'
+        el.style['-ms-transition'] = 'opacity 500ms ease-out'
+        el.style['-o-transition'] = 'opacity 500ms ease-out'
+        el.style.opacity = 0
+        setTimeout(() => {el?.remove()}, 501);
 
         // progress bar top
         /*AxiosAjaxDetct.init(
@@ -263,31 +276,6 @@ const editor = new Vue({
     },
 
     methods: {
-        /*async InitializeSession (data) {
-            this.user = data.user
-            this.log = data.log
-            this.presets = data.presets
-
-            // set language (and check if language is supported)
-            this.language = Object.keys(this.$localization).includes(data.presets.language) ? data.presets.language : 'en'
-
-            // set dark mode
-            this.$vuetify.theme.dark = this.presets.color_theme === 1 ? true : false
-
-            this.$root.baseURL  = data.baseURL
-            this.$root.sparql   = data.sparql
-            this.$root.system   = data.system
-
-            this.$store.commit('setBaseURL', this.$root.baseURL)
-            this.$store.commit('setLanguage', this.$root.language)
-
-            this.$store.commit('setUser', this.$root.user)
-            this.$store.commit('setSystem', this.$root.system)
-
-            console.log('SESSION: initialized.')
-            this.greeting();
-        },*/
-
         async changeSettings (key, value) {
             this.loading = true
 
@@ -312,21 +300,6 @@ const editor = new Vue({
             message = typeof message === 'string' ? message : (message[this.language] ? message[this.language] : message.en)
             self.snack = { color: state ? state : null, message: message }
             setTimeout (() => { self.snack = { color: null, message: null }}, 4000)
-        },
-
-        greeting () {
-            let greeting = null
-            if (this.user?.level > 9) {
-                const currentdate = new Date()
-                const hour        = currentdate.getHours()
-
-                if      ( hour > 4 && hour < 12)    { greeting = 'Good Morning!' }
-                else if ( hour > 11 && hour < 17)   { greeting = 'Good Afternoon!' }
-                else if ( hour > 16 && hour < 23)   { greeting = 'Good Evening!' }
-                else                                { greeting = 'Pretty late, isn\'t it?'}
-            }
-
-            if (greeting) { this.snackbar(greeting) }
         },
 
         label (string) {

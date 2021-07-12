@@ -52,7 +52,7 @@
     </div>
 
     <!-- Vue SPA -->
-    <div id="editor2">
+    <div id="editor">
 
         <app-settings :data='{!! json_encode($data) !!}'></app-settings>
 

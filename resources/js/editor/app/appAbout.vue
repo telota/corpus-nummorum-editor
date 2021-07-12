@@ -3,8 +3,8 @@
     :value="show"
     :z-index="500"
 >
-    <v-card tile :max-width="750">
-        <h1 class="text-center pl-5 pr-5 pt-5 font-weight-thin text-uppercase">
+    <v-card tile dark :max-width="750">
+        <h1 class="text-center pl-5 pr-5 pt-5 font-weight-thin">
             {{ $store.state.appName }}
         </h1>
 
