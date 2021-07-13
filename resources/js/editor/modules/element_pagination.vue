@@ -1,15 +1,22 @@
 <template>
 <div class="d-flex component-wrap">
 
+    <!--<adv-btn
+        medium
+        icon="first_page"
+        :disabled="offset > 0 ? false : true"
+        @click="$emit ('offset', 0)"
+    />-->
+
     <v-btn :color="color" depressed
-        @click="$emit ('offset', 0)" 
+        @click="$emit ('offset', 0)"
         :disabled="offset > 0 ? false : true"
         :text="offset > 0 ? false : true"
         :tile="offset > 0 ? true: false"
     > <v-icon>first_page</v-icon> </v-btn>
 
     <v-btn :color="color" depressed
-        @click="$emit ('offset', offset - limit)" 
+        @click="$emit ('offset', offset - limit)"
         :disabled="offset > 0 ? false : true"
         :text="offset > 0 ? false : true"
         :tile="offset > 0 ? true : false"
@@ -21,7 +28,7 @@
             <v-tooltip bottom>
             <template v-slot:activator="{ on: tooltip }">
                 <v-btn v-on="{ ...tooltip, ...menu }" class="caption" :color="color" depressed
-                    :disabled="count < limit" 
+                    :disabled="count < limit"
                     :text="count < limit"
                     :tile="count >= limit"
                 >
@@ -37,18 +44,18 @@
                 v-on:input="$emit ('offset', page_jump > 0 ? ((page_jump-1) * limit) : 0)"
                 hint="jump to page" persistent-hint
             ></v-text-field>
-        </v-card>                       
+        </v-card>
     </v-menu>
 
     <v-btn :color="color" depressed
-        @click="$emit ('offset', offset + limit)" 
+        @click="$emit ('offset', offset + limit)"
         :disabled="offset < count - limit ? false : true"
         :text="offset < count - limit ? false : true"
-        :tile="offset < count - limit ? true : false" 
+        :tile="offset < count - limit ? true : false"
     > <v-icon>navigate_next</v-icon> </v-btn>
 
     <v-btn :color="color" depressed
-        @click="$emit ('offset', (Math.ceil (count / limit) -1) * limit)" 
+        @click="$emit ('offset', (Math.ceil (count / limit) -1) * limit)"
         :disabled="offset < count - limit ? false : true"
         :text="offset < count - limit ? false : true"
         :tile="offset < count - limit ? true : false"
@@ -61,7 +68,7 @@
 <script>
 export default {
     data () {
-        return { 
+        return {
             page_jump:          null,
         }
     },
@@ -71,7 +78,7 @@ export default {
         offset:     {type: [String, Number], default: 0},
         limit:      {type: [String, Number], default: 10},
         count:      {type: [String, Number], default: 0},
-        color:      {type: [String], default: 'sysbar'}  
+        color:      {type: [String], default: 'sysbar'}
     }
 }
 </script>

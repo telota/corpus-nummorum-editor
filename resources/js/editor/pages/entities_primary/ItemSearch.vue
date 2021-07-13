@@ -3,19 +3,214 @@
     <!-- Toolbar ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
     <component-toolbar>
         <template v-slot:toolbar>
+            <pagination-bar
+                :offset="dbi_params.offset"
+                :limit="dbi_params.limit"
+                :count="dbi_params.count"
+                :sortby="dbi_params.sort_by + ' ' + dbi_params.sort_by_op"
+                :sorters="sorters"
+                :layout="display"
+                :layouts="display_mode"
+                v-on:reload="SetItems()"
+                v-on:offset="(emit) => { dbi_params.offset = emit; SetItems() }"
+                v-on:limit="(emit) => { dbi_params.limit = emit; SetItems() }"
+                v-on:sortby="OrderBy"
+                v-on:layout="setDisplayMode"
+            >
+                <template v-slot:right>
+                    <!-- Publisher Functions -->
+                    <v-slide-x-reverse-transition>
+                        <adv-btn
+                            v-if="publisher"
+                            :icon="checked_state ? 'radio_button_unchecked' : 'radio_button_checked'"
+                            :tooltip="(checked_state ? 'Deselect' : 'Select') + ' all ' + labels[entity]"
+                            :disabled="items[0] ? false : true"
+                            color-main="blue_prim"
+                            color-hover="blue_sec"
+                            color-text="white"
+                            @click="checked_state = !checked_state; SetChecked(checked_state);"
+                        />
+                    </v-slide-x-reverse-transition>
+
+                    <v-slide-x-reverse-transition>
+                        <adv-btn
+                            v-if="publisher"
+                            icon="publish"
+                            :tooltip="'Publish selected ' + labels[entity]"
+                            :disabled="!checked.filter((check) => { return check.state === true })[0]"
+                            color-main="blue_prim"
+                            color-hover="blue_sec"
+                            color-text="white"
+                            @click="Publish(checked, 1)"
+                        />
+                    </v-slide-x-reverse-transition>
+
+                    <!-- Publisher Toggle -->
+                    <adv-btn
+                        :icon="publisher ? 'public_off' : 'public'"
+                        :tooltip="publisher ? 'Hide Publisher' : 'Show Publisher'"
+                        :disabled="$root.user.level < 18"
+                        color-hover="header_hover"
+                        @click="TogglePublisher()"
+                    />
+
+                    <!-- Switch Coin/Types -->
+                    <a :href="'/editor#/' + (entity === 'coins' ? 'types' : 'coins') + '/search'">
+                        <adv-btn
+                            :icon="entity === 'coins' ? 'blur_circular' : 'copyright'"
+                            :tooltip="entity === 'coins' ? 'Go to Types' : 'Go to Coins'"
+                            color-hover="header_hover"
+                        />
+                    </a>
+                </template>
+            </pagination-bar>
         </template>
     </component-toolbar>
 
+    <!-- Content ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
+    <component-content>
+        <template v-slot:content>
+
+            <!-- Error -->
+            <div
+                v-if="error"
+                class="mt-10 headline d-flex justify-center"
+                v-html="'Sorry, an error occured.<br/>Please reload and retry!'"
+            />
+
+            <!-- Results -->
+            <div v-else-if="items[0]">
+
+                <!-- Trading Cards || Index Cards -->
+                <div v-if="[0, 1, 2].includes(display)" style="padding-left: 43px; padding-top: 3px">
+                    <v-row class="ma-0 pa-0">
+                        <v-col
+                            v-for="(item, i) in items"
+                            :key="i + ' ' + display"
+                            cols="12"
+                            :sm="display === 0 ? 6 : 12"
+                            :md="display === 0 ? 3 : 12"
+                            :lg="display === 0 ? 2 : 12"
+                        >
+                            <component
+                                :is="display_mode[display].component"
+                                :key="display + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
+                                :entity="entity"
+                                :item="item"
+                                :publisher="publisher"
+                                :checked="checked[i].state"
+                                v-on:publish="(emit) => { Publish ([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0)) }"
+                                v-on:checked="checked[i].state = !checked[i].state"
+                            ></component><!-- v-on:inheritor="(emit) => { details_dialog = { entity: 'types', id: emit } }"-->
+                        </v-col>
+                    </v-row>
+                </div>
+
+            </div>
+
+            <!-- Start Screen -->
+            <div v-else :style="[
+                'position: fixed',
+                'width: 500px',
+                'left: 50%',
+                'margin-left: -250px',
+                'height: 300px',
+                'top: 50%',
+                'margin-top: -150px'
+            ].join(';\n')">
+                <v-card
+                    tile
+                    raised
+                    class="grey_prim"
+                    style="height: 100%; position: relative"
+                >
+                    <div class="pa-3">
+                        <div class="text-center title text-uppercase" v-text="'Search ' + entity" />
+                        <a :href="'/editor#/' + (entity === 'coins' ? 'types' : 'coins') + '/search'">
+                            <div class="text-center caption mb-4" v-text="'Looking for ' + (entity === 'coins' ? 'types' : 'coins') + '?'" />
+                        </a>
+
+                        <v-text-field clearable dense
+                            v-model="search.id"
+                            label="ID"
+                            class="mb-3"
+                            v-on:keyup.enter="RunSearch()"
+                            style="width: 50%"
+                        />
+
+                        <v-text-field clearable dense
+                            v-model="search.q"
+                            :label="$root.label('keywords')"
+                            append-icon="keyboard"
+                            class="mb-n2"
+                            v-on:keyup.enter="RunSearch()"
+                            v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
+                        />
+                        <v-expand-transition>
+                            <div v-if="searchStringKeyboard" class="d-flex justify-center">
+                                <keyboard
+                                    :string="search.q"
+                                    layout="el_uc"
+                                    small
+                                    hide_options
+                                    v-on:input="(emit) => { search.q = emit }"
+                                ></keyboard>
+                            </div>
+                        </v-expand-transition>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div
+                        class="text-center mt-1 pa-3"
+                        style="position:absolute; bottom: 0; width: 100%"
+                    >
+                        <div class="text-center body-2 mb-3" v-text="'Please check the left sidebar for advanced filters.'" />
+                        <v-btn
+                            tile
+                            block
+                            dark
+                            color="blue_prim"
+                            class="title"
+                            v-text="'search'"
+                            :width="350"
+                            @click="RunSearch()"
+                        />
+                    </div>
+                </v-card>
+            </div>
+
+
+        </template>
+    </component-content>
+
     <!-- Search ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-    <drawer v-on:hover="onDrawerHover">
-        <template v-slot:default>
+    <drawer v-on:hover="onDrawerHover" :header="40" :collapse="searchCounter" v-on:search="RunSearch()">
+
+        <!-- Filters -->
+        <template v-slot:content>
             <v-expansion-panels accordion tile flat v-model="activeTab" style="z-index: 100;">
-                <!-- String Search ------------------------------------------------- ------------------------------------------------- -->
-                <v-expansion-panel>
+
+                <!-- Favorites ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel class="transparent">
                     <!-- Header -->
-                    <v-expansion-panel-header class="pl-2">
+                    <v-expansion-panel-header class="pl-2 font-weight-bold">
                         <div class="d-flex align-center">
-                            <v-icon v-text="'search'" />
+                            <v-icon v-text="'star'" />
+                            <div v-text="'Stored Queries'" class="ml-2 whitespace-nowrap" />
+                        </div>
+                    </v-expansion-panel-header>
+
+                    <!-- Content -->
+                    <v-expansion-panel-content>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+
+                <!-- String Search ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel class="transparent">
+                    <!-- Header -->
+                    <v-expansion-panel-header class="pl-2 font-weight-bold">
+                        <div class="d-flex align-center">
+                            <v-icon v-text="'manage_search'" />
                             <div v-text="'test'" class="ml-2" />
                         </div>
                     </v-expansion-panel-header>
@@ -23,20 +218,19 @@
                     <!-- Content -->
                     <v-expansion-panel-content>
 
-                        <v-text-field outlined filled clearable dense
+                        <v-text-field clearable dense
                             v-model="search.q"
-                            :label="$root.label('search_strings')"
-                            prepend-icon="search"
+                            :label="$root.label('keywords')"
                             append-icon="keyboard"
                             class="mt-5 mb-n4"
                             v-on:keyup.enter="RunSearch()"
-                            v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
+                            v-on:click:append="searchStringKeyboardf = !searchStringKeyboardf"
                         ></v-text-field>
                         <v-expand-transition>
-                            <div v-if="searchStringKeyboard" class="pl-10 d-flex justify-center">
+                            <div v-if="searchStringKeyboardf" class="d-flex justify-center mb-3">
                                 <keyboard
                                     :string="search.q"
-                                    layout="el_uc_adv"
+                                    layout="el_uc"
                                     small
                                     hide_options
                                     v-on:input="(emit) => { search.q = emit }"
@@ -45,7 +239,7 @@
                         </v-expand-transition>
 
                         <!-- Options -->
-                        <div class="d-flex flex-wrap justify-center align-center mt-n6">
+                        <div class="d-flex flex-wrap align-center mt-n5">
                             <div class="d-flex mr-9 align-center">
                                 <v-checkbox
                                     v-model="search.qre"
@@ -61,57 +255,6 @@
                                 class="mr-10"
                             />
 
-                            <!-- Excludes
-                            <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
-                                <template v-slot:activator="{ on, attrs }">
-                                    <div
-                                        class="d-flex align-center body-1 mr-9"
-                                        style="cursor: pointer"
-                                        v-bind="attrs" v-on="on"
-                                    >
-                                        <v-btn icon class="mr-1"><v-icon v-text="'manage_search'" /></v-btn>
-                                        <div v-text="'Included Fields'" />
-                                    </div>
-                                </template>
-
-                                <div style="width: 450px" class="grey_sec d-flex flex-wrap pt-7">
-                                    <div
-                                        v-for="(key, k) in [
-                                            'period', 'region',
-                                            null,
-                                            'coinage', 'mint', 'ruler', 'tribe',
-                                            null,
-                                            'standard', 'denomination', 'material',
-                                            null,
-                                            'design_o_de', 'design_o_en', 'design_r_de', 'design_r_en',
-                                            null,
-                                            'symbol_o_de', 'symbol_o_en', 'symbol_r_de', 'symbol_r_en',
-                                            null,
-                                            'legend_o', 'legend_r',
-                                            null,
-                                            'persons',
-                                            null,
-                                            'literature', 'objectgroups', 'owner',
-                                            null,
-                                            'pecularities_de', 'pecularities_en',
-                                            'comment_de', 'comment_en'
-                                        ]"
-                                        :key="key + k"
-                                        class="pl-5 pr-5"
-                                        :style="'width:' + (key ? 50 : 100) + '%;'"
-                                    >
-                                        <v-checkbox
-                                            v-if="key"
-                                            :input-value="search.qex ? !search.qex.includes(key) : true"
-                                            :label="key"
-                                            class="mt-n3"
-                                            @click="searchStringIncludeFiled(key)"
-                                        />
-                                        <v-divider v-else class="mb-4 mt-n3" />
-                                    </div>
-                                </div>
-                            </v-menu> -->
-
                             <!-- Filter -->
                             <v-menu tile offset-y nudge-bottom="5" :close-on-content-click="false">
                                 <template v-slot:activator="{ on, attrs }">
@@ -121,7 +264,7 @@
                                         v-bind="attrs" v-on="on"
                                     >
                                         <v-btn icon class="mr-1"><v-icon v-text="'filter_alt'" /></v-btn>
-                                        <div v-text="'Additional Filters'" />
+                                        <div v-text="'Filters'" />
                                     </div>
                                 </template>
 
@@ -211,7 +354,7 @@
                                         v-bind="attrs" v-on="on"
                                     >
                                         <v-btn icon class="mr-1"><v-icon v-text="'help_outline'" /></v-btn>
-                                        <div v-text="'Instructions'" />
+                                        <div v-text="'How to'" />
                                     </div>
                                 </template>
 
@@ -254,13 +397,113 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
 
-                <v-expansion-panel>
-                    <v-expansion-panel-header class="pl-2">
+                <!-- Mixed ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel class="transparent">
+                    <!-- Header -->
+                    <v-expansion-panel-header class="pl-2 font-weight-bold">
+                        <div class="d-flex align-center">
+                            <v-icon v-text="'settings'" />
+                            <div v-text="'System'" class="ml-2" />
+                        </div>
+                    </v-expansion-panel-header>
+
+                    <!-- Content -->
+                    <v-expansion-panel-content>
+                        <!-- ID -->
+                        <v-text-field dense outlined filled clearable
+                            v-model="search.id"
+                            :label="labels[entity.slice(0, -1)] + ' ID'"
+                            prepend-icon="fingerprint"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <!-- Linked to Type/coin -->
+                        <v-select dense outlined filled
+                            :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
+                            :label="'Linked to '+(entity == 'coins' ? 'Type' : 'Coin')+'?'"
+                            v-model="search.state_linked"
+                            :items="selects.state_yes_no"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <!-- ID Opposite Entity -->
+                        <v-text-field dense outlined filled clearable
+                            v-model="search ['id_'+(entity == 'coins' ? 'type' : 'coin')]"
+                            :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'"
+                            :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <!-- Linked to Type/coin -->
+                        <v-select dense outlined filled
+                            prepend-icon="sync"
+                            :label="(entity == 'coins' ? 'Is inherited' : 'Inherits to Coins')+'?'"
+                            v-model="search.state_inherited"
+                            :items="selects.state_yes_no"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <!-- Creator / Editor -->
+                        <SearchForeignKey
+                            entity="users"
+                            label="Creator"
+                            icon="person"
+                            :selected="search"
+                            selected_key="id_creator"
+                            v-on:select="(emit) => { search.id_creator = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+
+                        <SearchForeignKey
+                            entity="users"
+                            label="Editor"
+                            icon="person_outline"
+                            :selected="search"
+                            selected_key="id_editor"
+                            v-on:select="(emit) => { search.id_editor = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+
+                        <!-- Public -->
+                        <v-select dense outlined filled
+                            :items="selects.state_public"
+                            v-model="search.state_public"
+                            prepend-icon="publish"
+                            label="Publication State"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <v-select dense outlined filled
+                            v-model="search.imported"
+                            :items="$store.state.lists.manual.imports"
+                            prepend-icon="arrow_circle_down"
+                            label="Coins Import"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <SearchForeignKey
+                            entity="objectgroups"
+                            label="Object Group"
+                            icon="control_camera"
+                            :selected="search"
+                            selected_key="id_group"
+                            v-on:select="(emit) => { search.id_group = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+
+                <!-- String Search ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel class="transparent">
+                    <!-- Header -->
+                    <v-expansion-panel-header class="pl-2 font-weight-bold">
                         <div class="d-flex align-center">
                             <v-icon v-text="'search'" />
                             <div v-text="'test'" class="ml-2" />
                         </div>
                     </v-expansion-panel-header>
+
+                    <!-- Content -->
                     <v-expansion-panel-content>
                     eg
                     </v-expansion-panel-content>
@@ -268,280 +511,6 @@
             </v-expansion-panels>
         </template>
     </drawer>
-
-    <!-- Content ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-    <component-content>
-        <template v-slot:content>
-            <!-- Control Bar ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-            <v-card tile flat class="sysbar" :loading="loading">
-                <v-divider></v-divider>
-                <div class="d-flex component-wrap">
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn v-on="on" depressed color="sysbar"
-                                :tile="$root.user.level > 18"
-                                :text="$root.user.level < 18"
-                                :disabled="$root.user.level < 18"
-                                @click="TogglePublisher()"
-                            >
-                                <v-icon v-text="publisher ? 'public_off' : 'public'"></v-icon>
-                            </v-btn>
-                        </template>
-                        <span v-text="publisher ? 'Hide Publisher' : 'Show Publisher'"></span>
-                    </v-tooltip>
-
-                    <v-spacer></v-spacer>
-
-                    <pagination
-                        :offset="dbi_params.offset"
-                        :limit="dbi_params.limit"
-                        :count="dbi_params.count"
-                        v-on:offset="(emit) => { dbi_params.offset = emit; SetItems () }"
-                    ></pagination>
-
-                    <v-spacer></v-spacer>
-
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn v-on="on"
-                                depressed
-                                tile
-                                color="sysbar"
-                                @click="$router.push(entity === 'coins' ? '/types/search' : '/coins/search')"
-                            >
-                                <v-icon v-text="entity === 'coins' ? 'blur_circular' : 'copyright'"></v-icon>
-                            </v-btn>
-                        </template>
-                        <span v-text="entity === 'coins' ? 'Go to Types' : 'Go to Coins'"></span>
-                    </v-tooltip>
-                </div>
-            </v-card>
-
-            <div class="appbar d-flex component-wrap">
-
-                <!-- Publisher -->
-                <v-fade-transition>
-                    <div v-if="publisher" class="d-flex component-wrap">
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                                <v-btn v-on="on" color="blue_prim" depressed
-                                    :tile="items[0] ? true : false"
-                                    :text="items[0] ? false : true"
-                                    :disabled="items[0] ? false : true"
-                                    @click="checked_state = !checked_state; SetChecked (checked_state);"
-                                >
-                                    <v-icon v-text="checked_state ? 'radio_button_unchecked' : 'radio_button_checked'"></v-icon>
-                                </v-btn>
-                            </template>
-                            <span v-text="(checked_state ? 'Deselect' : 'Select') + ' all ' + labels[entity]"></span>
-                        </v-tooltip>
-
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                                <v-btn v-on="on" color="blue_prim" depressed
-                                    :tile="items[0] ? true : false"
-                                    :text="!checked.filter((check) => { return check.state === true })[0]"
-                                    :disabled="!checked.filter((check) => { return check.state === true })[0]"
-                                    @click="Publish(checked, 1)"
-                                >
-                                    <v-icon>publish</v-icon>
-                                </v-btn>
-                            </template>
-                            <span v-text="'Publish selected ' + labels[entity]"></span>
-                        </v-tooltip>
-                        <v-divider vertical></v-divider>
-                    </div>
-                </v-fade-transition>
-
-                <!-- JK: Limit -->
-                <v-menu offset-y transition="scale-transition">
-                    <template v-slot:activator="{ on: menu }">
-                        <v-tooltip bottom>
-                        <template v-slot:activator="{ on: tooltip }">
-                            <v-btn v-on="{ ...tooltip, ...menu }" tile depressed>
-                                {{ dbi_params.limit }}
-                            </v-btn>
-                        </template>
-                        <span v-text="'Set number of ' + labels[entity] + ' per page'"></span>
-                        </v-tooltip>
-                    </template>
-                    <v-list>
-                        <v-list-item
-                            v-for="(ipp, i) in $store.state.ItemsPerPage"
-                            :key="i"
-                            :class="dbi_params.limit === ipp ? 'font-weight-black' : ''"
-                            @click="dbi_params.limit = ipp; SetItems ();"
-                        >
-                            <v-list-item-title v-text="ipp"></v-list-item-title>
-                        </v-list-item>
-                    </v-list>
-                </v-menu>
-
-                <!-- Order by -->
-                <v-menu offset-y transition="scale-transition">
-                    <template v-slot:activator="{ on: menu }">
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on: tooltip }">
-                                <v-btn v-on="{ ...tooltip, ...menu }" tile depressed>
-                                    <v-icon>sort_by_alpha</v-icon>
-                                </v-btn>
-                            </template>
-                            <span v-text="'Order ' + labels[entity] + ' by ...'"></span>
-                        </v-tooltip>
-                    </template>
-                    <v-card tile>
-                        <v-list>
-                            <v-list-item
-                                v-for="(sorter, i) in sorters"
-                                :key="i"
-                                :class="dbi_params.sort_by === sorter.value ? 'font-weight-black' : ''"
-                                @click="OrderBy(sorter.value)"
-                            >
-                                <v-list-item-icon>
-                                    <v-icon v-text="dbi_params.sort_by === sorter.value ? (dbi_params.sort_by_op == 'ASC' ? 'keyboard_arrow_down' : 'keyboard_arrow_up') : 'keyboard_arrow_up'"></v-icon>
-                                </v-list-item-icon>
-                                <v-list-item-title v-text="sorter.text"></v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </v-card>
-                </v-menu>
-
-                <!-- Display Mode -->
-                <v-menu offset-y transition="scale-transition">
-                    <template v-slot:activator="{ on: menu }">
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on: tooltip }">
-                                <v-btn v-on="{ ...tooltip, ...menu }" tile depressed>
-                                    <v-icon v-text="display_mode[display].icon"></v-icon>
-                                </v-btn>
-                            </template>
-                            <span v-text="'Display ' + labels[entity] + ' as ...'"></span>
-                        </v-tooltip>
-                    </template>
-                    <v-card tile>
-                        <v-list>
-                            <v-list-item
-                                v-for="(dm, i) in display_mode"
-                                :key="i"
-                                :class="display === dm.value ? 'font-weight-black' : ''"
-                                @click="setDisplayMode(dm.value)"
-                            >
-                                <v-list-item-icon><v-icon v-text="dm.icon"></v-icon></v-list-item-icon>
-                                <v-list-item-title v-text="dm.text"></v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </v-card>
-                </v-menu>
-
-                <v-spacer></v-spacer>
-
-                <!-- Refresh -->
-                <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                        <v-btn v-on="on" depressed
-                            :tile="items[0] ? true : false"
-                            :text="items[0] ? false : true"
-                            :disabled="items[0] ? false : true"
-                            @click="SetItems ();"
-                        >
-                            <v-icon>refresh</v-icon>
-                        </v-btn>
-                    </template>
-                    <span>Refresh current page</span>
-                </v-tooltip>
-
-            </div>
-
-            <!-- Search Results ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-
-            <!-- Error -->
-            <div
-                v-if="error"
-                class="pt-5 headline d-flex justify-center"
-                v-html="'Sorry, an error occured.&ensp;Please reload and retry'"
-            ></div>
-
-            <!-- Content -->
-            <div v-if="items[0]">
-
-                <!-- Trading Cards || Index Cards -->
-                <div v-if="[0, 1, 2].includes(display)">
-                    <v-row>
-                        <v-col
-                            v-for="(item, i) in items"
-                            :key="i + ' ' + display"
-                            cols="12"
-                            :sm="display === 0 ? 6 : 12"
-                            :md="display === 0 ? 3 : 12"
-                            :lg="display === 0 ? 2 : 12"
-                        >
-                            <component
-                                :is="display_mode[display].component"
-                                :key="display + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
-                                :entity="entity"
-                                :item="item"
-                                :publisher="publisher"
-                                :checked="checked[i].state"
-                                v-on:publish="(emit) => { Publish ([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0)) }"
-                                v-on:checked="checked[i].state = !checked[i].state"
-                            ></component><!-- v-on:inheritor="(emit) => { details_dialog = { entity: 'types', id: emit } }"-->
-                        </v-col>
-                    </v-row>
-                </div>
-
-            </div>
-
-            <!-- Pagination -->
-            <v-card
-                v-if="items[0]"
-                tile
-                :class="'sysbar d-flex component-wrap justify-center'+(display !== 1 ? ' mt-5' : '')"
-                sytel="position: relative"
-            >
-                <pagination
-                    :offset="dbi_params.offset"
-                    :limit="dbi_params.limit"
-                    :count="dbi_params.count"
-                    v-on:offset="(emit) => {
-                        dbi_params.offset = emit;
-                        SetItems();
-                        ScrollTop();
-                    }"
-                ></pagination>
-                <div style="position: absolute; right: 0">
-                    <!-- Refresh -->
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn
-                                v-on="on"
-                                depressed
-                                tile
-                                color="grey_prim"
-                                @click="SetItems();"
-                            >
-                                <v-icon>refresh</v-icon>
-                            </v-btn>
-                        </template>
-                        <span>Refresh current page</span>
-                    </v-tooltip>
-                    <!-- Scroll to top
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn v-on="on" depressed
-                                tile
-                                color="grey_prim"
-                                @click="ScrollTop()"
-                            >
-                                <v-icon>north</v-icon>
-                            </v-btn>
-                        </template>
-                        <span>Scroll to top</span>
-                    </v-tooltip> -->
-                </div>
-            </v-card>
-
-        </template>
-    </component-content>
 
 </div>
 </template>
@@ -573,6 +542,7 @@ export default {
                 q: null
             },
             //previous_search:    [],
+            searchCounter:      0,
             search_refresh:     0,
             dbi_params:         {},
 
@@ -616,7 +586,8 @@ export default {
                 ]
             },
 
-            searchStringKeyboard: false
+            searchStringKeyboard: false,
+            searchStringKeyboardf: false
         }
     },
 
@@ -688,12 +659,13 @@ export default {
         },
 
         RunSearch () {
+            ++this.searchCounter
             this.cacheCurrentSearch()
             this.SetItems()
         },
 
         async SetItems () {
-            this.loading    = true;
+            this.loading    = this.$root.loading = true;
             this.error      = false;
             const self      = this;
 
@@ -745,7 +717,7 @@ export default {
                 this.error = true
             }
 
-            this.loading = false
+            this.loading = this.$root.loading = false
         },
 
         SetChecked (state) {
@@ -753,7 +725,7 @@ export default {
             this.checked = []
 
             this.items.forEach((item) => {
-                checkers.push({ id: item.id, state: item.public === 0 ? state : false })
+                checkers.push({ id: item.id, state: [0, 2].includes(item.public) ? state : false })
             })
             this.checked = checkers
         },

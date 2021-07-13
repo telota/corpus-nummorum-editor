@@ -1,8 +1,8 @@
 <template>
 <div class="component-tb">
-    <div v-if="!flat" class="component-toolbar component-toolbar-shadow" />
-    <div class="component-toolbar header_bg">
-        <div :class="styling" style="width: 100%; height: 50px;">
+    <div v-if="!flat" class="component-toolbar component-toolbar-shadow" :style="styling" />
+    <div class="component-toolbar header_bg" :style="styling">
+        <div :class="classes" :style="'width: 100%; height:' + (this.height ? this.height: 50) + 'px;'">
             <slot name="toolbar" />
         </div>
     </div>
@@ -20,12 +20,20 @@ export default {
 
     props: {
         flat: { type: Boolean, default: false },
-        noFlex: { type: Boolean, default: false }
+        noFlex: { type: Boolean, default: false },
+        top: { type: Number, default: null },
+        height: { type: Number, default: null },
     },
 
     computed: {
-        styling () {
+        classes () {
             return this.noFlex ? '' : 'd-flex align-center'
+        },
+        styling () {
+            return [
+                this.top ? ('top:' + this.top + 'px') : null,
+                this.height ? ('height:' + this.height + 'px') : null,
+            ].join('\n;')
         }
     },
 

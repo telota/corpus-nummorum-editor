@@ -46,6 +46,7 @@ a {
     z-index: 99;
     width: 120%;
     left: -20px;
+    z-index: 90;
     box-shadow: 0px 0px 10px rgba(0,0,0,0.75);
 }
 
@@ -55,4 +56,8 @@ a {
     height: calc(100vh - 90px);
     width: 100%;
     overflow-y: auto;
+}
+
+.whitespace-nowrap {
+    white-space: nowrap;
 }

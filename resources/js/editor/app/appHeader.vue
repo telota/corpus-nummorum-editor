@@ -38,7 +38,7 @@
                         style="height: 40px; cursor: pointer;"
                     >
                         <div
-                            class="font-weight-bold blue_sec--text"
+                            class="font-weight-bold light-blue--text text--darken-3"
                             style="font-size: 24px; line-height: 24px;" v-text="'CN'"
                         />
                     </div>
@@ -50,7 +50,7 @@
                 <v-menu
                     :key="'route' + r"
                     offset-y
-                    open-on-hover
+                    disabled-open-on-hover
                     tile
                 >
                     <template v-slot:activator="{ on, attrs }">
@@ -332,30 +332,28 @@ export default {
     },
 
     mounted () {
-        if (this.$root.settings?.dashboardFavorites) {
-            const favorites = []
-
-            JSON.parse(this.$root.settings.dashboardFavorites).forEach((link) => {
-                const found = this.availableFavs.find((listed) => listed.link === link)
-                if (found) favorites.push(found)
-            })
-            this.favorites = favorites
-        }
+        this.setFavorites()
     },
 
     methods: {
-        openInNewTab (link) {
-            if (link) { window.open(link) }
-        },
-        goTo (link) {
-            if (link.startsWith('http')) this.openInNewTab('link')
-            else if (this.$route.name !== link) this.$router.push('/' + link)
-            //else window.location.reload()
+        setFavorites () {
+            if (this.$root.settings?.dashboardFavorites) {
+                const favorites = []
+                const presets = this.$root.settings.dashboardFavorites
+
+                if (presets) {
+                    presets.trim().split(/\s+/).forEach((link) => {
+                        const found = this.availableFavs.find((listed) => listed.link === link)
+                        if (found) favorites.push(found)
+                    })
+                }
+                this.favorites = favorites
+            }
         },
 
         manageFavorites (toggle) {
             if (toggle) {
-                this.selectedFavs = this.favorites.slice(0)
+                this.selectedFavs = this.favorites.splice(0)
                 this.showFavorites = true
             }
             else {
@@ -391,7 +389,7 @@ export default {
         },
 
         async saveFavorites () {
-            await this.$root.changeSettings('dashboardFavorites', JSON.stringify(this.selectedFavs.map((fav) => { return fav.link })))
+            await this.$root.changeSettings('dashboardFavorites', this.selectedFavs.map((fav) => { return fav.link }).join(' '))
             this.favorites = this.selectedFavs
             this.manageFavorites (false)
         }

@@ -57,7 +57,7 @@
         <app-settings :data='{!! json_encode($data) !!}'></app-settings>
 
         <template>
-            <v-app id="inspire" :style="$vuetify.theme.dark ? 'background-color:#181818' : 'background-color:#d0d0d0'">
+            <v-app id="inspire" :style="$vuetify.theme.dark ? 'background-color:#181818' : 'background-color:#aaa'">
 
                 <app-header></app-header>
 

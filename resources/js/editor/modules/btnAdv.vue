@@ -2,10 +2,11 @@
 <v-tooltip :disabled="disabled || !tooltip" bottom>
     <template v-slot:activator="{ on }">
 
-        <v-hover v-slot="{ hover }" :disabled="disabled">
+        <v-hover v-slot="{ hover }">
             <div
                 v-on="on"
-                :class="classes(hover)"
+                class="d-flex justify-center align-center"
+                :class="colors[hover && !disabled ? 'hovered' : 'main']"
                 :style="style"
                 @click="clicked"
             >
@@ -107,7 +108,7 @@ export default {
         classes (hover) {
             const classes = []
 
-            classes.push('d-flex justify-center align-center')
+            classes.push('')
             classes.push(this.colors[hover ? 'hovered' : 'main'])
 
             return classes.join(' ')
