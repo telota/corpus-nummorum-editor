@@ -16,8 +16,8 @@
     {{--<link rel="shortcut icon" href="favicon.ico">--}}
     <link rel="icon" type="image/png" href="favicon.png" sizes="96x96">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link href="{{ env('APP_URL') }}/css/editor.css" rel="stylesheet">
-    <link href="{{ env('APP_URL') }}/css/loader.css" rel="stylesheet">
+    <link href="{{ env('APP_URL') }}/css/editor.css{{ $version }}" rel="stylesheet">
+    <link href="{{ env('APP_URL') }}/css/loader.css{{ $version }}" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
 
@@ -117,7 +117,7 @@
     </div>
 
     <!-- Editor JS -->
-    <script src="{{ env('APP_URL') }}/js/editor.js"></script>
+    <script src="{{ env('APP_URL') }}/js/editor.js{{ $version }}"></script>
 
 </body>
 

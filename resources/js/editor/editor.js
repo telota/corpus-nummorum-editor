@@ -150,6 +150,7 @@ const editor = new Vue({
                     header_bg:  '#e6e6e6',
                     header_hover:'#d2d2d2',
                     header_marked:'#0099cc',
+                    drawer_bg:  '#d0d0d0',
                 },
                 dark: {
                     app_bg:     '#181818',
@@ -174,6 +175,7 @@ const editor = new Vue({
                     header_bg:  '#363636',
                     header_hover:'#666666',
                     header_marked:'#0099cc',
+                    drawer_bg:  '#262626',
                 },
             },
         },
@@ -256,13 +258,10 @@ const editor = new Vue({
 
         // Remove initial Loader
         el = document.getElementById('initial-loader')
-        el.style.opacity = 1
-        el.style['-webkit-transition'] = 'opacity 500ms ease-out'
-        el.style['-moz-transition'] = 'opacity 500ms ease-out'
-        el.style['-ms-transition'] = 'opacity 500ms ease-out'
-        el.style['-o-transition'] = 'opacity 500ms ease-out'
-        el.style.opacity = 0
-        setTimeout(() => {el?.remove()}, 501);
+        if (el) {
+            el.style.opacity = 0
+            setTimeout(() => { el.remove() }, 501);
+        }
 
         // progress bar top
         /*AxiosAjaxDetct.init(

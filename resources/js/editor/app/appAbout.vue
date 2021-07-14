@@ -3,7 +3,7 @@
     :value="show"
     :z-index="500"
 >
-    <v-card tile dark :max-width="750">
+    <v-card tile dark class="grey_sec" :max-width="750">
         <h1 class="text-center pl-5 pr-5 pt-5 font-weight-thin">
             {{ $store.state.appName }}
         </h1>
@@ -11,6 +11,7 @@
         <v-card-text class="text-center">
             <p>
                 This is an Instance of the "CN Editor" App.
+                <span v-if="git" v-html="git" />
             </p>
             <p>
                 "CN Editor" is open-sourced software licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">GNU General Public License v3.0</a>,<br/>
@@ -74,9 +75,9 @@ export default {
             if (!this.$root.system?.git?.[0]) return null
             const git = this.$root.system.git
             return [
-                'VERSION:',
-                '<a href="' + git[0] + '" target="_blank">' + git[1] + '</a>',
-                '(committed by ' + git[2] + ' ' + git[3] + ')'
+                '<br/>VERSION:',
+                '<a href="' + git[0] + '" target="_blank">' + (git[4] ?? git[1]) + '</a>,',
+                'committed by ' + git[2] + ' (' + git[3] + ')'
             ].join('\n');
         }
     }

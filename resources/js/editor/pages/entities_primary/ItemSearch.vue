@@ -71,6 +71,7 @@
     <component-content>
         <template v-slot:content>
 
+            <div id="results-anchor" />
             <!-- Error -->
             <div
                 v-if="error"
@@ -109,19 +110,11 @@
             </div>
 
             <!-- Start Screen -->
-            <div v-else :style="[
-                'position: fixed',
-                'width: 500px',
-                'left: 50%',
-                'margin-left: -250px',
-                'height: 300px',
-                'top: 50%',
-                'margin-top: -150px'
-            ].join(';\n')">
+            <div v-else class="start-screen">
                 <v-card
                     tile
                     raised
-                    class="grey_prim"
+                    class="header_bg"
                     style="height: 100%; position: relative"
                 >
                     <div class="pa-3">
@@ -184,48 +177,65 @@
     </component-content>
 
     <!-- Search ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-    <drawer v-on:hover="onDrawerHover" :header="40" :collapse="searchCounter" v-on:search="RunSearch()">
+    <drawer
+        header
+        :collapse="searchCounter"
+        v-on:expand="onDrawerExpand"
+        v-on:search="RunSearch()"
+        v-on:clear="SearchDefaults(true)"
+    >
 
         <!-- Filters -->
         <template v-slot:content>
             <v-expansion-panels accordion tile flat v-model="activeTab" style="z-index: 100;">
 
                 <!-- Favorites ------------------------------------------------- ------------------------------------------------- -->
-                <v-expansion-panel class="transparent">
+                <v-expansion-panel  :class="activeTab === 0 ? 'header_bg' : 'transparent'">
                     <!-- Header -->
-                    <v-expansion-panel-header class="pl-2 font-weight-bold">
+                    <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                         <div class="d-flex align-center">
                             <v-icon v-text="'star'" />
-                            <div v-text="'Stored Queries'" class="ml-2 whitespace-nowrap" />
+                            <div v-text="'Stored Queries'" class="ml-4 whitespace-nowrap" />
                         </div>
                     </v-expansion-panel-header>
 
                     <!-- Content -->
                     <v-expansion-panel-content>
+                        <v-select dense outlined filled
+                            prepend-icon="youtube_searched_for"
+                            label="Previous Queries"
+                            :items="$store.state.previousSearches[entity].map((ls) => {
+                                return { value: ls, text: printPreviousSearch(ls) }
+                            })"
+                            :menu-props="{ offsetY: true }"
+                            @input="restorePreviousSearch"
+                        />
                     </v-expansion-panel-content>
                 </v-expansion-panel>
 
+                <hr class="search-divider" />
+
                 <!-- String Search ------------------------------------------------- ------------------------------------------------- -->
-                <v-expansion-panel class="transparent">
+                <v-expansion-panel :class="activeTab === 1 ? 'header_bg' : 'transparent'">
                     <!-- Header -->
-                    <v-expansion-panel-header class="pl-2 font-weight-bold">
+                    <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                         <div class="d-flex align-center">
                             <v-icon v-text="'manage_search'" />
-                            <div v-text="'test'" class="ml-2" />
+                            <div v-text="'Fulltext Keyword Search'" class="ml-4 whitespace-nowrap" />
                         </div>
                     </v-expansion-panel-header>
 
                     <!-- Content -->
                     <v-expansion-panel-content>
 
-                        <v-text-field clearable dense
+                        <v-text-field dense outlined filled clearable
                             v-model="search.q"
                             :label="$root.label('keywords')"
                             append-icon="keyboard"
                             class="mt-5 mb-n4"
                             v-on:keyup.enter="RunSearch()"
                             v-on:click:append="searchStringKeyboardf = !searchStringKeyboardf"
-                        ></v-text-field>
+                        />
                         <v-expand-transition>
                             <div v-if="searchStringKeyboardf" class="d-flex justify-center mb-3">
                                 <keyboard
@@ -234,7 +244,7 @@
                                     small
                                     hide_options
                                     v-on:input="(emit) => { search.q = emit }"
-                                ></keyboard>
+                                />
                             </div>
                         </v-expand-transition>
 
@@ -279,7 +289,7 @@
                                                     label="Min."
                                                     prepend-icon="last_page"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-text-field>
+                                                />
                                             </v-col>
 
                                             <v-col cols="6">
@@ -288,7 +298,7 @@
                                                     label="Max."
                                                     append-outer-icon="first_page"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-text-field>
+                                                />
                                             </v-col>
 
                                             <!-- Weight -->
@@ -299,7 +309,7 @@
                                                     label="Min."
                                                     prepend-icon="last_page"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-text-field>
+                                                />
                                             </v-col>
 
                                             <v-col cols="6" v-if="entity == 'coins'">
@@ -308,7 +318,7 @@
                                                     label="Max."
                                                     append-outer-icon="first_page"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-text-field>
+                                                />
                                             </v-col>
 
                                             <!-- Diameter -->
@@ -319,7 +329,7 @@
                                                     label="Min."
                                                     prepend-icon="last_page"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-text-field>
+                                                />
                                             </v-col>
 
                                             <v-col cols="6" v-if="entity == 'coins'">
@@ -328,7 +338,7 @@
                                                     label="Max."
                                                     append-outer-icon="first_page"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-text-field>
+                                                />
                                             </v-col>
 
                                             <!-- Public -->
@@ -338,7 +348,7 @@
                                                     :items="selects.state_public"
                                                     v-model="search.state_public"
                                                     v-on:keyup.enter="RunSearch()"
-                                                ></v-select>
+                                                />
                                             </v-col>
                                         </v-row>
                                     </v-card-text>
@@ -397,89 +407,141 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
 
+                <hr class="search-divider" />
+
                 <!-- Mixed ------------------------------------------------- ------------------------------------------------- -->
-                <v-expansion-panel class="transparent">
+                <v-expansion-panel :class="activeTab === 2 ? 'header_bg' : 'transparent'">
                     <!-- Header -->
-                    <v-expansion-panel-header class="pl-2 font-weight-bold">
+                    <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                         <div class="d-flex align-center">
                             <v-icon v-text="'settings'" />
-                            <div v-text="'System'" class="ml-2" />
+                            <div v-text="'System'" class="ml-4 whitespace-nowrap" />
                         </div>
                     </v-expansion-panel-header>
 
                     <!-- Content -->
                     <v-expansion-panel-content>
-                        <!-- ID -->
-                        <v-text-field dense outlined filled clearable
-                            v-model="search.id"
-                            :label="labels[entity.slice(0, -1)] + ' ID'"
-                            prepend-icon="fingerprint"
-                            v-on:keyup.enter="RunSearch()"
-                        />
+                        <div class="d-flex">
+                            <!-- ID -->
+                            <div class="search-field-50 side-l">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.id"
+                                    :label="labels[entity.slice(0, -1)] + ' ID'"
+                                    prepend-icon="fingerprint"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
 
-                        <!-- Linked to Type/coin -->
-                        <v-select dense outlined filled
-                            :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
-                            :label="'Linked to '+(entity == 'coins' ? 'Type' : 'Coin')+'?'"
-                            v-model="search.state_linked"
-                            :items="selects.state_yes_no"
-                            v-on:keyup.enter="RunSearch()"
-                        />
+                            <!-- Public -->
+                            <div class="search-field-50 side-r">
+                                <v-select dense outlined filled
+                                    :items="selects.state_public"
+                                    v-model="search.state_public"
+                                    prepend-icon="publish"
+                                    label="Publication State"
+                                    :menu-props="{ offsetY: true }"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
 
-                        <!-- ID Opposite Entity -->
-                        <v-text-field dense outlined filled clearable
-                            v-model="search ['id_'+(entity == 'coins' ? 'type' : 'coin')]"
-                            :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'"
-                            :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
-                            v-on:keyup.enter="RunSearch()"
-                        />
+                        <div class="d-flex">
+                            <!-- Linked to Type/coin -->
+                            <div class="search-field-50 side-l">
+                                <v-select dense outlined filled
+                                    :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
+                                    :label="'Linked to '+(entity == 'coins' ? 'Type' : 'Coin')+'?'"
+                                    v-model="search.state_linked"
+                                    :items="selects.state_yes_no"
+                                    :menu-props="{ offsetY: true }"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
 
-                        <!-- Linked to Type/coin -->
-                        <v-select dense outlined filled
-                            prepend-icon="sync"
-                            :label="(entity == 'coins' ? 'Is inherited' : 'Inherits to Coins')+'?'"
-                            v-model="search.state_inherited"
-                            :items="selects.state_yes_no"
-                            v-on:keyup.enter="RunSearch()"
-                        />
+                            <!-- Linked to Type/coin -->
+                            <div class="search-field-50 side-r">
+                                <v-select dense outlined filled
+                                    prepend-icon="sync"
+                                    :label="(entity == 'coins' ? 'Is inherited' : 'Inherits to Coins')+'?'"
+                                    v-model="search.state_inherited"
+                                    :items="selects.state_yes_no"
+                                    :menu-props="{ offsetY: true }"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="d-flex">
+                            <!-- ID Opposite Entity -->
+                            <div class="search-field-50 side-l">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search ['id_'+(entity == 'coins' ? 'type' : 'coin')]"
+                                    :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'"
+                                    :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                            <div class="search-field-50 side-r"/>
+                        </div>
 
                         <!-- Creator / Editor -->
-                        <SearchForeignKey
-                            entity="users"
-                            label="Creator"
-                            icon="person"
-                            :selected="search"
-                            selected_key="id_creator"
-                            v-on:select="(emit) => { search.id_creator = emit }"
-                            v-on:keyup_enter="RunSearch()"
-                        />
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="users"
+                                    label="Creator"
+                                    icon="person"
+                                    :selected="search"
+                                    selected_key="id_creator"
+                                    v-on:select="(emit) => { search.id_creator = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
 
-                        <SearchForeignKey
-                            entity="users"
-                            label="Editor"
-                            icon="person_outline"
-                            :selected="search"
-                            selected_key="id_editor"
-                            v-on:select="(emit) => { search.id_editor = emit }"
-                            v-on:keyup_enter="RunSearch()"
-                        />
-
-                        <!-- Public -->
-                        <v-select dense outlined filled
-                            :items="selects.state_public"
-                            v-model="search.state_public"
-                            prepend-icon="publish"
-                            label="Publication State"
-                            v-on:keyup.enter="RunSearch()"
-                        />
+                            <div class="search-field-50 side-r">
+                                <SearchForeignKey
+                                    entity="users"
+                                    label="Editor"
+                                    icon="person_outline"
+                                    :selected="search"
+                                    selected_key="id_editor"
+                                    v-on:select="(emit) => { search.id_editor = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
 
                         <v-select dense outlined filled
                             v-model="search.imported"
                             :items="$store.state.lists.manual.imports"
                             prepend-icon="arrow_circle_down"
-                            label="Coins Import"
+                            label="Scripted Coin Import"
+                            :menu-props="{ offsetY: true }"
                             v-on:keyup.enter="RunSearch()"
                         />
+
+                        <!-- Source -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <v-select dense outlined filled
+                                    v-model="search.state_source"
+                                    :items="selects.state_yes_no"
+                                    prepend-icon="arrow_circle_down"
+                                    label="Has Source?"
+                                    :menu-props="{ offsetY: true }"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+
+                            <div class="search-field-50 side-r">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.source"
+                                    label="Source Link"
+                                    prepend-icon="arrow_circle_down"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
 
                         <SearchForeignKey
                             entity="objectgroups"
@@ -493,21 +555,456 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
 
-                <!-- String Search ------------------------------------------------- ------------------------------------------------- -->
-                <v-expansion-panel class="transparent">
+                <hr class="search-divider" />
+
+                <!-- Comment, References ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel :class="activeTab === 3 ? 'header_bg' : 'transparent'">
                     <!-- Header -->
-                    <v-expansion-panel-header class="pl-2 font-weight-bold">
+                    <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                         <div class="d-flex align-center">
-                            <v-icon v-text="'search'" />
-                            <div v-text="'test'" class="ml-2" />
+                            <v-icon v-text="'local_library'" />
+                            <div v-text="'Comment, References, Owner'" class="ml-4 whitespace-nowrap" />
                         </div>
                     </v-expansion-panel-header>
 
                     <!-- Content -->
                     <v-expansion-panel-content>
-                    eg
+
+                        <!-- Public Comment -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <v-select dense outlined filled
+                                    v-model="search.state_comment_public"
+                                    :items="selects.state_yes_no"
+                                    prepend-icon="chat_bubble"
+                                    label="Has public Comment?"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+
+                            <div class="search-field-50 side-r">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.comment_public"
+                                    label="Public Comment"
+                                    prepend-icon="chat_bubble"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Private Comment -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <v-select dense outlined filled
+                                    v-model="search.state_comment_private"
+                                    :items="selects.state_yes_no"
+                                    prepend-icon="chat_bubble_outline"
+                                    label="Has private Comment?"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+
+                            <div class="search-field-50 side-r">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="search.comment_private"
+                                    label="Private Comment"
+                                    prepend-icon="chat_bubble_outline"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Private Description -->
+                        <v-text-field dense outlined filled clearable
+                            v-model="search.description_private"
+                            label="Private Description"
+                            prepend-icon="label_important"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+                        <v-text-field dense outlined filled clearable
+                            v-if="entity === 'types'"
+                            v-model="search.name_private"
+                            label="Private Name"
+                            prepend-icon="label"
+                            v-on:keyup.enter="RunSearch()"
+                        />
+
+                        <!-- References -->
+                        <SearchForeignKey
+                            entity="references"
+                            label="Bibliography"
+                            icon="menu_book"
+                            :selected="search"
+                            selected_key="id_reference"
+                            v-on:select="(emit) => { search.id_reference = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+
+                        <!-- Owner -->
+                        <SearchForeignKey
+                            entity="owners"
+                            label="Owner"
+                            icon="account_circle"
+                            :selected="search"
+                            selected_key="id_owner"
+                            v-on:select="(emit) => { search.id_owner = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+                        <template v-if="entity === 'coins'">
+                            <v-text-field dense outlined filled clearable
+                                v-if="entity === 'coins'"
+                                v-model="search.provenience"
+                                label="Provenience"
+                                prepend-icon="play_circle_outline"
+                                v-on:keyup.enter="RunSearch()"
+                            />
+                            <div class="d-flex">
+                                <div class="search-field-50 side-l">
+                                    <v-text-field dense outlined filled clearable
+                                        v-model="search.collection_nr"
+                                        label="Collection Nr."
+                                        prepend-icon="bookmarks"
+                                        v-on:keyup.enter="RunSearch()"
+                                    />
+                                </div>
+                                <div class="search-field-50 side-r">
+                                    <v-text-field dense outlined filled clearable
+                                        v-model="search.plastercast_nr"
+                                        label="Plastercast Nr."
+                                        prepend-icon="bookmarks"
+                                        v-on:keyup.enter="RunSearch()"
+                                    />
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Hoards -->
+                        <SearchForeignKey
+                            entity="hoards"
+                            label="Hoard"
+                            icon="grain"
+                            :selected="search"
+                            selected_key="id_hoard"
+                            v-on:select="(emit) => { search.id_hoard = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+
+                        <!-- Findspots -->
+                        <SearchForeignKey
+                            entity="findspots"
+                            label="Findspot"
+                            icon="pin_drop"
+                            :selected="search"
+                            selected_key="id_findspot"
+                            v-on:select="(emit) => { search.id_findspot = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
                     </v-expansion-panel-content>
                 </v-expansion-panel>
+
+                <hr class="search-divider" />
+
+                <!-- Production ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel :class="activeTab === 4 ? 'header_bg' : 'transparent'">
+                    <!-- Header -->
+                    <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
+                        <div class="d-flex align-center">
+                            <v-icon v-text="'zoom_out_map'" />
+                            <div v-text="'Production Conditions'" class="ml-4 whitespace-nowrap" />
+                        </div>
+                    </v-expansion-panel-header>
+
+                    <!-- Content -->
+                    <v-expansion-panel-content>
+                        <!-- Region / Mint -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="regions"
+                                    label="Region"
+                                    icon="terrain"
+                                    :selected="search"
+                                    selected_key="id_region"
+                                    v-on:select="(emit) => { search.id_region = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="mints"
+                                    label="Mint"
+                                    icon="museum"
+                                    :selected="search"
+                                    selected_key="id_mint"
+                                    v-on:select="(emit) => { search.id_mint = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+                        <!-- Type of Coinage -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="authorities"
+                                    label="Type of Coinage"
+                                    icon="toll"
+                                    :selected="search"
+                                    selected_key="id_authority"
+                                    v-on:select="(emit) => { search.id_authority = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div><div class="search-field-50 side-r"/>
+                        </div>
+
+                        <!-- Authority -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="persons"
+                                    :conditions="[{ authority: 1 }]"
+                                    label="Ruler"
+                                    icon="how_to_reg"
+                                    :selected="search"
+                                    selected_key="id_authority_person"
+                                    v-on:select="(emit) => { search.id_authority_person = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                            <div class="search-field-50 side-r">
+                                <SearchForeignKey
+                                    entity="tribes"
+                                    label="Tribe"
+                                    icon="sports_kabaddi"
+                                    :selected="search"
+                                    selected_key="id_authority_group"
+                                    v-on:select="(emit) => { search.id_authority_group = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- persons -->
+                        <SearchForeignKey
+                            entity="persons"
+                            label="Person"
+                            icon="emoji_people"
+                            :selected="search"
+                            selected_key="id_person"
+                            v-on:select="(emit) => { search.id_person = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+
+                        <!-- Period -->
+                        <SearchForeignKey
+                            entity="periods"
+                            label="Epoch"
+                            icon="watch_later"
+                            :selected="search"
+                            selected_key="id_period"
+                            v-on:select="(emit) => { search.id_period = emit }"
+                            v-on:keyup_enter="RunSearch()"
+                        />
+
+                        <!-- Date -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <v-text-field dense outlined filled
+                                    v-model="search.date_start"
+                                    label="Date Start"
+                                    prepend-icon="first_page"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                            <div class="search-field-50 side-r">
+                                <v-text-field dense outlined filled
+                                    v-model="search.date_end"
+                                    label="Date End"
+                                    prepend-icon="last_page"
+                                    v-on:keyup.enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+
+                <hr class="search-divider" />
+
+                <!-- Technical Parameters ------------------------------------------------- ------------------------------------------------- -->
+                <v-expansion-panel :class="activeTab === 5 ? 'header_bg' : 'transparent'">
+                    <!-- Header -->
+                    <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
+                        <div class="d-flex align-center">
+                            <v-icon v-text="'category'" />
+                            <div v-text="'Technical Parameters'" class="ml-4 whitespace-nowrap" />
+                        </div>
+                    </v-expansion-panel-header>
+
+                    <!-- Content -->
+                    <v-expansion-panel-content>
+
+                        <!-- Material -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="materials"
+                                    label="Material"
+                                    icon="palette"
+                                    :selected="search"
+                                    selected_key="id_material"
+                                    v-on:select="(emit) => { search.id_material = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div><div class="search-field-50 side-l" />
+                        </div>
+
+                        <!-- Standard / Denomination -->
+                        <div class="d-flex">
+                            <div class="search-field-50 side-l">
+                                <SearchForeignKey
+                                    entity="denominations"
+                                    label="Denomination"
+                                    icon="bubble_chart"
+                                    :selected="search"
+                                    selected_key="id_denomination"
+                                    v-on:select="(emit) => { search.id_denomination = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                            <div class="search-field-50 side-r">
+                                <SearchForeignKey
+                                    entity="standards"
+                                    label="Standard"
+                                    icon="group_work"
+                                    :selected="search"
+                                    selected_key="id_standard"
+                                    v-on:select="(emit) => { search.id_standard = emit }"
+                                    v-on:keyup_enter="RunSearch()"
+                                />
+                            </div>
+                        </div>
+
+                        <template v-if="entity === 'coins'">
+
+                            <!-- Weight -->
+                            <div class="d-flex">
+                                <div class="search-field-50 side-l">
+                                    <v-text-field dense outlined filled
+                                        v-model="search.weight_start"
+                                        label="Weight Min."
+                                        prepend-icon="radio_button_unchecked"
+                                        v-on:keyup.enter="RunSearch()"
+                                    />
+                                </div>
+                                <div class="search-field-50 side-r">
+                                    <v-text-field dense outlined filled
+                                        v-model="search.weight_end"
+                                        label="Weight Max."
+                                        prepend-icon="lens"
+                                        v-on:keyup.enter="RunSearch()"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Diameter -->
+                            <div class="d-flex">
+                                <div class="search-field-50 side-l">
+                                    <v-text-field dense outlined filled
+                                        v-model="search.diameter_start"
+                                        label="Diameter Min."
+                                        prepend-icon="hdr_weak"
+                                        v-on:keyup.enter="RunSearch()"
+                                    />
+                                </div>
+                                <div class="search-field-50 side-r">
+                                    <v-text-field dense outlined filled
+                                        v-model="search.diameter_end"
+                                        label="Diameter Max."
+                                        prepend-icon="hdr_strong"
+                                        v-on:keyup.enter="RunSearch()"
+                                    />
+                                </div>
+                            </div>
+                        </template>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+
+                <hr class="search-divider" />
+
+                <!-- Obverse / Reverse ------------------------------------------------- ------------------------------------------------- -->
+                <template v-for="(key, i) in [
+                    { v: 'o', text: 'Obverse' },
+                    { v: 'r', text: 'Reverse' }
+                ]">
+                    <v-expansion-panel :key="'panel' + key.text" :class="activeTab === (6 + i) ? 'header_bg' : 'transparent'">
+                        <!-- Header -->
+                        <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
+                            <div class="d-flex align-center">
+                                <v-icon v-text="i === 0 ? 'flip_to_front' : 'flip_to_back'" />
+                                <div v-text="key.text + ' Depiction'" class="ml-4 whitespace-nowrap" />
+                            </div>
+                        </v-expansion-panel-header>
+
+                        <!-- Content -->
+                        <v-expansion-panel-content>
+
+                            <!-- Design -->
+                            <v-text-field filled dense outlined clearable
+                                v-model="search[key.v + '_design']"
+                                :label="key.text + ' Design (Fulltext Search)'"
+                                prepend-icon="notes"
+                                v-on:keyup.enter="RunSearch()"
+                            />
+                            <SearchForeignKey
+                                :entity="'designs'"
+                                :conditions="[{ side: key.v }]"
+                                :label="key.text + ' Design'"
+                                icon="notes"
+                                :selected="search"
+                                :selected_key="key.v + '_id_design'"
+                                v-on:select="(emit) => { search[key.v + '_id_design'] = emit }"
+                                v-on:keyup_enter="RunSearch()"
+                            />
+
+                            <!-- Legend -->
+                            <SearchForeignKey
+                                :entity="'legends'"
+                                :conditions="[{ side: key.v }]"
+                                :label="key.text + ' Legend'"
+                                icon="translate"
+                                sk="el_uc_adv"
+                                :selected="search"
+                                :selected_key="key.v + '_id_legend'"
+                                v-on:select="(emit) => { search[key.v + '_id_legend'] = emit }"
+                                v-on:keyup_enter="RunSearch()"
+                            />
+
+                            <!-- Monograms -->
+                            <SearchForeignKey
+                                entity="monograms"
+                                :label="key.text + ' Monogram'"
+                                icon="functions"
+                                :selected="search"
+                                :selected_key="key.v + '_id_monogram'"
+                                v-on:select="(emit) => { search[key.v + '_id_monogram'] = emit }"
+                                v-on:keyup_enter="RunSearch()"
+                            />
+
+                            <!-- Symbols -->
+                            <SearchForeignKey
+                                entity="symbols"
+                                :label="key.text + ' Symbol'"
+                                icon="flare"
+                                :selected="search"
+                                :selected_key="key.v + '_id_symbol'"
+                                v-on:select="(emit) => { search[key.v + '_id_symbol'] = emit }"
+                                v-on:keyup_enter="RunSearch()"
+                            />
+                        </v-expansion-panel-content>
+                    </v-expansion-panel>
+
+                    <hr v-if="i === 0" :key="'hr' + key.text" class="search-divider" />
+                </template>
+
             </v-expansion-panels>
         </template>
     </drawer>
@@ -560,7 +1057,7 @@ export default {
                 {value: 3,  text: 'Production'},
                 {value: 4,  text: 'Depiction'}
             ],*/
-            cachedTab: 0,
+            cachedTab: 1,
             activeTab: null,
 
             display:            this.$store.state.displayMode,
@@ -718,6 +1215,12 @@ export default {
             }
 
             this.loading = this.$root.loading = false
+            //this.scrollToTop()
+        },
+
+        scrollToTop () {
+            const el = document.getElementById('results-anchor')
+            el?.scrollIntoView({ behavior: "smooth" })
         },
 
         SetChecked (state) {
@@ -879,9 +1382,9 @@ export default {
             else this.search.qex = [key]
         },
 
-        onDrawerHover (hovered) {
-            if (hovered) {
-                this.activeTab = this.cachedTab
+        onDrawerExpand (expand) {
+            if (expand) {
+                if ([null, undefined].includes(this.activeTab)) setTimeout(() => { this.activeTab = this.cachedTab }, 350)
             }
             else {
                 this.cachedTab = this.activeTab
@@ -892,3 +1395,35 @@ export default {
 }
 
 </script>
+
+<style scoped>
+
+    .start-screen {
+        position: fixed;
+        width: 500px;
+        left: 50%;
+        margin-left: -250px;
+        height: 300px;
+        top: 50%;
+        margin-top: -150px;
+    }
+
+    .search-divider {
+        opacity: 0.15;
+        width: 100%;
+        height: 0.5px;
+    }
+
+    .search-field-50 {
+        width: 100%
+    }
+
+    .side-l {
+        padding-right: 10px;
+    }
+
+    .side-r {
+        padding-left: 10px;
+    }
+
+</style>

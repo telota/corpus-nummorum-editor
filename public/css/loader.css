@@ -6,6 +6,12 @@
     top: 0;
     background: rgb(24,24,24);
     z-index: 501;
+    opacity: 1;
+    transition: opacity 500ms ease-out;
+    -webkit-transition: opacity 500ms ease-out;
+    -moz-transition: opacity 500ms ease-out;
+    -ms-transition: opacity 500ms ease-out;
+    -o-transition: opacity 500ms ease-out;
 }
 
 .loader-symbol {

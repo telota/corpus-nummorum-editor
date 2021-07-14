@@ -1,47 +1,61 @@
 <template>
 <div>
+    <!-- Toggle -->
+    <div
+        :class="toggle.class"
+        :style="toggle.style"
+        @click="onDrawerExpand(false)"
+    >
+        <v-icon dark v-text="'arrow_back_ios'" />
+    </div>
+
+    <!-- Drawer -->
     <div
         :class="color"
         :style="styling"
-        @mouseover="onDrawerHover(true)"
-        dis-mouseleave="onDrawerHover(false)"
+        @click="onDrawerExpand(true)"
+        dis-mouseleave="onDrawerExpand(false)"
     >
-        <div
-            v-if="header"
-            :style="'height:' + header + 'px'"
-        >
-            <slot name="header">
-                <v-hover v-slot="{ hover }">
-                    <div
-                        class="d-flex align-center white--text light-blue"
-                        :class="hover ? 'darken-3' : 'darken-4'"
-                        style="cursor: pointer; position: relative"
-                        :style="'height:' + header + 'px'"
-                        @click="$emit('search')"
-                    >
-                        <div style="position: absolute">
-                            <adv-btn medium icon="search" color-hover="transparent" color-text="white" />
-                        </div>
-                        <div class="font-weight-bold text-center" v-text="'SEARCH'" :style="'width: 100%; padding: 0 ' + (header + 10) + 'px 0 ' + (header + 10) + 'px;'" />
+        <div v-if="header" style="height: 80px">
+            <v-hover v-slot="{ hover }">
+                <div
+                    class="d-flex align-center white--text light-blue"
+                    :class="hover ? 'darken-3' : 'darken-4'"
+                    style="cursor: pointer; position: relative"
+                    :style="'height: 40px'"
+                    @click="$emit('search')"
+                >
+                    <div style="position: absolute">
+                        <adv-btn medium icon="search" color-hover="transparent" color-text="white" />
                     </div>
-                </v-hover>
-            </slot>
+                    <div class="font-weight-bold text-center" v-text="'SEARCH'" :style="'width: 100%; padding: 0 50px 0 50px;'" />
+                </div>
+            </v-hover>
+
+            <v-hover v-slot="{ hover }">
+                <div
+                    class="d-flex align-center white--text caption grey"
+                    :class="hover ? 'darken-1' : 'darken-2'"
+                    style="cursor: pointer; position: relative; white-space: nowrap"
+                    :style="'height: 40px'"
+                    @click="$emit('clear')"
+                >
+                    <div style="position: absolute">
+                        <adv-btn medium icon="clear" color-hover="transparent" color-text="white" />
+                    </div>
+                    <div class="text-center" v-text="'Clear Query Parameters'" :style="'width: 100%; padding: 0 50px 0 50px;'" />
+                </div>
+            </v-hover>
+        </div>
+
+        <div v-else-if="costumHeader" :style="'height:' + header + 'px'">
+            <slot name="header" />
         </div>
 
         <div :style="stylingContent">
             <slot name="content" />
         </div>
     </div>
-
-        <v-card
-            :class="toggle.class"
-            :style="toggle.style"
-            :dark="!$vuetify.theme.dark"
-            :disabled="!drawerHover"
-            @click="onDrawerHover(false)"
-        >
-            <v-icon v-if="drawerHover" v-text="'arrow_back_ios'" />
-        </v-card>
 </div>
 </template>
 
@@ -49,20 +63,21 @@
 export default {
     data () {
         return {
-            drawerHover: false,
+            expanded: false,
             drawerWidth: '40px'
         }
     },
 
     props: {
         top: { type: Number, default: 90 },
-        header: { type: Number, default: 0 },
+        header: { type: Boolean, default: false },
+        costumHeader: { type: Number, default: 0 },
         zIndex: { type: Number, default: 98 },
-        maxWidth:  { type: [Number, String], default: 600 },
+        maxWidth:  { type: [Number, String], default: 700 },
         miniWidth:  { type: [Number, String], default: 40 },
-        hoverWidth:  { type: [Number, String], default: '50%' },
+        hoverWidth:  { type: [Number, String], default: '75%' },
         delay: { type: Number, default: 350 },
-        color: { type: String, default: 'header_bg' },
+        color: { type: String, default: 'drawer_bg' },
         collapse:  { type: [Number, String], default: null },
     },
 
@@ -87,7 +102,8 @@ export default {
                 'overflow-x: hidden',
                 'z-index:' + this.zIndex,
                 'max-width:' + this.max_width,
-                'width:' + this.drawerWidth + ';',
+                'width:' + this.drawerWidth,
+                'transition: width ' + this.delay + 'ms ease-out',
                 '-webkit-transition: width ' + this.delay + 'ms ease-out',
                 '-moz-transition: width ' + this.delay + 'ms ease-out',
                 '-ms-transition: width ' + this.delay + 'ms ease-out',
@@ -98,7 +114,7 @@ export default {
 
         stylingContent () {
             return [
-                'height: calc(100vh - ' + (this.top + this.header) + 'px)',
+                'height: calc(100vh - ' + (this.top + (this.header ? 80 : this.costumHeader)) + 'px)',
                 'width: 100%',
                 'overflow-y: auto',
                 'overflow-x: hidden',
@@ -107,13 +123,21 @@ export default {
 
         toggle () {
             return {
-                class: 'd-flex align-center justify-center',
+                class: 'd-flex align-center justify-end light-blue darken-4',
                 style: [
                     'position: fixed',
-                    'bottom: 0',
-                    'z-index: 100',
-                    'height:' + this.mini_width,
-                    'width:' + this.mini_width,
+                    'z-index:' + (this.zIndex - 10),
+                    'top: calc(50vh - 40px)',
+                    'max-width: calc(' + this.max_width + ' + 33px)',
+                    'width:' + (this.expanded ? ('calc(' + this.drawerWidth + ' + 33px)') : '0'),
+                    'height: 80px',
+                    'cursor: pointer',
+                    'transition: width ' + this.delay + 'ms ease-out',
+                    '-webkit-transition: width ' + this.delay + 'ms ease-out',
+                    '-moz-transition: width ' + this.delay + 'ms ease-out',
+                    '-ms-transition: width ' + this.delay + 'ms ease-out',
+                    '-o-transition: width ' + this.delay + 'ms ease-out',
+                    'box-shadow: 0px 0px 10px rgba(0,0,0,0.15)'
                 ].join(';\n')
             }
         }
@@ -121,14 +145,14 @@ export default {
 
     watch: {
         collapse () {
-            if (this.collapse) this.onDrawerHover(false)
+            if (this.collapse) this.onDrawerExpand(false)
         }
     },
 
     methods: {
-        onDrawerHover (hovered) {
-            if (this.drawerHover !== hovered) {
-                if (hovered) {
+        onDrawerExpand (expand) {
+            if (this.expanded !== expand) {
+                if (expand) {
                     this.drawerWidth = this.hover_width;
                     this.activeTab = this.cachedTab
                 }
@@ -138,12 +162,8 @@ export default {
                     this.activeTab = null
 
                 }
-                this.drawerHover = hovered
-                const delay = hovered ? (this.delay - (this.delay > 150 ? 150 : 0)) : 0
-
-                setTimeout(() => {
-                    this.$emit('hover', hovered)
-                }, hovered ? delay : 0);
+                this.expanded = expand
+                this.$emit('expand', expand)
             }
         }
     }
