@@ -34,7 +34,7 @@ const router = new Router (
             props: { entity: 'types'}
         },
         {
-            path: '/types/edit/:id',
+            path: '/types/edit/:id/:section?',
             name: 'types-edit',
             component: require('./../pages/entities_primary/ItemEditInput').default,
             props: { entity: 'types'}
@@ -46,7 +46,7 @@ const router = new Router (
             props: { entity: 'coins'}
         },
         {
-            path: '/coins/edit/:id',
+            path: '/coins/edit/:id/:section?',
             name: 'coins-edit',
             component: require('./../pages/entities_primary/ItemEditInput').default,
             props: { entity: 'coins'}
@@ -74,17 +74,27 @@ const router = new Router (
 
         // Search
         {
-            path: '/coins/search/:id?',
+            path: '/(coins|types)/(search|publish)',
+            name: 'coins-types-search',
+            component: require('./../pages/entities_primary/ItemSearch').default,
+            props: (route) => ({
+                entity: route.params.pathMatch,
+                mode: route.params["1"],
+                query: route.query || {}
+            })
+        },
+        /*{
+            path: '/coins/search',
             name: 'coins-search',
             component: require('./../pages/entities_primary/ItemSearch').default,
             props: { entity: 'coins'}
         },
         {
-            path: '/types/search/:id?',
+            path: '/types/search',
             name: 'types-search',
             component: require('./../pages/entities_primary/ItemSearch').default,
             props: { entity: 'types'}
-        },
+        },*/
 
         // Copy
         {

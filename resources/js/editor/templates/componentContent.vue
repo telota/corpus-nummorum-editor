@@ -34,7 +34,6 @@ export default {
 
     watch: {
         $route (to, from) {
-            if (this.$route.params.id) { this.getSingleItem(this.$route.params.id) }
         }
     },
 

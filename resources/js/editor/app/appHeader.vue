@@ -285,6 +285,13 @@ export default {
                     { text: this.$root.label('SPARQL'),           icon: 'auto_awesome',       link: 'sparql' },
                 ]}
             ]
+
+            // Publisher
+            if (this.rank >= 18) {
+                routes[1].children.push({ text: this.$root.label('types_publish'), icon: 'public', link: 'types/publish' })
+                routes[2].children.push({ text: this.$root.label('coins_publish'), icon: 'public', link: 'coins/publish' })
+            }
+
             // PR
             if (this.rank >= 21) {
                 routes.push({ text: 'Website',  icon: 'wifi_tethering',  children: [
@@ -292,6 +299,7 @@ export default {
                     { text: this.$root.label('news'),               icon: 'comment',    link: 'news' }
                 ]})
             }
+
             // Website
             /*if (this.rank >= 22) {
                 routes.push({ text: this.$root.label('website'),  icon: 'public',  children: [
@@ -299,6 +307,7 @@ export default {
                     { text: this.$root.label('texts'),  icon: 'format_align_left',  link: 'team' }
                 ]})
             }*/
+
             // Admin
             if (this.rank >= 31) {
                 routes.push({ text: 'Admin',  icon: 'font_download',  children: [

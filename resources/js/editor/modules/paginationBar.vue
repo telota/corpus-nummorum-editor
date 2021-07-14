@@ -123,7 +123,7 @@
                         >
                             <div class="text-center" style="font-size: 12px; line-height: 12px;">
                                 <div v-html="counted" class="font-weight-bold ma-2" />
-                                <div v-html="page.current + '&nbsp;/&nbsp;' + page.total" class="ma-2" />
+                                <div v-html="page.text.current + '&nbsp;/&nbsp;' + page.text.total" class="ma-2" />
                             </div>
                         </v-btn>
                     </template>
@@ -193,7 +193,7 @@ export default {
                 if (!v) return true
                 const parsed = parseInt(v)
                 if (!parsed) return 'No valid Number'
-                if (parsed > this.page.total) return 'Max is ' + this.page.total
+                if (parsed > this.page.int.total) return 'Max is ' + this.page.int.total
                 return true
             }
         }
@@ -216,7 +216,7 @@ export default {
         pageSelector () {
             if (this.pageSelector) {
                 const parsed = parseInt(this.pageSelector)
-                if (parsed && parsed !== this.page.current && parsed <= this.page.total) {
+                if (parsed && parsed !== this.page.int.current && parsed <= this.page.int.total) {
                     this.$emit('offset', (parsed - 1) * this.limit)
                 }
             }
@@ -225,11 +225,16 @@ export default {
 
     computed: {
         page () {
-            const page = { current: 0, total: 0}
+            const page = {
+                int: { current: 0, total: 0},
+                text: { current: 0, total: 0}
+            }
 
             if (this.count > 0) {
-                page.current = this.$editor_format.number(this.$root.language, Math.ceil(this.offset / this.limit) + 1)
-                page.total = this.$editor_format.number(this.$root.language, Math.ceil(this.count / this.limit))
+                page.int.current    = Math.ceil(this.offset / this.limit) + 1
+                page.int.total      = Math.ceil(this.count / this.limit)
+                page.text.current   = this.$editor_format.number(this.$root.language, page.int.current)
+                page.text.total     = this.$editor_format.number(this.$root.language, page.int.total)
             }
 
             return page

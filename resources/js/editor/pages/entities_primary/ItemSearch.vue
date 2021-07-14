@@ -67,114 +67,108 @@
         </template>
     </component-toolbar>
 
-    <!-- Content ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-    <component-content>
-        <template v-slot:content>
+    <!-- Results Content ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
+    <div id="primary-results-container" class="component-content">
+        <!-- Error -->
+        <div
+            v-if="error"
+            class="mt-10 headline d-flex justify-center"
+            v-html="'Sorry, an error occured.<br/>Please reload and retry!'"
+        />
 
-            <div id="results-anchor" />
-            <!-- Error -->
-            <div
-                v-if="error"
-                class="mt-10 headline d-flex justify-center"
-                v-html="'Sorry, an error occured.<br/>Please reload and retry!'"
-            />
+        <!-- Results -->
+        <div v-else-if="items[0]">
 
-            <!-- Results -->
-            <div v-else-if="items[0]">
+            <!-- Trading Cards || Index Cards -->
+            <div v-if="[0, 1, 2].includes(display)" style="padding-left: 43px; padding-top: 3px">
+                <v-row class="ma-0 pa-0">
+                    <v-col
+                        v-for="(item, i) in items"
+                        :key="i + ' ' + display"
+                        cols="12"
+                        :sm="display === 0 ? 6 : 12"
+                        :md="display === 0 ? 3 : 12"
+                        :lg="display === 0 ? 2 : 12"
+                    >
+                        <component
+                            :is="display_mode[display].component"
+                            :key="display + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
+                            :entity="entity"
+                            :item="item"
+                            :publisher="publisher"
+                            :checked="checked[i].state"
+                            v-on:publish="(emit) => { Publish ([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0)) }"
+                            v-on:checked="checked[i].state = !checked[i].state"
+                        ></component><!-- v-on:inheritor="(emit) => { details_dialog = { entity: 'types', id: emit } }"-->
+                    </v-col>
+                </v-row>
+            </div>
 
-                <!-- Trading Cards || Index Cards -->
-                <div v-if="[0, 1, 2].includes(display)" style="padding-left: 43px; padding-top: 3px">
-                    <v-row class="ma-0 pa-0">
-                        <v-col
-                            v-for="(item, i) in items"
-                            :key="i + ' ' + display"
-                            cols="12"
-                            :sm="display === 0 ? 6 : 12"
-                            :md="display === 0 ? 3 : 12"
-                            :lg="display === 0 ? 2 : 12"
-                        >
-                            <component
-                                :is="display_mode[display].component"
-                                :key="display + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
-                                :entity="entity"
-                                :item="item"
-                                :publisher="publisher"
-                                :checked="checked[i].state"
-                                v-on:publish="(emit) => { Publish ([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0)) }"
-                                v-on:checked="checked[i].state = !checked[i].state"
-                            ></component><!-- v-on:inheritor="(emit) => { details_dialog = { entity: 'types', id: emit } }"-->
-                        </v-col>
-                    </v-row>
+        </div>
+
+        <!-- Start Screen -->
+        <div v-else class="start-screen">
+            <v-card
+                tile
+                raised
+                class="header_bg"
+                style="height: 100%; position: relative"
+            >
+                <div class="pa-3">
+                    <div class="text-center title text-uppercase" v-text="'Search ' + entity" />
+                    <a :href="'/editor#/' + (entity === 'coins' ? 'types' : 'coins') + '/search'">
+                        <div class="text-center caption mb-4" v-text="'Looking for ' + (entity === 'coins' ? 'types' : 'coins') + '?'" />
+                    </a>
+
+                    <v-text-field clearable dense
+                        v-model="search.id"
+                        label="ID"
+                        class="mb-3"
+                        v-on:keyup.enter="RunSearch()"
+                        style="width: 50%"
+                    />
+
+                    <v-text-field clearable dense
+                        v-model="search.q"
+                        :label="$root.label('keywords')"
+                        append-icon="keyboard"
+                        class="mb-n2"
+                        v-on:keyup.enter="RunSearch()"
+                        v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
+                    />
+                    <v-expand-transition>
+                        <div v-if="searchStringKeyboard" class="d-flex justify-center">
+                            <keyboard
+                                :string="search.q"
+                                layout="el_uc"
+                                small
+                                hide_options
+                                v-on:input="(emit) => { search.q = emit }"
+                            ></keyboard>
+                        </div>
+                    </v-expand-transition>
                 </div>
 
-            </div>
-
-            <!-- Start Screen -->
-            <div v-else class="start-screen">
-                <v-card
-                    tile
-                    raised
-                    class="header_bg"
-                    style="height: 100%; position: relative"
+                <!-- Search Button -->
+                <div
+                    class="text-center mt-1 pa-3"
+                    style="position:absolute; bottom: 0; width: 100%"
                 >
-                    <div class="pa-3">
-                        <div class="text-center title text-uppercase" v-text="'Search ' + entity" />
-                        <a :href="'/editor#/' + (entity === 'coins' ? 'types' : 'coins') + '/search'">
-                            <div class="text-center caption mb-4" v-text="'Looking for ' + (entity === 'coins' ? 'types' : 'coins') + '?'" />
-                        </a>
-
-                        <v-text-field clearable dense
-                            v-model="search.id"
-                            label="ID"
-                            class="mb-3"
-                            v-on:keyup.enter="RunSearch()"
-                            style="width: 50%"
-                        />
-
-                        <v-text-field clearable dense
-                            v-model="search.q"
-                            :label="$root.label('keywords')"
-                            append-icon="keyboard"
-                            class="mb-n2"
-                            v-on:keyup.enter="RunSearch()"
-                            v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
-                        />
-                        <v-expand-transition>
-                            <div v-if="searchStringKeyboard" class="d-flex justify-center">
-                                <keyboard
-                                    :string="search.q"
-                                    layout="el_uc"
-                                    small
-                                    hide_options
-                                    v-on:input="(emit) => { search.q = emit }"
-                                ></keyboard>
-                            </div>
-                        </v-expand-transition>
-                    </div>
-
-                    <!-- Search Button -->
-                    <div
-                        class="text-center mt-1 pa-3"
-                        style="position:absolute; bottom: 0; width: 100%"
-                    >
-                        <div class="text-center body-2 mb-3" v-text="'Please check the left sidebar for advanced filters.'" />
-                        <v-btn
-                            tile
-                            block
-                            dark
-                            color="blue_prim"
-                            class="title"
-                            v-text="'search'"
-                            :width="350"
-                            @click="RunSearch()"
-                        />
-                    </div>
-                </v-card>
-            </div>
-
-
-        </template>
-    </component-content>
+                    <div class="text-center body-2 mb-3" v-text="'Please check the left sidebar for advanced filters.'" />
+                    <v-btn
+                        tile
+                        block
+                        dark
+                        color="blue_prim"
+                        class="title"
+                        v-text="'search'"
+                        :width="350"
+                        @click="RunSearch()"
+                    />
+                </div>
+            </v-card>
+        </div>
+    </div>
 
     <!-- Search ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
     <drawer
@@ -194,7 +188,7 @@
                     <!-- Header -->
                     <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                         <div class="d-flex align-center">
-                            <v-icon v-text="'star'" />
+                            <v-icon v-text="'star_border'" />
                             <div v-text="'Stored Queries'" class="ml-4 whitespace-nowrap" />
                         </div>
                     </v-expansion-panel-header>
@@ -562,7 +556,7 @@
                     <!-- Header -->
                     <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                         <div class="d-flex align-center">
-                            <v-icon v-text="'local_library'" />
+                            <v-icon v-text="'import_contacts'" />
                             <div v-text="'Comment, References, Owner'" class="ml-4 whitespace-nowrap" />
                         </div>
                     </v-expansion-panel-header>
@@ -1089,62 +1083,58 @@ export default {
     },
 
     props: {
-        entity:   {type: String, default: 'coins'},
-        prop_id:  {type: [String, Number], default: null}
+        entity:     { type: String, default: 'coins' },
+        mode:       { type: String, default: 'search' },
+        query:      { type: Object },
+        noRouter:   { type: Boolean, default: false }
     },
 
     computed: {
         // Localization
+        router () { return !this.noRouter },
+
         l () { return this.$root.language },
         labels () { return this.$root.labels },
-
-        given_id () {
-            return this.$route.params.id === undefined ? this.prop_id : this.$route.params.id
-        },
 
         label () {
             return this.entity == 'coins' ? {s: 'Coin', p: 'Coins'} : {s: 'Type', p: 'Types'};
         },
 
         sorters () {
-            return this.entity === 'coins' ? [
+            const sorters = [
                 { value: 'id', text: 'ID' },
-                { value: 'date', text: this.labels['date'] },
-                { value: 'weight', text: this.labels['weight'] },
-                { value: 'diameter', text: this.labels['diameter'] },
-                { value: 'mint', text: this.labels['mint'] },
-                { value: 'ruler', text: this.labels['authority_person'] },
-                { value: 'issuer', text: this.labels['issuer'] },
-                { value: 'created', text: this.labels['created_at'] },
-                { value: 'updated', text: this.labels['updated_at'] }
-            ] : [
-                { value: 'id', text: 'ID' },
-                { value: 'date', text: this.labels['date'] },
-                { value: 'mint', text: this.labels['mint'] },
-                { value: 'ruler', text: this.labels['authority_person'] },
-                { value: 'issuer', text: this.labels['issuer'] },
-                { value: 'created', text: this.labels['created_at'] },
-                { value: 'updated', text: this.labels['updated_at'] }
+                { value: 'date', text: this.labels['date'] }
             ]
+
+            if (this.entity === 'coins') {
+                sorters.push({ value: 'weight', text: this.labels['weight'] }),
+                sorters.push({ value: 'diameter', text: this.labels['diameter'] })
+            }
+
+            sorters.push({ value: 'mint', text: this.labels['mint'] })
+            sorters.push({ value: 'ruler', text: this.labels['authority_person'] })
+            sorters.push({ value: 'created', text: this.labels['created_at'] })
+            sorters.push({ value: 'updated', text: this.labels['updated_at'] })
+
+            return sorters
         }
     },
 
     watch: {
-        entity: function() { this.Init() }
+        entity: function () { this.Init() },
+        mode: function () { this.handleMode() },
+        query: function () { this.handleQuery() }
     },
 
     created () {
         this.Init()
+        this.handleMode()
+        this.handleQuery()
     },
 
     methods: {
         Init () {
-            this.$store.commit('setBreadcrumbs',[
-                { label: this.labels[this.entity], to:'' },
-                { label: 'Search', to:'' }
-            ])
             this.SearchDefaults(false)
-            this.publisher = false
             this.items = []
             this.dbi_params= {
                 sort_by: 'id',
@@ -1155,45 +1145,32 @@ export default {
             }
         },
 
+        handleMode () {
+            if (this.mode === 'publish') {
+                this.dbi_params.sort_by = 'updated_at'
+                this.dbi_params.sort_by_op = 'DESC'
+                this.search.state_public = 2
+                this.publisher = true
+                if (!Object.keys(this.query)[0]) this.SetItems()
+            }
+            else this.publisher = false
+        },
+
         RunSearch () {
             ++this.searchCounter
             this.cacheCurrentSearch()
             this.SetItems()
         },
 
-        async SetItems () {
-            this.loading    = this.$root.loading = true;
+        handleQuery () {
+            if (Object.keys(this.query)[0]) this.getItems(this.query)
+        },
+
+        async getItems (query) {
             this.error      = false;
-            const self      = this;
+            this.loading = this.$root.loading = true;
 
-            // Get Search Parameters
-            const search = {}
-            Object.keys(this.search).forEach((key) => {
-                if (key === 'state_public') {
-                   search[key] = self.search[key] === null ? [0, 1, 2] : self.search[key]
-                }
-                else if (['string', 'o_design', 'r_design'].includes(key)) {
-                    if (self.search[key]) {
-                        search[key] = self.search[key].split(' ')
-                    }
-                }
-                else if (![null, []].includes(self.search[key])) {
-                    search[key] = self.search[key]
-                }
-            })
-
-            // Set DBI Parameters
-            const params = {}
-            Object.keys(self.dbi_params).forEach((key) => {
-                if (key === 'sort_by') {
-                    params[key] = self.dbi_params.sort_by + '.' + self.dbi_params.sort_by_op
-                }
-                else if (key != 'sort_by_op') {
-                    params[key] = self.dbi_params[key]
-                }
-            })
-
-            const dbi = await this.$root.DBI_SELECT_POST(this.entity, params, search)
+            const dbi = await this.$root.DBI_SELECT_POST(this.entity, query)
 
             if (dbi?.contents) {
                 const sort_explode = dbi.pagination.sort_by.split(' ')
@@ -1215,12 +1192,55 @@ export default {
             }
 
             this.loading = this.$root.loading = false
-            //this.scrollToTop()
+            this.scrollToTop()
+        },
+
+        SetItems () {
+            const query = {}
+
+            // Get Search Parameters
+            Object.keys(this.search).forEach((key) => {
+                if (key === 'state_public') {
+                query[key] = this.search[key] === null ? [0, 1, 2] : this.search[key]
+                }
+                else if (['string', 'o_design', 'r_design'].includes(key)) {
+                    if (this.search[key]) {
+                        search[key] = this.search[key].split(' ')
+                    }
+                }
+                else if (![null, []].includes(this.search[key])) {
+                    query[key] = this.search[key]
+                }
+            })
+
+            // Set DBI Parameters
+            const params = {}
+            Object.keys(this.dbi_params).forEach((key) => {
+                if (key === 'sort_by') {
+                    params[key] = this.dbi_params.sort_by + '.' + this.dbi_params.sort_by_op
+                }
+                else if (key != 'sort_by_op') {
+                    params[key] = this.dbi_params[key]
+                }
+            })
+
+            if (this.router) {
+                this.$router.push({ query: {
+                    ...{
+                        i: this.searchCounter,
+                        offset: params.offset,
+                        limit: params.limit,
+                        sort_by: params.sort_by,
+                        sort_by_op: params.sort_by_op
+                    },
+                    ...query
+                }})
+            }
+            else this.getItems(params, query)
         },
 
         scrollToTop () {
-            const el = document.getElementById('results-anchor')
-            el?.scrollIntoView({ behavior: "smooth" })
+            document.getElementById('primary-results-container')?.scrollTo(0, 0)
         },
 
         SetChecked (state) {

@@ -362,9 +362,8 @@ const editor = new Vue({
 
                 await axios.get(source)
                     .then((response) => {
-                        dbi = response.data
-                        console.log('AXIOS: ' + (dbi.contents?.[0] ? ((dbi.contents?.[0].id ? dbi.contents?.length : 0) + ' items') : 'data') + ' received.')
-                        console.log(response)
+                        dbi = response?.data
+                        console.log('AXIOS Response:', response)
                     })
                     .catch((error) => {
                         self.AXIOS_ERROR_HANDLER(error)
@@ -390,9 +389,8 @@ const editor = new Vue({
 
                 await axios.post(source, Object.assign ({}, params))
                     .then((response) => {
-                        dbi = response.data
-                        console.log ('AXIOS: ' + (dbi.contents?.[0] ? ((dbi.contents?.[0].id ? dbi.contents?.length : 0) + ' items') : 'data') + ' received.')
-                        console.log (response)
+                        dbi = response?.data
+                        console.log('AXIOS Response:', response)
                     })
                     .catch((error) => {
                         self.AXIOS_ERROR_HANDLER (error)
@@ -417,15 +415,14 @@ const editor = new Vue({
                     await axios.post(url, Object.assign ({}, item))
                         .then((response) => {
                             if (response.data.success) {
-                                dbi = response.data
-                                console.log('RESPONSE CHECK: Server accepted input as valid:')
+                                dbi = response?.data
+                                console.log('RESPONSE CHECK: Server accepted input as valid:', response)
                             }
                             else {
                                 self.snackbar('Validation Issue!', 'error')
                                 self.error = { active: true, validation: response.data?.[self.language] ? response.data[self.language] : response.data }
-                                console.log('RESPONSE CHECK: Validation Issue: Server declined input as invalid:')
+                                console.log('RESPONSE CHECK: Validation Issue: Server declined input as invalid:', response)
                             }
-                            console.log(response);
                         })
                         .catch((error) => { self.AXIOS_ERROR_HANDLER(error) })
 
