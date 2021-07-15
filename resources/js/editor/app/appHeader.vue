@@ -152,7 +152,7 @@
         persistent
         scrollable
         v-model="showFavorites"
-        width="500px"
+        :width="500"
     >
         <v-card tile>
             <dialogbartop

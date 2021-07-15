@@ -13,7 +13,7 @@
     <div
         :class="color"
         :style="styling"
-        @click="onDrawerExpand(true)"
+
         dis-mouseleave="onDrawerExpand(false)"
     >
         <div v-if="header" style="height: 80px">
@@ -38,7 +38,7 @@
                     :class="hover ? 'darken-1' : 'darken-2'"
                     style="cursor: pointer; position: relative; white-space: nowrap"
                     :style="'height: 40px'"
-                    @click="$emit('clear')"
+                    @click="onDrawerExpand(true); $emit('clear')"
                 >
                     <div style="position: absolute">
                         <adv-btn medium icon="clear" color-hover="transparent" color-text="white" />
@@ -52,7 +52,7 @@
             <slot name="header" />
         </div>
 
-        <div :style="stylingContent">
+        <div :style="stylingContent" @click="onDrawerExpand(true)">
             <slot name="content" />
         </div>
     </div>

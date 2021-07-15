@@ -78,9 +78,10 @@ const router = new Router (
             name: 'coins-types-search',
             component: require('./../pages/entities_primary/ItemSearch').default,
             props: (route) => ({
+                routed: true,
                 entity: route.params.pathMatch,
-                mode: route.params["1"],
-                query: route.query || {}
+                publisher: route.params["1"] === 'publish',
+                routedQuery: route.query || {}
             })
         },
         /*{

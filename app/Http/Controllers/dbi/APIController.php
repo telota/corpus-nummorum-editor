@@ -132,6 +132,12 @@ class APIController extends Controller {
         $keys = $this->getRequestKeys($entity);
 
         $where = [];
+        $strings = '';
+        foreach ($keys['where'] as $key) {
+            $strings .= $key.': d.'.$key.' ? d.'.$key.' : null,'."\n";
+        }
+        die($strings);
+
         foreach ($keys['where'] as $key) {
             // Exclude private Keys and publications state
             if (strpos($key, 'private') === false && $key !== 'state_public') {

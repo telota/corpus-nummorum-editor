@@ -379,7 +379,7 @@ const editor = new Vue({
                 const source = 'dbi/' + entity
                 let dbi = {}
 
-                console.log ('AXIOS: Fetching Data from "' + source + '" using POST. Awaiting Server Response ...');
+                //console.log ('AXIOS: Fetching Data from "' + source + '" using POST. Awaiting Server Response ...');
 
                 if (search) {
                     for (const[key, value] of Object.entries(search)) {
@@ -390,7 +390,7 @@ const editor = new Vue({
                 await axios.post(source, Object.assign ({}, params))
                     .then((response) => {
                         dbi = response?.data
-                        console.log('AXIOS Response:', response)
+                        //console.log('AXIOS Response:', response)
                     })
                     .catch((error) => {
                         self.AXIOS_ERROR_HANDLER (error)

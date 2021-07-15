@@ -53,6 +53,11 @@ export default new Vuex.Store ({
 
         showAbout: false,
 
+        cache: {
+            coins: [],
+            types: []
+        },
+
 
 
 
@@ -116,6 +121,11 @@ export default new Vuex.Store ({
         },
 
         setAbout (state, input) { state.showAbout = input ?? false },
+
+        setCache (state, input) {
+            if (input.key && input.value) state.cache[input.key] = input.value //; console.log(state.cache[input.key])
+            else console.log('ERROR: Store-setCache requires { key, value }')
+        },
 
 
 

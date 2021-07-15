@@ -4,55 +4,56 @@
     <component-toolbar>
         <template v-slot:toolbar>
             <pagination-bar
-                :offset="dbi_params.offset"
-                :limit="dbi_params.limit"
-                :count="dbi_params.count"
-                :sortby="dbi_params.sort_by + ' ' + dbi_params.sort_by_op"
+                :offset="pagination.offset"
+                :limit="pagination.limit"
+                :count="pagination.count"
+                :sortby="pagination.sort_by + ' ' + pagination.sort_by_op"
                 :sorters="sorters"
                 :layout="display"
                 :layouts="display_mode"
-                v-on:reload="SetItems()"
-                v-on:offset="(emit) => { dbi_params.offset = emit; SetItems() }"
-                v-on:limit="(emit) => { dbi_params.limit = emit; SetItems() }"
+                v-on:reload="processQuery()"
+                v-on:offset="(emit) => { pagination.offset = emit; processQuery() }"
+                v-on:limit="(emit) => { pagination.limit = emit; processQuery() }"
                 v-on:sortby="OrderBy"
                 v-on:layout="setDisplayMode"
             >
                 <template v-slot:right>
-                    <!-- Publisher Functions -->
-                    <v-slide-x-reverse-transition>
-                        <adv-btn
-                            v-if="publisher"
-                            :icon="checked_state ? 'radio_button_unchecked' : 'radio_button_checked'"
-                            :tooltip="(checked_state ? 'Deselect' : 'Select') + ' all ' + labels[entity]"
-                            :disabled="items[0] ? false : true"
-                            color-main="blue_prim"
-                            color-hover="blue_sec"
-                            color-text="white"
-                            @click="checked_state = !checked_state; SetChecked(checked_state);"
-                        />
-                    </v-slide-x-reverse-transition>
+                    <template v-if="routed && $root.user.level > 17">
+                        <!-- Publisher Functions -->
+                        <v-slide-x-reverse-transition>
+                            <adv-btn
+                                v-if="publisher"
+                                :icon="checked_state ? 'radio_button_unchecked' : 'radio_button_checked'"
+                                :tooltip="(checked_state ? 'Deselect' : 'Select') + ' all ' + labels[entity]"
+                                :disabled="items[0] ? false : true"
+                                color-main="blue_prim"
+                                color-hover="blue_sec"
+                                color-text="white"
+                                @click="checked_state = !checked_state; SetChecked(checked_state);"
+                            />
+                        </v-slide-x-reverse-transition>
 
-                    <v-slide-x-reverse-transition>
-                        <adv-btn
-                            v-if="publisher"
-                            icon="publish"
-                            :tooltip="'Publish selected ' + labels[entity]"
-                            :disabled="!checked.filter((check) => { return check.state === true })[0]"
-                            color-main="blue_prim"
-                            color-hover="blue_sec"
-                            color-text="white"
-                            @click="Publish(checked, 1)"
-                        />
-                    </v-slide-x-reverse-transition>
+                        <v-slide-x-reverse-transition>
+                            <adv-btn
+                                v-if="publisher"
+                                icon="publish"
+                                :tooltip="'Publish selected ' + labels[entity]"
+                                :disabled="!checked.filter((check) => { return check.state === true })[0]"
+                                color-main="blue_prim"
+                                color-hover="blue_sec"
+                                color-text="white"
+                                @click="Publish(checked, 1)"
+                            />
+                        </v-slide-x-reverse-transition>
 
-                    <!-- Publisher Toggle -->
-                    <adv-btn
-                        :icon="publisher ? 'public_off' : 'public'"
-                        :tooltip="publisher ? 'Hide Publisher' : 'Show Publisher'"
-                        :disabled="$root.user.level < 18"
-                        color-hover="header_hover"
-                        @click="TogglePublisher()"
-                    />
+                        <!-- Publisher Toggle -->
+                        <adv-btn
+                            :icon="publisher ? 'public_off' : 'public'"
+                            :tooltip="publisher ? 'Hide Publisher' : 'Show Publisher'"
+                            color-hover="header_hover"
+                            @click="togglePublisher()"
+                        />
+                    </template>
 
                     <!-- Switch Coin/Types -->
                     <a :href="'/editor#/' + (entity === 'coins' ? 'types' : 'coins') + '/search'">
@@ -106,6 +107,13 @@
 
         </div>
 
+        <!-- No results -->
+        <div
+            v-else-if="queried"
+            class="mt-10 headline d-flex justify-center"
+            v-html="loading ? 'Loading ...' : 'Sorry, no matching Records!'"
+        />
+
         <!-- Start Screen -->
         <div v-else class="start-screen">
             <v-card
@@ -124,7 +132,7 @@
                         v-model="search.id"
                         label="ID"
                         class="mb-3"
-                        v-on:keyup.enter="RunSearch()"
+                        v-on:keyup.enter="runQuery()"
                         style="width: 50%"
                     />
 
@@ -133,7 +141,7 @@
                         :label="$root.label('keywords')"
                         append-icon="keyboard"
                         class="mb-n2"
-                        v-on:keyup.enter="RunSearch()"
+                        v-on:keyup.enter="runQuery()"
                         v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
                     />
                     <v-expand-transition>
@@ -163,7 +171,7 @@
                         class="title"
                         v-text="'search'"
                         :width="350"
-                        @click="RunSearch()"
+                        @click="runQuery()"
                     />
                 </div>
             </v-card>
@@ -175,7 +183,7 @@
         header
         :collapse="searchCounter"
         v-on:expand="onDrawerExpand"
-        v-on:search="RunSearch()"
+        v-on:search="runQuery()"
         v-on:clear="SearchDefaults(true)"
     >
 
@@ -195,15 +203,65 @@
 
                     <!-- Content -->
                     <v-expansion-panel-content>
-                        <v-select dense outlined filled
-                            prepend-icon="youtube_searched_for"
-                            label="Previous Queries"
-                            :items="$store.state.previousSearches[entity].map((ls) => {
-                                return { value: ls, text: printPreviousSearch(ls) }
-                            })"
-                            :menu-props="{ offsetY: true }"
-                            @input="restorePreviousSearch"
-                        />
+                        <!-- Cache -->
+                        <div class="d-flex">
+                            <v-icon v-text="'history'" />
+                            <div class="font-weight-bold ml-2" v-html="'Session&nbsp;History&nbsp;(' + cachedQueries.length + ')' " />
+                        </div>
+                        <div class="ml-8 mt-2 mb-2">
+                            <v-divider />
+                            <div style="height: 110px; overflow-y: scroll; overflow-x: hidden">
+                                <template v-if="cachedQueries[0]">
+                                    <div
+                                        v-for="(q, i) in cachedQueries"
+                                        :key="'storedQ' + i"
+                                        class="pt-1 pb-1 pr-5"
+                                    >
+                                        <div
+                                            class="text-truncate" v-text="q.text"
+                                            style="cursor: pointer"
+                                            @click="restoreCachedQuery(q.value)"
+                                        />
+                                    </div>
+                                </template>
+                                <div v-else class="pt-1 pb-1" v-text="'No cached queries, yet'" />
+                            </div>
+                            <v-divider />
+                        </div>
+
+                        <!-- Favorites -->
+                        <div class="d-flex mt-8">
+                            <v-icon v-text="'star'" />
+                            <div class="font-weight-bold ml-2" v-html="'Favorites&nbsp;(' + Object.keys(storedQueries).length + ')'" />
+                            <v-spacer />
+                            <div
+                                v-text="'+ Add current Query to Favorites'"
+                                class="caption"
+                                style="cursor: pointer;"
+                                @click="storeCurrentQuery"
+                            />
+                        </div>
+                        <div class="ml-8 mt-2 mb-2">
+                            <v-divider />
+                            <div style="height: 110px; overflow-y: scroll; overflow-x: hidden">
+                                <template v-if="Object.keys(storedQueries)[0]">
+                                    <div
+                                        v-for="(value, name, i) in storedQueries"
+                                        :key="'storedQ' + i"
+                                        class="d-flex justify-space-between pt-1 pb-1"
+                                    >
+                                        <div
+                                            class="text-truncate" v-text="name"
+                                            style="cursor: pointer"
+                                            @click="restoreCachedQuery(value)"
+                                        />
+                                        <v-icon v-text="'delete'" class="ml-5 mr-2" @click="deleteStoredQuery(name)" />
+                                    </div>
+                                </template>
+                                <div v-else class="pt-1 pb-1" v-text="'No favorite queries, yet'" />
+                            </div>
+                            <v-divider />
+                        </div>
                     </v-expansion-panel-content>
                 </v-expansion-panel>
 
@@ -227,11 +285,11 @@
                             :label="$root.label('keywords')"
                             append-icon="keyboard"
                             class="mt-5 mb-n4"
-                            v-on:keyup.enter="RunSearch()"
-                            v-on:click:append="searchStringKeyboardf = !searchStringKeyboardf"
+                            v-on:keyup.enter="runQuery()"
+                            v-on:click:append="searchStringKeyboardF = !searchStringKeyboardF"
                         />
                         <v-expand-transition>
-                            <div v-if="searchStringKeyboardf" class="d-flex justify-center mb-3">
+                            <div v-if="searchStringKeyboardF" class="d-flex justify-center mb-3">
                                 <keyboard
                                     :string="search.q"
                                     layout="el_uc"
@@ -282,7 +340,7 @@
                                                     v-model="search.date_start"
                                                     label="Min."
                                                     prepend-icon="last_page"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
 
@@ -291,7 +349,7 @@
                                                     v-model="search.date_end"
                                                     label="Max."
                                                     append-outer-icon="first_page"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
 
@@ -302,7 +360,7 @@
                                                     v-model="search.weight_start"
                                                     label="Min."
                                                     prepend-icon="last_page"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
 
@@ -311,7 +369,7 @@
                                                     v-model="search.weight_end"
                                                     label="Max."
                                                     append-outer-icon="first_page"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
 
@@ -322,7 +380,7 @@
                                                     v-model="search.diameter_start"
                                                     label="Min."
                                                     prepend-icon="last_page"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
 
@@ -331,7 +389,7 @@
                                                     v-model="search.diameter_end"
                                                     label="Max."
                                                     append-outer-icon="first_page"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
 
@@ -341,7 +399,7 @@
                                                 <v-select dense outlined filled
                                                     :items="selects.state_public"
                                                     v-model="search.state_public"
-                                                    v-on:keyup.enter="RunSearch()"
+                                                    v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
                                         </v-row>
@@ -422,7 +480,7 @@
                                     v-model="search.id"
                                     :label="labels[entity.slice(0, -1)] + ' ID'"
                                     prepend-icon="fingerprint"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
 
@@ -434,7 +492,7 @@
                                     prepend-icon="publish"
                                     label="Publication State"
                                     :menu-props="{ offsetY: true }"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -448,7 +506,7 @@
                                     v-model="search.state_linked"
                                     :items="selects.state_yes_no"
                                     :menu-props="{ offsetY: true }"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
 
@@ -460,7 +518,7 @@
                                     v-model="search.state_inherited"
                                     :items="selects.state_yes_no"
                                     :menu-props="{ offsetY: true }"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -472,7 +530,7 @@
                                     v-model="search ['id_'+(entity == 'coins' ? 'type' : 'coin')]"
                                     :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'"
                                     :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                             <div class="search-field-50 side-r"/>
@@ -488,7 +546,7 @@
                                     :selected="search"
                                     selected_key="id_creator"
                                     v-on:select="(emit) => { search.id_creator = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
 
@@ -500,7 +558,7 @@
                                     :selected="search"
                                     selected_key="id_editor"
                                     v-on:select="(emit) => { search.id_editor = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -511,7 +569,7 @@
                             prepend-icon="arrow_circle_down"
                             label="Scripted Coin Import"
                             :menu-props="{ offsetY: true }"
-                            v-on:keyup.enter="RunSearch()"
+                            v-on:keyup.enter="runQuery()"
                         />
 
                         <!-- Source -->
@@ -523,7 +581,7 @@
                                     prepend-icon="arrow_circle_down"
                                     label="Has Source?"
                                     :menu-props="{ offsetY: true }"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
 
@@ -532,7 +590,7 @@
                                     v-model="search.source"
                                     label="Source Link"
                                     prepend-icon="arrow_circle_down"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -544,7 +602,7 @@
                             :selected="search"
                             selected_key="id_group"
                             v-on:select="(emit) => { search.id_group = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
                     </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -572,7 +630,7 @@
                                     :items="selects.state_yes_no"
                                     prepend-icon="chat_bubble"
                                     label="Has public Comment?"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
 
@@ -581,7 +639,7 @@
                                     v-model="search.comment_public"
                                     label="Public Comment"
                                     prepend-icon="chat_bubble"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -594,7 +652,7 @@
                                     :items="selects.state_yes_no"
                                     prepend-icon="chat_bubble_outline"
                                     label="Has private Comment?"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
 
@@ -603,7 +661,7 @@
                                     v-model="search.comment_private"
                                     label="Private Comment"
                                     prepend-icon="chat_bubble_outline"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -613,14 +671,14 @@
                             v-model="search.description_private"
                             label="Private Description"
                             prepend-icon="label_important"
-                            v-on:keyup.enter="RunSearch()"
+                            v-on:keyup.enter="runQuery()"
                         />
                         <v-text-field dense outlined filled clearable
                             v-if="entity === 'types'"
                             v-model="search.name_private"
                             label="Private Name"
                             prepend-icon="label"
-                            v-on:keyup.enter="RunSearch()"
+                            v-on:keyup.enter="runQuery()"
                         />
 
                         <!-- References -->
@@ -631,7 +689,7 @@
                             :selected="search"
                             selected_key="id_reference"
                             v-on:select="(emit) => { search.id_reference = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
 
                         <!-- Owner -->
@@ -642,7 +700,7 @@
                             :selected="search"
                             selected_key="id_owner"
                             v-on:select="(emit) => { search.id_owner = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
                         <template v-if="entity === 'coins'">
                             <v-text-field dense outlined filled clearable
@@ -650,7 +708,7 @@
                                 v-model="search.provenience"
                                 label="Provenience"
                                 prepend-icon="play_circle_outline"
-                                v-on:keyup.enter="RunSearch()"
+                                v-on:keyup.enter="runQuery()"
                             />
                             <div class="d-flex">
                                 <div class="search-field-50 side-l">
@@ -658,7 +716,7 @@
                                         v-model="search.collection_nr"
                                         label="Collection Nr."
                                         prepend-icon="bookmarks"
-                                        v-on:keyup.enter="RunSearch()"
+                                        v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
                                 <div class="search-field-50 side-r">
@@ -666,7 +724,7 @@
                                         v-model="search.plastercast_nr"
                                         label="Plastercast Nr."
                                         prepend-icon="bookmarks"
-                                        v-on:keyup.enter="RunSearch()"
+                                        v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
                             </div>
@@ -680,7 +738,7 @@
                             :selected="search"
                             selected_key="id_hoard"
                             v-on:select="(emit) => { search.id_hoard = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
 
                         <!-- Findspots -->
@@ -691,7 +749,7 @@
                             :selected="search"
                             selected_key="id_findspot"
                             v-on:select="(emit) => { search.id_findspot = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
                     </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -720,7 +778,7 @@
                                     :selected="search"
                                     selected_key="id_region"
                                     v-on:select="(emit) => { search.id_region = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                             <div class="search-field-50 side-l">
@@ -731,7 +789,7 @@
                                     :selected="search"
                                     selected_key="id_mint"
                                     v-on:select="(emit) => { search.id_mint = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -745,7 +803,7 @@
                                     :selected="search"
                                     selected_key="id_authority"
                                     v-on:select="(emit) => { search.id_authority = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div><div class="search-field-50 side-r"/>
                         </div>
@@ -761,7 +819,7 @@
                                     :selected="search"
                                     selected_key="id_authority_person"
                                     v-on:select="(emit) => { search.id_authority_person = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                             <div class="search-field-50 side-r">
@@ -772,7 +830,7 @@
                                     :selected="search"
                                     selected_key="id_authority_group"
                                     v-on:select="(emit) => { search.id_authority_group = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -785,7 +843,7 @@
                             :selected="search"
                             selected_key="id_person"
                             v-on:select="(emit) => { search.id_person = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
 
                         <!-- Period -->
@@ -796,7 +854,7 @@
                             :selected="search"
                             selected_key="id_period"
                             v-on:select="(emit) => { search.id_period = emit }"
-                            v-on:keyup_enter="RunSearch()"
+                            v-on:keyup_enter="runQuery()"
                         />
 
                         <!-- Date -->
@@ -806,7 +864,7 @@
                                     v-model="search.date_start"
                                     label="Date Start"
                                     prepend-icon="first_page"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                             <div class="search-field-50 side-r">
@@ -814,7 +872,7 @@
                                     v-model="search.date_end"
                                     label="Date End"
                                     prepend-icon="last_page"
-                                    v-on:keyup.enter="RunSearch()"
+                                    v-on:keyup.enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -846,7 +904,7 @@
                                     :selected="search"
                                     selected_key="id_material"
                                     v-on:select="(emit) => { search.id_material = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div><div class="search-field-50 side-l" />
                         </div>
@@ -861,7 +919,7 @@
                                     :selected="search"
                                     selected_key="id_denomination"
                                     v-on:select="(emit) => { search.id_denomination = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                             <div class="search-field-50 side-r">
@@ -872,7 +930,7 @@
                                     :selected="search"
                                     selected_key="id_standard"
                                     v-on:select="(emit) => { search.id_standard = emit }"
-                                    v-on:keyup_enter="RunSearch()"
+                                    v-on:keyup_enter="runQuery()"
                                 />
                             </div>
                         </div>
@@ -886,7 +944,7 @@
                                         v-model="search.weight_start"
                                         label="Weight Min."
                                         prepend-icon="radio_button_unchecked"
-                                        v-on:keyup.enter="RunSearch()"
+                                        v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
                                 <div class="search-field-50 side-r">
@@ -894,7 +952,7 @@
                                         v-model="search.weight_end"
                                         label="Weight Max."
                                         prepend-icon="lens"
-                                        v-on:keyup.enter="RunSearch()"
+                                        v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
                             </div>
@@ -906,7 +964,7 @@
                                         v-model="search.diameter_start"
                                         label="Diameter Min."
                                         prepend-icon="hdr_weak"
-                                        v-on:keyup.enter="RunSearch()"
+                                        v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
                                 <div class="search-field-50 side-r">
@@ -914,7 +972,7 @@
                                         v-model="search.diameter_end"
                                         label="Diameter Max."
                                         prepend-icon="hdr_strong"
-                                        v-on:keyup.enter="RunSearch()"
+                                        v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
                             </div>
@@ -946,7 +1004,7 @@
                                 v-model="search[key.v + '_design']"
                                 :label="key.text + ' Design (Fulltext Search)'"
                                 prepend-icon="notes"
-                                v-on:keyup.enter="RunSearch()"
+                                v-on:keyup.enter="runQuery()"
                             />
                             <SearchForeignKey
                                 :entity="'designs'"
@@ -956,7 +1014,7 @@
                                 :selected="search"
                                 :selected_key="key.v + '_id_design'"
                                 v-on:select="(emit) => { search[key.v + '_id_design'] = emit }"
-                                v-on:keyup_enter="RunSearch()"
+                                v-on:keyup_enter="runQuery()"
                             />
 
                             <!-- Legend -->
@@ -969,7 +1027,7 @@
                                 :selected="search"
                                 :selected_key="key.v + '_id_legend'"
                                 v-on:select="(emit) => { search[key.v + '_id_legend'] = emit }"
-                                v-on:keyup_enter="RunSearch()"
+                                v-on:keyup_enter="runQuery()"
                             />
 
                             <!-- Monograms -->
@@ -980,7 +1038,7 @@
                                 :selected="search"
                                 :selected_key="key.v + '_id_monogram'"
                                 v-on:select="(emit) => { search[key.v + '_id_monogram'] = emit }"
-                                v-on:keyup_enter="RunSearch()"
+                                v-on:keyup_enter="runQuery()"
                             />
 
                             <!-- Symbols -->
@@ -991,7 +1049,7 @@
                                 :selected="search"
                                 :selected_key="key.v + '_id_symbol'"
                                 v-on:select="(emit) => { search[key.v + '_id_symbol'] = emit }"
-                                v-on:keyup_enter="RunSearch()"
+                                v-on:keyup_enter="runQuery()"
                             />
                         </v-expansion-panel-content>
                     </v-expansion-panel>
@@ -1002,6 +1060,48 @@
             </v-expansion-panels>
         </template>
     </drawer>
+
+
+
+    <!-- Manage Favorites -->
+    <v-dialog
+        tile
+        persistent
+        v-model="queryDialog.show"
+        :width="500"
+    >
+        <v-card tile>
+            <dialogbartop
+                icon="star"
+                text="Query Favorites"
+                :fullscreen="null"
+                v-on:close="queryDialog.show = false"
+            ></dialogbartop>
+
+            <v-card-text>
+
+                <div class="text-center pa-4">
+                    Please provide a unique name for your Query. Otherwise an older query of the same name will be overwritten.
+                </div>
+
+                <v-text-field
+                    dense filled outlined clearable
+                    v-model="queryDialog.text"
+                />
+                <div class="d-flex flex-wrap justify-center mt-n4">
+                    <v-checkbox
+                        v-model="queryDialog.page"
+                        label="Save current Page offset"
+                    />
+                </div>
+            </v-card-text>
+
+            <div class="d-flex justify-center mb-2" >
+                <v-btn text v-text="'cancel'" @click="queryDialog.show = false" class="mr-1" />
+                <v-btn text v-text="'save'" :disabled="!queryDialog.text" @click="saveQuery()" class="ml-1" />
+            </div>
+        </v-card>
+    </v-dialog>
 
 </div>
 </template>
@@ -1022,37 +1122,21 @@ export default {
 
     data () {
         return {
+            queried:            false,
             loading:            false,
             error:              false,
 
             items:              [],
 
-            search:             {
-                id: null,
-                state_public:   this.publisher ? 0 : null,
-                q: null
-            },
-            //previous_search:    [],
+            search:             this.constructParams(),
             searchCounter:      0,
-            search_refresh:     0,
-            dbi_params:         {},
+            pagination:         {},
 
-            tools:              true,
-
-            publisher:          false,
             checked_state:      false,
             checked:            [],
 
-            /*tab:                'tab-0',
-            tabs:               [
-                {value: 0,  text: 'String Search'},
-                {value: 1,  text: 'Frequently used'},
-                {value: 2,  text: 'General'},
-                {value: 3,  text: 'Production'},
-                {value: 4,  text: 'Depiction'}
-            ],*/
-            cachedTab: 1,
-            activeTab: null,
+            cachedTab:          1,
+            activeTab:          null,
 
             display:            this.$store.state.displayMode,
             display_mode:       [
@@ -1078,27 +1162,29 @@ export default {
             },
 
             searchStringKeyboard: false,
-            searchStringKeyboardf: false
+            searchStringKeyboardF: false,
+
+            queryDialog: {
+                show: false,
+                text: null,
+                page: false
+            }
         }
     },
 
     props: {
-        entity:     { type: String, default: 'coins' },
-        mode:       { type: String, default: 'search' },
-        query:      { type: Object },
-        noRouter:   { type: Boolean, default: false }
+        entity:         { type: String, default: 'coins' },
+        publisher:      { type: Boolean, default: 'search' },
+        selected:       { type: [Number, String], default: null },
+        routedQuery:    { type: Object },
+        routed:         { type: Boolean, default: false }
     },
 
     computed: {
-        // Localization
-        router () { return !this.noRouter },
+        router () { return this.routed },
 
         l () { return this.$root.language },
         labels () { return this.$root.labels },
-
-        label () {
-            return this.entity == 'coins' ? {s: 'Coin', p: 'Coins'} : {s: 'Type', p: 'Types'};
-        },
 
         sorters () {
             const sorters = [
@@ -1117,26 +1203,76 @@ export default {
             sorters.push({ value: 'updated', text: this.labels['updated_at'] })
 
             return sorters
+        },
+
+        query () {
+            if (!this.routed) return {}
+            else {
+                const query = this.routedQuery
+                if (query.public !== undefined) {
+                    query.state_public = query.public == 'all' ? null : parseInt(query.public)
+                    delete(query.public)
+                    delete(query.sort_by_op)
+                }
+                return query
+            }
+        },
+
+        queryGiven () {
+            return Object.keys(this.query)[0] ? true : false
+        },
+
+        cachedQueries () {
+            return this.$store.state.cache[this.entity].map((query) => {
+                let q = {}
+                let pPublic = ''
+                let sortBy = ''
+
+                query.split('&').forEach((param) => {
+                    const split = param.split('=')
+                    const key = split.shift()
+                    const val = split.join('=')
+
+                    if (key === 'public') pPublic = val.replaceAll('-', ', ')
+                    else if (key === 'sort_by') sortBy = val.replace('.', ', ')
+                    else q[key] = (q[key] ? (q[key] + ', ') : '') + val
+                })
+
+                let text = Object.keys(q).map((key) => { return key + ': ' + q[key] }).join('; ') ?? ''
+                if (text) text += '; '
+                text += 'sort: ' + sortBy + '; public: ' + pPublic
+
+                return {
+                    value: 'limit=' + this.pagination.limit + '&' + query,
+                    text
+                }
+            })
+        },
+
+        storedQueries () {
+            let queries = this.$root.settings?.queries
+            if (!queries) return {}
+            queries = JSON.parse(queries)
+            return queries?.[this.entity] ?? {}
         }
     },
 
     watch: {
         entity: function () { this.Init() },
-        mode: function () { this.handleMode() },
         query: function () { this.handleQuery() }
     },
 
     created () {
         this.Init()
-        this.handleMode()
-        this.handleQuery()
+        if (this.routed) this.handleQuery()
     },
 
     methods: {
         Init () {
-            this.SearchDefaults(false)
+            this.queried = false
+            this.SearchDefaults()
             this.items = []
-            this.dbi_params= {
+            this.pagination= {
                 sort_by: 'id',
                 sort_by_op:  'DESC',
                 count:  0,
@@ -1145,57 +1281,53 @@ export default {
             }
         },
 
-        handleMode () {
-            if (this.mode === 'publish') {
-                this.dbi_params.sort_by = 'updated_at'
-                this.dbi_params.sort_by_op = 'DESC'
-                this.search.state_public = 2
-                this.publisher = true
-                if (!Object.keys(this.query)[0]) this.SetItems()
-            }
-            else this.publisher = false
-        },
-
-        RunSearch () {
-            ++this.searchCounter
-            this.cacheCurrentSearch()
-            this.SetItems()
+        SearchDefaults (message) {
+            /*const search = {}
+            Object.keys(this.search).forEach((key) => {
+                if (key === 'state_public')                 search[key] = this.publisher ? 2 : null
+                else if (Array.isArray(this.search[key]))   search[key] = []
+                else                                        search[key] = null
+            })*/
+            this.search = this.constructParams() //search
+            if (message) this.$store.dispatch('showSnack', { color: 'blue_sec', message: 'Query Parameters set to default!' })
         },
 
         handleQuery () {
-            if (Object.keys(this.query)[0]) this.getItems(this.query)
+            if (this.publisher && !this.queryGiven) this.togglePublisher(true)
+            else if (this.queryGiven) {
+                this.getItems(this.query)
+                this.reconstructSearch()
+            }
         },
 
-        async getItems (query) {
-            this.error      = false;
-            this.loading = this.$root.loading = true;
-
-            const dbi = await this.$root.DBI_SELECT_POST(this.entity, query)
-
-            if (dbi?.contents) {
-                const sort_explode = dbi.pagination.sort_by.split(' ')
-                dbi.pagination.sort_by = sort_explode[0]
-                dbi.pagination.sort_by_op = sort_explode[1]
-                this.dbi_params = dbi.pagination
-
-                this.items = Object.values(dbi.contents)
-                if (this.items[0]) {
-                    this.SetChecked (false)
-                }
-                else {
-                    this.$root.snackbar('No ' + this.labels[this.entity] + ' found')
-                }
-            }
-            else {
-                console.log(dbi)
-                this.error = true
-            }
-
-            this.loading = this.$root.loading = false
-            this.scrollToTop()
+        runQuery () {
+            ++this.searchCounter
+            this.cacheCurrentQuery()
+            this.processQuery()
         },
 
-        SetItems () {
+        reconstructSearch () {
+            this.search = this.constructParams(this.query)
+            /*console.log('construct', this.constructParams(this.query))
+            for (let [key, value] of Object.entries({ ...this.query })) {
+                if (key === 'offset') this.pagination.offset = value ?? 0
+                else if (key === 'limit') this.pagination.limit = value ?? 12
+                else if (key === 'sort_by') {
+                    const split = value?.split('.')
+                    this.pagination.sort_by = split?.[0] ?? 'id'
+                    this.pagination.sort_by_op = split?.[1] ?? 'DESC'
+                }
+                else if (key === 'state_public' && (value === [0, 1, 2] || value === 'all'))  this.search.state_public = null
+                else if (key !== 'i') {
+                    //console.log(key, value)
+                    this.search[key] = value
+                }
+                //console.log('RECO', this.search, this.pagination)
+            }*/
+                //console.log(this.search)
+        },
+
+        processQuery () {
             const query = {}
 
             // Get Search Parameters
@@ -1215,16 +1347,20 @@ export default {
 
             // Set DBI Parameters
             const params = {}
-            Object.keys(this.dbi_params).forEach((key) => {
+            Object.keys(this.pagination).forEach((key) => {
                 if (key === 'sort_by') {
-                    params[key] = this.dbi_params.sort_by + '.' + this.dbi_params.sort_by_op
+                    params[key] = this.pagination.sort_by + '.' + this.pagination.sort_by_op
                 }
                 else if (key != 'sort_by_op') {
-                    params[key] = this.dbi_params[key]
+                    params[key] = this.pagination[key]
                 }
             })
 
             if (this.router) {
+                if (query.state_public) {
+                    query.public = typeof query.state_public === 'number' ? query.state_public : 'all'
+                    delete(query.state_public)
+                }
                 this.$router.push({ query: {
                     ...{
                         i: this.searchCounter,
@@ -1237,6 +1373,32 @@ export default {
                 }})
             }
             else this.getItems(params, query)
+        },
+
+        async getItems (query) {
+            this.queried = true
+            this.error  = false
+            this.loading = this.$root.loading = true
+
+            const dbi = await this.$root.DBI_SELECT_POST(this.entity, query)
+
+            if (dbi?.contents) {
+                const sort_explode = dbi.pagination.sort_by.split(' ')
+                dbi.pagination.sort_by = sort_explode[0]
+                dbi.pagination.sort_by_op = sort_explode[1]
+                this.pagination = dbi.pagination
+
+                this.items = dbi.contents
+                if (this.items[0]) this.SetChecked (false)
+                else this.$store.dispatch('showSnack', { message: 'No items found!' })
+            }
+            else {
+                console.error('ERROR', dbi)
+                this.error = true
+            }
+
+            this.loading = this.$root.loading = false
+            this.scrollToTop()
         },
 
         scrollToTop () {
@@ -1253,58 +1415,46 @@ export default {
             this.checked = checkers
         },
 
-        SearchDefaults (refresh) {
-            const self = this
-            const search = {}
-            Object.keys(this.search).forEach((key) => {
-                if (key === 'state_public') {
-                   search[key] = this.publisher ? 0 : null
-                }
-                else if (Array.isArray(self.search[key])) {
-                    search[key] = []
-                }
-                else {
-                    search[key] = null
-                }
-            })
-            this.search = search
-            /*this.search = { id: null, state_public: (this.publisher ? 0 : null) }
-            if (refresh) { ++this.search_refresh }*/
-        },
-
         ScrollTop () {
             window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
         },
 
         OrderBy (input) {
-            if (input === this.dbi_params.sort_by) {
-                this.dbi_params.sort_by_op = this.dbi_params.sort_by_op != 'ASC' ? 'ASC' : 'DESC'
+            if (input === this.pagination.sort_by) {
+                this.pagination.sort_by_op = this.pagination.sort_by_op != 'ASC' ? 'ASC' : 'DESC'
             }
             else {
-                this.dbi_params.sort_by = input
-                this.dbi_params.sort_by_op = 'ASC'
+                this.pagination.sort_by = input
+                this.pagination.sort_by_op = 'ASC'
             }
-            this.dbi_params.offset = 0
-            this.cacheCurrentSearch()
-            this.SetItems();
+            this.pagination.offset = 0
+            this.cacheCurrentQuery()
+            this.processQuery();
         },
 
-        TogglePublisher () {
-            if (!this.publisher){
-                this.publisher = true
-                if (this.search.state_public !== 2) {
-                    this.search.state_public = this.publisher ? 2 : null
-                    this.$root.snackbar('Publishing activated (' + this.labels[this.entity] + ' requested to be published only)')
-                    this.dbi_params.offset = 0;
-                    this.SetItems();
+        togglePublisher (replace) {
+            if (this.publisher) {
+
+                if (this.queryGiven) {
+                    let q = window.location.href?.split('?') ?? [null]
+                    q.shift()
+                    q = q.join('?')
+                    this.$router.push('/editor#/' + this.entity + '/publish?' + q)
+                }
+                else {
+                    const path = {
+                        path: '/' + this.entity + '/publish',
+                        query: {
+                            limit: this.pagination.limit,
+                            sort_by: 'updated_at.DESC',
+                            public: 2
+                        }
+                    }
+
+                    this.$router[replace ? 'replace' : 'push'](path)
                 }
             }
-            else {
-                this.publisher = false
-                this.search.state_public = null
-                this.$root.snackbar('Publishing deactivated (all ' + this.labels[this.entity] + ' shown)')
-                this.SetItems()
-            }
+            else this.$router.push('/editor#/' + this.entity + '/search')
         },
 
         async Publish (input, mode) {
@@ -1317,14 +1467,14 @@ export default {
                     const response = await this.$root.DBI_INPUT_POST('publish', 'input', { entity: this.entity, items: items.map((item) => { return item.id }), mode: mode });
 
                     if (response.success) {
-                        this.$root.snackbar(response.success, 'success')
-                        this.SetItems()
+                        this.$store.dispatch('showSnack', { color: 'success', message: response.success })
+                        this.processQuery()
                     }
                 }
             }
             else {
-                this.snackbar('No items selected!');
-                this.SetItems();
+                this.$store.dispatch('showSnack', { color: 'error', message: 'No items selected!' })
+                this.processQuery();
             }
         },
 
@@ -1333,73 +1483,57 @@ export default {
             this.display = value
         },
 
-        cacheCurrentSearch () {
-            const self = this
-            const search = {}
-            Object.keys(this.search).forEach((key) => {
-                if (![null, []].includes(self.search[key])) {
-                    if (Array.isArray(self.search[key])) {
-                        const new_array = []
-                        self.search[key].forEach((val) => { new_array.push(val)})
-                        search[key] = new_array
-                    }
-                    else {
-                        search[key] = self.search[key]
+        getQueryString (page) {
+            let query = window.location.href?.split('?') ?? [null]
+            query.shift()
+            const pattern = '(i' + (page ? '' : '|limit|offset') + ')=[^&]+&'
+            return query.join('?').replaceAll(new RegExp(pattern, 'g'), '')
+        },
+
+        cacheCurrentQuery () {
+            if (this.routed) {
+                const query = this.getQueryString()
+
+                if (query) {
+                    const value = this.$store.state.cache[this.entity].slice(0, 49)
+                    if (value[0] !== query) {
+                        value.unshift(query)
+                        this.$store.commit('setCache', { key: this.entity, value })
                     }
                 }
-            })
-            if (search) {
-                const params = {
-                    sort_by: self.dbi_params.sort_by,
-                    sort_by_op: self.dbi_params.sort_by_op,
-                    count:  0,
-                    offset: 0,
-                    limit:  self.dbi_params.limit
-                }
-                const ls_array = []
-                ls_array.push({ search: search, params: params })
-                this.$store.state.previousSearches[this.entity].forEach((ls) => {
-                    ls_array.push(ls)
-                })
-                this.$store.commit('set_previous_search', { entity: this.entity, data: ls_array })
             }
         },
 
-        printPreviousSearch (ls) {
-            let keys = JSON.stringify(ls.search)
-            keys = keys.replaceAll(',', ', ').replaceAll('"', '').slice(1,-1).replaceAll(':', ': ')
-            return (keys.trim() ? keys : '--') + ', sort by: ' + (ls.params.sort_by + ' ' + ls.params.sort_by_op)
+        storeCurrentQuery () {
+            this.queryDialog = {
+                show: true,
+                page: false,
+                text: '' + Date.now()
+            }
         },
 
-        restorePreviousSearch (ls) {
+        saveQuery () {
+            console.log(this.queryDialog)
+            const queries = { ...this.storedQueries }
+            queries[this.queryDialog.text.trim()] = this.getQueryString(this.queryDialog.page)
+            console.log(queries)
+            this.$root.changeSettings('queries', JSON.stringify({ [this.entity]: queries }))
+            this.queryDialog.show = false
+        },
+
+        deleteStoredQuery (key) {
+            const queries = { ...this.storedQueries }
+            delete(queries[key])
+            this.$root.changeSettings('queries', JSON.stringify({ [this.entity]: queries }))
+        },
+
+        restoreCachedQuery (query) {
             this.SearchDefaults()
-            // Search
-            const search = {}
-            Object.keys(ls.search).forEach((key) => {
-                search[key] = ls.search[key]
-            })
-            this.search = search
-            // Parameters
-            const params = {}
-            Object.keys(ls.params).forEach((key) => {
-                params[key] = ls.params[key]
-            })
-            this.dbi_params = params
-            this.SetItems()
-        },
-
-        searchStringIncludeFiled (key) {
-            if (this.search.qex?.[0]) {
-                if (this.search.qex?.includes(key)) {
-                    if (this.search.qex.length > 1) {
-                        const index = this.search.qex.indexOf(key)
-                        this.search.qex.splice(index, 1)
-                    }
-                    else this.search.qex = []
-                }
-                else this.search.qex.push(key)
-            }
-            else this.search.qex = [key]
+            const regex = new RegExp('limit=[^&]+&')
+            if (!regex.test(query)) query = 'limit=' + this.pagination.limit + '&' + query
+            //console.log(query)
+            window.location.href = '/editor#/' + this.entity + '/' + (this.publisher ? 'publish' : 'search') + '?' + query
+            ++this.searchCounter
         },
 
         onDrawerExpand (expand) {
@@ -1410,6 +1544,106 @@ export default {
                 this.cachedTab = this.activeTab
                 this.activeTab = null
             }
+        },
+
+        constructParams (input) {
+            const d = input === null || input === undefined || typeof input !== 'object' ? {} : { ...input }
+
+            // Public
+            let state_public = null
+            if (d.state_public !== undefined && d.state_public !== [0, 1, 2]) state_public = parseInt(d.state_public)
+            else if (d.public !== undefined && d.public !== 'all') state_public = parseInt(d.state_public)
+
+            return {
+                state_public,
+                sort_by:            d.sort_by ?? 'id.DESC',
+                offset:             d.offset ? parseInt(d.offset) : 0,
+                limit:              d.limit ? parseInt(d.limit) : 12,
+
+                id:                 this.parseInt(d.id),
+                q:                  d.q ?? null,
+
+                collection_nr:      d.collection_nr ?? null,
+                comment_private:    d.comment_private ?? null,
+                comment_public:     d.comment_public ?? null,
+                date_end:           this.parseYear(d.date_end),
+                date_start:         this.parseYear(d.date_start),
+                description_private: d.description_private ?? null,
+                diameter_end:       this.parseFloat(d.diameter_end),
+                diameter_start:     this.parseFloat(d.diameter_start),
+                has_images:         this.parseBoolean(d.has_images),
+                id_authority:       this.parseArrayInt(d.id_authority),
+                id_authority_group: this.parseArrayInt(d.id_authority_group),
+                id_authority_person: this.parseArrayInt(d.id_authority_person),
+                id_creator:         this.parseArrayInt(d.id_creator),
+                id_denomination:    this.parseArrayInt(d.id_denomination),
+                id_design:          this.parseArrayInt(d.id_design),
+                id_die:             this.parseArrayInt(d.id_die),
+                id_editor:          this.parseArrayInt(d.id_editor),
+                id_findspot:        this.parseArrayInt(d.id_findspot),
+                id_group:           this.parseArrayInt(d.id_group),
+                id_hoard:           this.parseArrayInt(d.id_hoard),
+                id_legend:          this.parseArrayInt(d.id_legend),
+                id_material:        this.parseArrayInt(d.id_material),
+                id_mint:            this.parseArrayInt(d.id_mint),
+                id_monogram:        this.parseArrayInt(d.id_monogram),
+                id_owner:           this.parseArrayInt(d.id_owner),
+                id_period:          this.parseArrayInt(d.id_period),
+                id_person:          this.parseArrayInt(d.id_person),
+                id_reference:       this.parseArrayString(d.id_reference),
+                id_region:          this.parseArrayInt(d.id_region),
+                id_standard:        this.parseArrayInt(d.id_standard),
+                id_symbol:          this.parseArrayInt(d.id_symbol),
+                id_type:            this.parseInt(d.id_type),
+                imported:           this.parseBoolean(d.imported),
+
+                plastercast_nr:     d.plastercast_nr ?? null,
+                provenience:        d.provenience ?? null,
+
+                source:             d.source ?? null,
+                state_comment_private: d.state_comment_private ?? null,
+                state_comment_public: d.state_comment_public ?? null,
+                state_inherited:    this.parseBoolean(d.state_inherited),
+                state_linked:       this.parseBoolean(d.state_linked),
+                state_source:       this.parseBoolean(d.state_source),
+                weight_end:         this.parseFloat(d.weight_end),
+                weight_start:       this.parseFloat(d.weight_start),
+
+                o_design:           this.parseArrayInt(d.o_design),
+                o_id_design:        this.parseArrayInt(d.o_id_design),
+                o_id_legend:        this.parseArrayInt(d.o_id_legend),
+                o_id_monogram:      this.parseArrayInt(d.o_id_monogram),
+                o_id_symbol:        this.parseArrayInt(d.o_id_symbol),
+
+                r_design:           this.parseArrayInt(d.r_design),
+                r_id_design:        this.parseArrayInt(d.r_id_design),
+                r_id_legend:        this.parseArrayInt(d.r_id_legend),
+                r_id_monogram:      this.parseArrayInt(d.r_id_monogram),
+                r_id_symbol:        this.parseArrayInt(d.r_id_symbol),
+            }
+        },
+
+        parseArrayInt (val) {
+            return val ? (typeof val === 'object' ? val : [val]).map((s) => parseInt(s)) : []
+        },
+        parseArrayString (val) {
+            return val ? (typeof val === 'object' ? val : [val]) : []
+        },
+        parseInt (val) {
+            return val ? parseInt(val) : null
+        },
+        parseFloat (val) {
+            return val ? parseFloat(val) : null
+        },
+        parseBoolean (val) {
+            if (val === undefined) return null
+            if (val === null) return null
+            if (parseInt(val) === 1) return 1
+            if (parseInt(val) === 0) return 0
+            return null
+        },
+        parseYear (val) {
+            return val ? (parseInt(val) ?? null) : null
         }
     }
 }
