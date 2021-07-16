@@ -390,7 +390,7 @@ const editor = new Vue({
                 await axios.post(source, Object.assign ({}, params))
                     .then((response) => {
                         dbi = response?.data
-                        //console.log('AXIOS Response:', response)
+                        console.log('AXIOS', source, response)
                     })
                     .catch((error) => {
                         self.AXIOS_ERROR_HANDLER (error)

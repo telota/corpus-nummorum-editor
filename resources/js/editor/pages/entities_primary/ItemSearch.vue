@@ -1109,6 +1109,7 @@
 
 <script>
 
+import h            from './modules/itemSearch.js'
 import tradingcard  from './modules/searchLayoutTradingcard.vue'
 import indexcard    from './modules/searchLayoutIndexcard.vue'
 import tablerow     from './modules/searchLayoutTablerow.vue'
@@ -1128,7 +1129,7 @@ export default {
 
             items:              [],
 
-            search:             this.constructParams(),
+            search:             h.constructParams(),
             searchCounter:      0,
             pagination:         {},
 
@@ -1148,7 +1149,7 @@ export default {
             // selectlists
             selects:            {
                 state_public:       [
-                    { value: null, text: 'All' },
+                    { value: 'all', text: 'All' },
                     { value: 0, text: 'Not published' },
                     { value: 2, text: 'Publishing requested' },
                     { value: 1, text: 'Published' },
@@ -1176,8 +1177,8 @@ export default {
         entity:         { type: String, default: 'coins' },
         publisher:      { type: Boolean, default: 'search' },
         selected:       { type: [Number, String], default: null },
-        routedQuery:    { type: Object },
-        routed:         { type: Boolean, default: false }
+        routed:         { type: Boolean, default: false },
+        routedQuery:    { type: Object }
     },
 
     computed: {
@@ -1207,19 +1208,11 @@ export default {
 
         query () {
             if (!this.routed) return {}
-            else {
-                const query = this.routedQuery
-                if (query.public !== undefined) {
-                    query.state_public = query.public == 'all' ? null : parseInt(query.public)
-                    delete(query.public)
-                    delete(query.sort_by_op)
-                }
-                return query
-            }
+            else return h.constructRequest(h.constructParams(this.routedQuery))
         },
 
         queryGiven () {
-            return Object.keys(this.query)[0] ? true : false
+            return Object.keys(this.routedQuery)[0] ? true : false
         },
 
         cachedQueries () {
@@ -1235,15 +1228,15 @@ export default {
 
                     if (key === 'public') pPublic = val.replaceAll('-', ', ')
                     else if (key === 'sort_by') sortBy = val.replace('.', ', ')
-                    else q[key] = (q[key] ? (q[key] + ', ') : '') + val
+                    else if (key !== 'limit') q[key] = (q[key] ? (q[key] + ', ') : '') + val
                 })
 
                 let text = Object.keys(q).map((key) => { return key + ': ' + q[key] }).join('; ') ?? ''
                 if (text) text += '; '
-                text += 'sort: ' + sortBy + '; public: ' + pPublic
+                text += 'published: ' + pPublic + '; sort: ' + sortBy
 
                 return {
-                    value: 'limit=' + this.pagination.limit + '&' + query,
+                    value: query,
                     text
                 }
             })
@@ -1273,8 +1266,7 @@ export default {
             this.SearchDefaults()
             this.items = []
             this.pagination= {
-                sort_by: 'id',
-                sort_by_op:  'DESC',
+                sort_by: 'id.DESC',
                 count:  0,
                 offset: 0,
                 limit:  12
@@ -1282,21 +1274,15 @@ export default {
         },
 
         SearchDefaults (message) {
-            /*const search = {}
-            Object.keys(this.search).forEach((key) => {
-                if (key === 'state_public')                 search[key] = this.publisher ? 2 : null
-                else if (Array.isArray(this.search[key]))   search[key] = []
-                else                                        search[key] = null
-            })*/
-            this.search = this.constructParams() //search
+            this.search = h.constructParams()
             if (message) this.$store.dispatch('showSnack', { color: 'blue_sec', message: 'Query Parameters set to default!' })
         },
 
-        handleQuery () {
-            if (this.publisher && !this.queryGiven) this.togglePublisher(true)
+        async handleQuery () {
+            if (this.publisher && !this.queryGiven) this.showPublisher(true)
             else if (this.queryGiven) {
-                this.getItems(this.query)
-                this.reconstructSearch()
+                await this.getItems(this.query)
+                this.search = h.constructParams(this.query)
             }
         },
 
@@ -1306,73 +1292,17 @@ export default {
             this.processQuery()
         },
 
-        reconstructSearch () {
-            this.search = this.constructParams(this.query)
-            /*console.log('construct', this.constructParams(this.query))
-            for (let [key, value] of Object.entries({ ...this.query })) {
-                if (key === 'offset') this.pagination.offset = value ?? 0
-                else if (key === 'limit') this.pagination.limit = value ?? 12
-                else if (key === 'sort_by') {
-                    const split = value?.split('.')
-                    this.pagination.sort_by = split?.[0] ?? 'id'
-                    this.pagination.sort_by_op = split?.[1] ?? 'DESC'
-                }
-                else if (key === 'state_public' && (value === [0, 1, 2] || value === 'all'))  this.search.state_public = null
-                else if (key !== 'i') {
-                    //console.log(key, value)
-                    this.search[key] = value
-                }
-                //console.log('RECO', this.search, this.pagination)
-            }*/
-                //console.log(this.search)
-        },
-
         processQuery () {
-            const query = {}
+            const query = { ...this.search }
+            query.offset = this.pagination.offset
+            query.limit = this.pagination.limit
+            query.sort_by = this.pagination.sort_by
 
-            // Get Search Parameters
-            Object.keys(this.search).forEach((key) => {
-                if (key === 'state_public') {
-                query[key] = this.search[key] === null ? [0, 1, 2] : this.search[key]
-                }
-                else if (['string', 'o_design', 'r_design'].includes(key)) {
-                    if (this.search[key]) {
-                        search[key] = this.search[key].split(' ')
-                    }
-                }
-                else if (![null, []].includes(this.search[key])) {
-                    query[key] = this.search[key]
-                }
-            })
+            const request = h.constructRequest(query)
+            console.log('request', request)
 
-            // Set DBI Parameters
-            const params = {}
-            Object.keys(this.pagination).forEach((key) => {
-                if (key === 'sort_by') {
-                    params[key] = this.pagination.sort_by + '.' + this.pagination.sort_by_op
-                }
-                else if (key != 'sort_by_op') {
-                    params[key] = this.pagination[key]
-                }
-            })
-
-            if (this.router) {
-                if (query.state_public) {
-                    query.public = typeof query.state_public === 'number' ? query.state_public : 'all'
-                    delete(query.state_public)
-                }
-                this.$router.push({ query: {
-                    ...{
-                        i: this.searchCounter,
-                        offset: params.offset,
-                        limit: params.limit,
-                        sort_by: params.sort_by,
-                        sort_by_op: params.sort_by_op
-                    },
-                    ...query
-                }})
-            }
-            else this.getItems(params, query)
+            if (this.router)    this.$router.push({ query: Object.assign({}, request, { i: this.searchCounter }) })
+            else                this.getItems(request)
         },
 
         async getItems (query) {
@@ -1383,14 +1313,22 @@ export default {
             const dbi = await this.$root.DBI_SELECT_POST(this.entity, query)
 
             if (dbi?.contents) {
-                const sort_explode = dbi.pagination.sort_by.split(' ')
-                dbi.pagination.sort_by = sort_explode[0]
-                dbi.pagination.sort_by_op = sort_explode[1]
-                this.pagination = dbi.pagination
-
+                this.pagination= {
+                    sort_by: dbi.pagination?.sort_by?.replace(' ', '.'),
+                    count:  dbi.pagination?.count,
+                    offset: dbi.pagination?.offset,
+                    limit:  dbi.pagination?.limit
+                }
                 this.items = dbi.contents
-                if (this.items[0]) this.SetChecked (false)
-                else this.$store.dispatch('showSnack', { message: 'No items found!' })
+
+                if (dbi.contents[0]) {
+                    this.items = dbi.contents
+                    this.SetChecked (false)
+                }
+                else {
+                    this.items = []
+                    this.$store.dispatch('showSnack', { message: 'No items found!' })
+                }
             }
             else {
                 console.error('ERROR', dbi)
@@ -1415,10 +1353,6 @@ export default {
             this.checked = checkers
         },
 
-        ScrollTop () {
-            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
-        },
-
         OrderBy (input) {
             if (input === this.pagination.sort_by) {
                 this.pagination.sort_by_op = this.pagination.sort_by_op != 'ASC' ? 'ASC' : 'DESC'
@@ -1432,29 +1366,30 @@ export default {
             this.processQuery();
         },
 
-        togglePublisher (replace) {
-            if (this.publisher) {
+        togglePublisher () {
+            if (!this.publisher) this.showPublisher()
+            else this.$router.push('/' + this.entity + '/search')
+        },
 
-                if (this.queryGiven) {
-                    let q = window.location.href?.split('?') ?? [null]
-                    q.shift()
-                    q = q.join('?')
-                    this.$router.push('/editor#/' + this.entity + '/publish?' + q)
-                }
-                else {
-                    const path = {
-                        path: '/' + this.entity + '/publish',
-                        query: {
-                            limit: this.pagination.limit,
-                            sort_by: 'updated_at.DESC',
-                            public: 2
-                        }
-                    }
-
-                    this.$router[replace ? 'replace' : 'push'](path)
-                }
+        showPublisher (replace) {
+            if (this.queryGiven) {
+                let q = window.location.href?.split('?') ?? [null]
+                q.shift()
+                q = q.join('?')
+                this.$router.push('/' + this.entity + '/publish?' + q)
             }
-            else this.$router.push('/editor#/' + this.entity + '/search')
+            else {
+                const path = {
+                    path: '/' + this.entity + '/publish',
+                    query: {
+                        limit: this.pagination.limit,
+                        sort_by: 'updated.DESC',
+                        public: 2
+                    }
+                }
+
+                this.$router[replace ? 'replace' : 'push'](path)
+            }
         },
 
         async Publish (input, mode) {
@@ -1486,8 +1421,8 @@ export default {
         getQueryString (page) {
             let query = window.location.href?.split('?') ?? [null]
             query.shift()
-            const pattern = '(i' + (page ? '' : '|limit|offset') + ')=[^&]+&'
-            return query.join('?').replaceAll(new RegExp(pattern, 'g'), '')
+            const pagination = '(i' + (page ? '' : '|limit|offset') + ')=[^&]+&?'
+            return query.join('?').replaceAll(new RegExp(pagination, 'g'), '').replaceAll('state_public=', 'public=')
         },
 
         cacheCurrentQuery () {
@@ -1529,8 +1464,6 @@ export default {
 
         restoreCachedQuery (query) {
             this.SearchDefaults()
-            const regex = new RegExp('limit=[^&]+&')
-            if (!regex.test(query)) query = 'limit=' + this.pagination.limit + '&' + query
             //console.log(query)
             window.location.href = '/editor#/' + this.entity + '/' + (this.publisher ? 'publish' : 'search') + '?' + query
             ++this.searchCounter
@@ -1544,106 +1477,6 @@ export default {
                 this.cachedTab = this.activeTab
                 this.activeTab = null
             }
-        },
-
-        constructParams (input) {
-            const d = input === null || input === undefined || typeof input !== 'object' ? {} : { ...input }
-
-            // Public
-            let state_public = null
-            if (d.state_public !== undefined && d.state_public !== [0, 1, 2]) state_public = parseInt(d.state_public)
-            else if (d.public !== undefined && d.public !== 'all') state_public = parseInt(d.state_public)
-
-            return {
-                state_public,
-                sort_by:            d.sort_by ?? 'id.DESC',
-                offset:             d.offset ? parseInt(d.offset) : 0,
-                limit:              d.limit ? parseInt(d.limit) : 12,
-
-                id:                 this.parseInt(d.id),
-                q:                  d.q ?? null,
-
-                collection_nr:      d.collection_nr ?? null,
-                comment_private:    d.comment_private ?? null,
-                comment_public:     d.comment_public ?? null,
-                date_end:           this.parseYear(d.date_end),
-                date_start:         this.parseYear(d.date_start),
-                description_private: d.description_private ?? null,
-                diameter_end:       this.parseFloat(d.diameter_end),
-                diameter_start:     this.parseFloat(d.diameter_start),
-                has_images:         this.parseBoolean(d.has_images),
-                id_authority:       this.parseArrayInt(d.id_authority),
-                id_authority_group: this.parseArrayInt(d.id_authority_group),
-                id_authority_person: this.parseArrayInt(d.id_authority_person),
-                id_creator:         this.parseArrayInt(d.id_creator),
-                id_denomination:    this.parseArrayInt(d.id_denomination),
-                id_design:          this.parseArrayInt(d.id_design),
-                id_die:             this.parseArrayInt(d.id_die),
-                id_editor:          this.parseArrayInt(d.id_editor),
-                id_findspot:        this.parseArrayInt(d.id_findspot),
-                id_group:           this.parseArrayInt(d.id_group),
-                id_hoard:           this.parseArrayInt(d.id_hoard),
-                id_legend:          this.parseArrayInt(d.id_legend),
-                id_material:        this.parseArrayInt(d.id_material),
-                id_mint:            this.parseArrayInt(d.id_mint),
-                id_monogram:        this.parseArrayInt(d.id_monogram),
-                id_owner:           this.parseArrayInt(d.id_owner),
-                id_period:          this.parseArrayInt(d.id_period),
-                id_person:          this.parseArrayInt(d.id_person),
-                id_reference:       this.parseArrayString(d.id_reference),
-                id_region:          this.parseArrayInt(d.id_region),
-                id_standard:        this.parseArrayInt(d.id_standard),
-                id_symbol:          this.parseArrayInt(d.id_symbol),
-                id_type:            this.parseInt(d.id_type),
-                imported:           this.parseBoolean(d.imported),
-
-                plastercast_nr:     d.plastercast_nr ?? null,
-                provenience:        d.provenience ?? null,
-
-                source:             d.source ?? null,
-                state_comment_private: d.state_comment_private ?? null,
-                state_comment_public: d.state_comment_public ?? null,
-                state_inherited:    this.parseBoolean(d.state_inherited),
-                state_linked:       this.parseBoolean(d.state_linked),
-                state_source:       this.parseBoolean(d.state_source),
-                weight_end:         this.parseFloat(d.weight_end),
-                weight_start:       this.parseFloat(d.weight_start),
-
-                o_design:           this.parseArrayInt(d.o_design),
-                o_id_design:        this.parseArrayInt(d.o_id_design),
-                o_id_legend:        this.parseArrayInt(d.o_id_legend),
-                o_id_monogram:      this.parseArrayInt(d.o_id_monogram),
-                o_id_symbol:        this.parseArrayInt(d.o_id_symbol),
-
-                r_design:           this.parseArrayInt(d.r_design),
-                r_id_design:        this.parseArrayInt(d.r_id_design),
-                r_id_legend:        this.parseArrayInt(d.r_id_legend),
-                r_id_monogram:      this.parseArrayInt(d.r_id_monogram),
-                r_id_symbol:        this.parseArrayInt(d.r_id_symbol),
-            }
-        },
-
-        parseArrayInt (val) {
-            return val ? (typeof val === 'object' ? val : [val]).map((s) => parseInt(s)) : []
-        },
-        parseArrayString (val) {
-            return val ? (typeof val === 'object' ? val : [val]) : []
-        },
-        parseInt (val) {
-            return val ? parseInt(val) : null
-        },
-        parseFloat (val) {
-            return val ? parseFloat(val) : null
-        },
-        parseBoolean (val) {
-            if (val === undefined) return null
-            if (val === null) return null
-            if (parseInt(val) === 1) return 1
-            if (parseInt(val) === 0) return 0
-            return null
-        },
-        parseYear (val) {
-            return val ? (parseInt(val) ?? null) : null
         }
     }
 }

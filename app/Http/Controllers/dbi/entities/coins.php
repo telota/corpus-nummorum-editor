@@ -4,6 +4,7 @@ namespace App\Http\Controllers\dbi\entities;
 
 use App\Http\Controllers\dbi\dbiInterface;
 use DB;
+use Request;
 
 use App\Http\Controllers\dbi\handler\complex_select;
 use App\Http\Controllers\dbi\entities\coins\input;
@@ -15,8 +16,10 @@ class coins implements dbiInterface  {
     // Controller-Functions ------------------------------------------------------------------
 
     public function select ($user, $id) {
+
         $handler = new complex_select;
-        return $handler -> handleRequest('coins', $user, $id);
+        $input = $handler->paramPreprocessing('coins', $user, Request::post());
+        return $handler->handleRequest('coins', $user, $id, $input);
     }
 
 

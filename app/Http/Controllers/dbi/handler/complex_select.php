@@ -3,14 +3,25 @@
 namespace App\Http\Controllers\dbi\handler;
 
 use DB;
-use Request;
 use App\Http\Controllers\dbi\handler\pagination;
 use App\Http\Controllers\dbi\handler\index_handler;
 
 
 class complex_select {
 
-    public function handleRequest ($entity, $user, $id) {
+    public function paramPreprocessing ($entity, $user, $input) {
+        // Hide not published objects for any average user
+        if($user['level'] < 9) $input['state_public'] = 1;
+        else {
+            if (!isset($input['state_public']) && isset($input['public'])) $input['state_public'] = $input['public'];
+            if (isset($input['state_public']) && $input['state_public'] === 'all') $input['state_public'] = [0, 1, 2];
+        }
+        if (!empty($input['sort_by'])) $input['sort_by'] = trim(str_replace(' ', '.', $input['sort_by']));
+
+        return $input;
+    }
+
+    public function handleRequest ($entity, $user, $id, $input) {
         $base_name  = config('dbi.tablenames.'.$entity);
         $base_alias = substr($entity, 0, 1);
         $base_id    = $base_alias.'.id';
@@ -37,9 +48,7 @@ class complex_select {
 
         // No ID given->parametric request -----------------------------------------------------
         else {
-            $input = Request::post();
-            // Hide not published objects for any average user
-            if($user['level'] < 9) { $input['state_public'] = 1; }
+            //$input = Request::post();
 
             // Set basic variables
             $pagination = $where = $where_display = $selection = [];
