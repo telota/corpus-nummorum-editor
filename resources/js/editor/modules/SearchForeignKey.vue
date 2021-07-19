@@ -254,7 +254,7 @@ export default {
                 return item.string
                 //return item.string.length > 60 ? (item.string.slice(0, 60) + ' ...') : item.string
             }
-            else {
+            else {searchStringIncludeFiled
                 const selected = this.selected?.[this.selected_key]
                 const index = selected.indexOf(item)
                 return 'ID ' + (selected?.[index] ? selected[index] : 'unknown')

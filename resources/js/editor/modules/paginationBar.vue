@@ -90,14 +90,14 @@
     <div class="d-flex" style="width: 324px">
         <adv-btn
             icon="first_page"
-            :disabled="offset < 1"
+            :disabled="loading || offset < 1"
             :color-hover="colorHover"
             @click="$emit('offset', 0)"
         />
 
         <adv-btn
             icon="navigate_before"
-            :disabled="offset < 1"
+            :disabled="loading || offset < 1"
             :color-hover="colorHover"
             @click="$emit('offset', offset - limit)"
         />
@@ -115,13 +115,18 @@
                             v-on="{ ...tooltip, ...menu }"
                             class="transparent"
                             depressed
-                            :disabled="count < limit"
+                            :disabled="loading || count < limit"
                             :text="count < limit"
                             :tile="count >= limit"
                             height="50px"
                             width="124px"
                         >
-                            <div class="text-center" style="font-size: 12px; line-height: 12px;">
+                            <v-progress-linear
+                                v-if="loading"
+                                indeterminate
+                                :height="1"
+                            />
+                            <div v-else class="text-center" style="font-size: 12px; line-height: 12px;">
                                 <div v-html="counted" class="font-weight-bold ma-2" />
                                 <div v-html="page.text.current + '&nbsp;/&nbsp;' + page.text.total" class="ma-2" />
                             </div>
@@ -150,14 +155,14 @@
 
         <adv-btn
             icon="navigate_next"
-            :disabled="offset >= count - limit"
+            :disabled="loading || offset >= count - limit"
             :color-hover="colorHover"
             @click="$emit('offset', offset + limit)"
         />
 
         <adv-btn
             icon="last_page"
-            :disabled="offset >= count - limit"
+            :disabled="loading || offset >= count - limit"
             :color-hover="colorHover"
             @click="$emit('offset', (Math.ceil(count / limit) - 1) * limit)"
         />
@@ -224,6 +229,10 @@ export default {
     },
 
     computed: {
+        loading () {
+            return this.$root.loading
+        },
+
         page () {
             const page = {
                 int: { current: 0, total: 0},

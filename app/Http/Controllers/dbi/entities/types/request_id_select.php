@@ -407,6 +407,7 @@ class request_id_select {
         // Images
         $select['images'] = ['raw' => 'IF(t.id_imageset > "", (SELECT JSON_ARRAYAGG(JSON_OBJECT(
             "id",         img.ImageID,
+            "kind",       IFNULL(img.ObjectType, "unknown"),
             "obverse",    JSON_OBJECT(
                 "link",     IF( img.ObverseImageFilename > "", CONCAT( IF( img.Path > "", IF( SUBSTRING( img.Path, -1, 1 ) != "/", CONCAT( img.Path, "/" ), img.Path ),""), img.ObverseImageFilename ), null),
                 "kind",     IF( img.ObverseImageFilename > "", img.ObjectType, null),

@@ -322,7 +322,16 @@ class complex_select {
         foreach ($dbi as $item) {
             $rows = [];
             foreach ($item as $key => $val) {
-                if ($val === '') {
+                if ($key === 'dbi') {
+                    $val = json_decode($val, true);
+                    $val['images'] = $this->handleImages($val['images'], true);
+                    $rows[$key] = $val;
+                }
+                else if ($key === 'images') {
+                    $val = $this->handleImages(json_decode($val, true));
+                    $rows[$key] = $val;
+                }
+                else if ($val === '') {
                     $rows[$key] = null;
                 }
                 else if (is_numeric($val)) {
@@ -344,5 +353,31 @@ class complex_select {
             $items[] = $rows;
         }
         return empty($items) ? [] : $items;
+    }
+
+    public function handleImages ($images, $is_dbi = false) {
+        $column = array_column($images, 'kind');
+        array_multisort($column, SORT_ASC, $images);
+
+        foreach ($images as $i => $img) {
+            foreach (['obverse', 'reverse'] as $side) {
+                $images[$i][$side]['digilib'] = null;
+                if ($is_dbi === true) $images[$i][$side]['path'] = null;
+                $src = trim($img[$side]['link'], '/');
+
+                if (substr($src, 0, 4) !== 'http') {
+                    $split = explode('.', $src);
+                    $ext = strtolower(end($split));
+                    if (substr($src, 0, 8) === 'storage/') $src = substr($src, 8);
+                    if ($is_dbi === true) $images[$i][$side]['path'] = $src;
+
+                    $images[$i][$side]['digilib'] = config('dbi.url.digilib_viewer').$src;
+
+                    if ($ext === 'tif' || $ext === 'tiff') $images[$i][$side]['link'] = config('dbi.url.digilib_scaler').$src.'&dw=500&dh=500';
+                    else $images[$i][$side]['link'] = trim(config('dbi.url.storage'), '/').'/'.$src;
+                }
+            }
+        }
+        return $images;
     }
 }

@@ -143,7 +143,13 @@
         </div>
 
         <!-- Loading -->
-        <v-progress-linear :indeterminate="$root.loading" height="1" />
+        <v-progress-linear
+            :indeterminate="$root.loading"
+            height="1"
+            color="light-blue darken-2"
+            background-color="grey"
+            :background-opacity="0.3"
+        />
     </div>
 
     <!-- Manage Favorites -->

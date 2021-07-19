@@ -26,8 +26,32 @@ const router = new Router (
 
         // ----------------------------------------------------------------------------------------------
 
+        // New
+        {
+            path: '/(coins|types)/edit',
+            name: 'coins-types-new',
+            component: require('./../pages/entities_primary/editNew').default,
+            props: (route) => ({
+                routed: true,
+                entity: route.params.pathMatch
+            })
+        },
+
         // Edit
         {
+            path: '/(coins|types)/edit/:id/:section?',
+            name: 'coins-types-edit',
+            component: require('./../pages/entities_primary/edit').default,
+            props: (route) => ({
+                routed: true,
+                entity: route.params.pathMatch,
+                id: parseInt(route.params.id),
+                section: route.params.section
+            })
+        },
+
+        // Edit
+        /*{
             path: '/types/edit',
             name: 'types-new',
             component: require('./../pages/entities_primary/ItemEdit').default,
@@ -50,7 +74,7 @@ const router = new Router (
             name: 'coins-edit',
             component: require('./../pages/entities_primary/ItemEditInput').default,
             props: { entity: 'coins'}
-        },
+        },*/
 
         // Details
         {
@@ -76,7 +100,7 @@ const router = new Router (
         {
             path: '/(coins|types)/(search|publish)',
             name: 'coins-types-search',
-            component: require('./../pages/entities_primary/ItemSearch').default,
+            component: require('./../pages/entities_primary/search').default,
             props: (route) => ({
                 routed: true,
                 entity: route.params.pathMatch,

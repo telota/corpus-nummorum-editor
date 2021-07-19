@@ -79,10 +79,10 @@ Vue.component('vertdivider',        require('./modules/vertDivider.vue').default
 Vue.component('drawer',             require('./modules/drawer.vue').default);
 
 // Primary Entities
-Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);
-Vue.component('ItemEditInput',      require('./pages/entities_primary/ItemEditInput.vue').default);
+//Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);
+//Vue.component('ItemEditInput',      require('./pages/entities_primary/ItemEditInput.vue').default);
 Vue.component('ItemInputTemplate',  require('./templates/itemInputTemplate.vue').default);
-Vue.component('ItemSearch',         require('./pages/entities_primary/ItemSearch.vue').default);
+//Vue.component('ItemSearch',         require('./pages/entities_primary/ItemSearch.vue').default);
 Vue.component('ItemCopy',           require('./pages/entities_primary/ItemCopy.vue').default);
 Vue.component('ItemDetails',        require('./pages/entities_primary/ItemDetails.vue').default);
 Vue.component('detailsdialog',      require('./pages/entities_primary/modules/detailsDialog.vue').default);
