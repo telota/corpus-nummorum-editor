@@ -339,7 +339,7 @@ const router = new Router (
 });
 
 
-router.beforeEach((to, from, next) => {
+/*router.beforeEach((to, from, next) => {
     store.commit('showLoader');
     next();
 });
@@ -348,6 +348,6 @@ router.afterEach((to, from) => {
     setTimeout(()=>{
         store.commit('hideLoader');
     },1000);
-});
+});*/
 
 export default router;

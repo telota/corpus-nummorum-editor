@@ -252,22 +252,18 @@ const editor = new Vue({
         el.style.overflowY = 'hidden'
 
         // Add Resize-Watcher to get client size
-        this.onResize()
-        window.addEventListener('resize', this.onResize)
+        //this.onResize()
+        //window.addEventListener('resize', this.onResize)
         //window.addEventListener('error', this.errorHandler)
 
         // Remove initial Loader
         el = document.getElementById('initial-loader')
         if (el) {
-            el.style.opacity = 0
-            setTimeout(() => { el.remove() }, 501);
+            setTimeout(() => {
+                el.style.opacity = 0
+                setTimeout(() => { el.remove() }, 501);
+            }, 250);
         }
-
-        // progress bar top
-        /*AxiosAjaxDetct.init(
-            () => { self.$Progress.start() },
-            () => { self.$Progress.finish() }
-        );*/
     },
 
     computed: {
@@ -319,6 +315,10 @@ const editor = new Vue({
             else {
                 return 'NONE'
             }
+        },
+
+        setTitle (newTitle) {
+            if (newTitle && document.title !== newTitle) document.title = 'CN Editor | ' + newTitle
         },
 
         onResize () {

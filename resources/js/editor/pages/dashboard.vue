@@ -296,7 +296,8 @@ export default {
     },
 
     created () {
-        this.getData();
+        this.$root.setTitle('Dashboard')
+        this.getData()
     },
 
     mounted () {

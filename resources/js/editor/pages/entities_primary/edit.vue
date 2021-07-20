@@ -1,22 +1,27 @@
 <template>
 <div>
     <!-- Toolbar -->
-    <component-toolbar>
-        <template v-slot:toolbar>
+    <edit-toolbar
+        :entity="entity"
+        :item="item"
+        v-on:save="SendItem()"
+        v-on:mark="MarkItemAsReadyToPublish()"
+        v-on:erase="EraseItem()"
+        v-on:details="(emit) => { this.detailsDialog = emit }"
+    />
 
-        </template>
-    </component-toolbar>
-
-    <!-- Content -->
-    <div id="edit-form-container" class="component-content" style="padding-left: 43px">
-        <div v-text="'TESTETSTET: ' +section" />
-
-        <!-- Images -->
-        <edit-images :item="item" :index="img_index" :refresh="img_refresh" />
-    </div>
+    <!-- Images -->
+    <edit-images :item="item" />
 
     <!-- Drawer -->
     <edit-tabs :entity="entity" :id="id" :section="section" />
+
+    <!-- Content -->
+    <div id="edit-form-container" class="component-content" style="padding-left: 43px; width: calc(100vw - 200px);">
+        <div v-text="'TESTETSTET: ' +section" />
+
+
+    </div>
 
 
     <!-- Dialog Inheritance ---------------------------------------------------------- -->
@@ -158,6 +163,8 @@
 
 import editTabs         from './modules/editTabs.vue'
 import editImages       from './modules/editImages.vue'
+import editToolbar      from './modules/editToolbar.vue'
+
 import ItemLink         from './modules/ItemSingleLink.vue'
 import inheritButton    from './modules/inheritButton.vue'
 import imported         from './modules/importContent.vue'
@@ -166,6 +173,8 @@ export default {
     components: {
         editTabs,
         editImages,
+        editToolbar,
+
         ItemLink,
         inheritButton,
         imported
@@ -177,9 +186,9 @@ export default {
             refresh:            0,
             gallery_refresh:    0,
 
-            tab:                this.entity === 'types' ? 'coins' : 'images',
-            img_index:          0,
-            img_refresh:        0,
+            tab:                null,
+            imgId:              null,
+            //img_refresh:        0,
             show_imported:      false,
 
             item:               {}, // processed item
@@ -287,34 +296,17 @@ export default {
     },
 
     watch: {
-        id: function () {
-            this.$store.commit('setBreadcrumbs', [
-                { label: this.entity, to:'' },
-                { label: this.id, to:'' }
-            ])
-            this.SetItem()
-        },
-        entity: function () {
-            this.tab = this.entity === 'types' ? 'coins' : 'images'
-            this.img_index = 0
-            this.$store.commit('setBreadcrumbs', [
-                { label: this.entity, to:'' },
-                { label: this.id, to:'' }
-            ])
-            this.SetItem()
-        },
+        id: function () { this.SetItem() },
+        entity: function () { this.SetItem() },
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [
-            { label: this.entity, to:'' },
-            { label: this.id, to:'' }
-        ])
         this.SetItem()
     },
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------
     methods: {
+
         Refresh () {
             this.refresh = this.refresh + 1;
         },

@@ -7,13 +7,13 @@
         <v-hover v-slot="{ hover }" v-for="(tab, t) in tabs" :key="'tab' + t">
             <div
                 class="d-flex align-center body-2"
-                :class="tab.key === section ? ' light-blue--text text--darken-3' : (hover ? 'header_hover' : '')"
+                :class="tab.key === selected ? ' light-blue--text text--darken-3' : (hover ? 'header_hover' : '')"
                 style="height: 40px; width: 300px;"
-                :style="'cursor:' + (tab.key === section ? 'default' : 'pointer')"
+                :style="'cursor:' + (tab.key === selected ? 'default' : 'pointer')"
                 @click="pushRoute(tab.key, tab.route)"
             >
                 <div class="d-flex justify-center align-center" style="height: 40px; width: 40px;">
-                    <div class="font-weight-bold body-1" v-text="tab.abb" />
+                    <v-icon v-text="tab.icon" :color="tab.key === selected ? 'light-blue darken-3' : ''" />
                 </div>
 
                 <div class="pl-2 text-truncate" v-text="tab.label" />
@@ -28,52 +28,56 @@ export default {
     data () {
         return {
             collapse: 0,
-
-            navigationElements: {
-                types: [
-                    'coins',
-                    'production',
-                    'basics',
-                    'obverse',
-                    'reverse',
-                    'references',
-                    'individuals',
-                    'miscellaneous'
-                ],
-                coins: [
-                    'images',
-                    'types',
-                    'production',
-                    'basics',
-                    'obverse',
-                    'reverse',
-                    'references',
-                    'individuals',
-                    'miscellaneous'
-                ]
-            }
         }
     },
 
     props: {
-        entity: { type: String, default: 'coins' },
-        id: { type: Number, default: null },
-        section: { type: String, default: null },
+        entity:     { type: String, default: 'coins' },
+        id:         { type: Number, default: null },
+        section:    { type: String, default: null },
     },
 
     computed: {
-        select () {
-            return this.section ?? this.navigationElements[this.entity][0]
+        selected () {
+            return this.section ?? this.tabs[0]?.key
         },
 
         tabs () {
-            return this.navigationElements[this.entity].map((key) => { return {
-                key,
-                route: '/' + [this.entity, 'edit', this.id, key].join('/'),
-                label: this.$root.label(key),
-                abb: this.$root.label(key).slice(0, 2)
+            const tabs = [
+                this.entity === 'coins' ? { key: 'types', icon: 'blur_circular' } : { key: 'coins', icon: 'copyright' },
+                { key: 'production',    icon: 'zoom_out_map' },
+                { key: 'basics',        icon: 'category' },
+                { key: 'obverse',       icon: 'flip_to_front' },
+                { key: 'reverse',       icon: 'flip_to_back' },
+                { key: 'references',    icon: 'import_contacts' },
+                { key: 'individuals',   icon: 'emoji_people' },
+                { key: 'miscellaneous', icon: 'style' }
+            ]
+
+            if (this.entity === 'coins') tabs.unshift({ key: 'images', icon: 'camera_alt' })
+
+
+            return tabs.map((el) => { return {
+                key: el.key,
+                route: '/' + [this.entity, 'edit', this.id, el.key].join('/'),
+                label: this.$root.label(el.key),
+                icon: el.icon
             }})
+        },
+
+        title () {
+            return 'edit cn ' + this.entity.slice(0, -1) + ' ' + this.id + ' (' + this.selected + ')'
         }
+    },
+
+    watch: {
+        title: function () {
+            this.$root.setTitle(this.title)
+        },
+    },
+
+    mounted () {
+        this.$root.setTitle(this.title)
     },
 
     methods: {

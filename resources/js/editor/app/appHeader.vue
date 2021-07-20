@@ -33,9 +33,9 @@
             <a href="/editor#/dashboard" class="invert--text">
                 <v-hover v-slot="{ hover }">
                     <div
-                        class="pl-2 pr-2 d-flex align-center"
+                        class="d-flex align-center justify-center"
                         :class="hover ? 'header_hover' : ''"
-                        style="height: 40px; cursor: pointer;"
+                        style="height: 40px; width: 50px; cursor: pointer;"
                     >
                         <div
                             class="font-weight-bold light-blue--text text--darken-3"
