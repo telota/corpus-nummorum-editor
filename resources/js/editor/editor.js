@@ -57,7 +57,8 @@ Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').defau
 Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
 
 Vue.component('Imager',             require('./modules/Imager.vue').default);
-Vue.component('adv-img',             require('./modules/advImg.vue').default);
+//Vue.component('coin-images',        require('./modules/coinImages.vue').default);
+Vue.component('adv-img',            require('./modules/advImg.vue').default);
 Vue.component('InputForeignKey',    require('./modules/InputForeignKey.vue').default);
 Vue.component('SearchForeignKey',   require('./modules/SearchForeignKey.vue').default);
 Vue.component('ErrorDialog',        require('./modules/ErrorDialog.vue').default);
@@ -318,7 +319,7 @@ const editor = new Vue({
         },
 
         setTitle (newTitle) {
-            if (newTitle && document.title !== newTitle) document.title = 'CN Editor | ' + newTitle
+            if (newTitle) document.title = 'CN Editor | ' + newTitle.trim()
         },
 
         onResize () {

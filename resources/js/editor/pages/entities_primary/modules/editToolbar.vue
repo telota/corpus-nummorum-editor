@@ -5,10 +5,10 @@
         <!-- Name -->
         <div
             class="ml-3 headline"
-            :class="item.public === 3 ? ' text-decoration-line-through' : ''"
+            :class="status === 3 ? ' text-decoration-line-through' : ''"
             v-html="name.replaceAll(' ', '&nbsp;')"
         />
-        <a v-if="item.public === 1" :href="'https://www.corpus-nummorum.eu/' + entity + '/' + id" target="_blank">
+        <a v-if="status === 1" :href="'https://www.corpus-nummorum.eu/' + entity + '/' + id" target="_blank">
             <div class="ml-2 headline" v-text="'*'" />
         </a>
 
@@ -30,7 +30,7 @@
             />
         </a>
 
-        <div class="header_hover fill-height" style="width: 1px;" />
+        <div :class="divider" />
 
         <a :href="'/editor#/types/copy/' + entity + '/' + id">
             <adv-btn
@@ -48,27 +48,27 @@
             />
         </a>
 
-        <div class="header_hover fill-height" style="width: 1px;" />
+        <div :class="divider" />
 
         <adv-btn
             icon="delete"
             tooltip="Request Deletion"
             color-hover="header_hover"
-            :disabled="item.public === 3 || item.public === 1"
+            :disabled="status === 3 || status === 1"
             @click="$emit('erase', true)"
         />
 
-        <div class="header_hover fill-height" style="width: 1px;" />
+        <div :class="divider" />
 
         <adv-btn
             icon="preview"
             tooltip="Details page Preview"
             color-hover="header_hover"
-            @click="$emit('details', { entity, id, public: item.public })"
+            @click="$emit('details', { entity, id, public: status })"
         />
 
         <div>
-            <a v-if="item.public === 1" :href="'https://www.corpus-nummorum.eu/' + entity + '/' + id" target="_blank">
+            <a v-if="status === 1" :href="'https://www.corpus-nummorum.eu/' + entity + '/' + id" target="_blank">
                 <adv-btn
                     icon="public"
                     :tooltip="'Show ' + name + ' on public website'"
@@ -78,28 +78,30 @@
 
             <adv-btn
                 v-else
-                :icon="item.public === 3 ? 'hide_source' : (item.public === 2 ? 'hourglass_empty' : 'publish')"
+                :icon="status === 3 ? 'hide_source' : (status === 2 ? 'hourglass_empty' : 'publish')"
                 tooltip="Request publishing"
                 color-hover="header_hover"
                 color-text="blue_sec"
-                :disabled="item.public !== 0"
+                :disabled="status !== 0"
                 @click="$emit('mark', true)"
             />
         </div>
 
+        <div :class="divider" />
+
         <!-- Save -->
-        <v-btn
-            tile
-            depressed
-            dark
-            class="headline"
-            color="blue_prim"
-            :width="200"
-            :height="50"
-            :disabled="item.public === 3 || (item.public === 1 && $root.user.level < 12)"
-            v-text="'save'"
-            @click="$emit('save', true)"
-        ></v-btn>
+        <v-hover v-slot="{ hover }">
+            <div
+                class="d-flex align-center justify-center headline font-weight-bold"
+                :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
+                style="width: 200px; height: 50px;"
+                :style="saveDisabled ? 'cursor: default:' : 'cursor: pointer'"
+                @click="save()"
+            >
+                <v-icon v-text="'save'" class="mr-2" :class="saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2'" />
+                <div v-text="saveDisabled ? (status === 3 ? 'deleted' : 'forbidden') : 'save'" />
+            </div>
+        </v-hover>
 
     </template>
 
@@ -112,6 +114,7 @@
 export default {
     data () {
         return {
+            divider: 'header_hover fill-height width-1px'
         }
     },
 
@@ -125,6 +128,20 @@ export default {
 
         name () {
             return ['cn', this.entity.slice(0, -1), this.item.id].join(' ')
+        },
+
+        status () {
+            return this.item.public ?? 0
+        },
+
+        saveDisabled () {
+            return this.item.public === 3 || (this.item.public === 1 && this.$root.user.level < 12)
+        }
+    },
+
+    methods: {
+        save () {
+            if (!this.saveDisabled) this.$emit('save', true)
         }
     }
 }

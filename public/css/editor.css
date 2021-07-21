@@ -61,3 +61,7 @@ a {
 .whitespace-nowrap {
     white-space: nowrap;
 }
+
+.width-1px {
+    width: 1px;
+}

@@ -14,11 +14,1376 @@
     <edit-images :item="item" />
 
     <!-- Drawer -->
-    <edit-tabs :entity="entity" :id="id" :section="section" />
+    <edit-tabs
+        :entity="entity"
+        :id="id"
+        :section="section"
+        :item="item_data"
+        :show-imported="showImported"
+        v-on:import="showImported = !showImported"
+    />
 
     <!-- Content -->
     <div id="edit-form-container" class="component-content" style="padding-left: 43px; width: calc(100vw - 200px);">
-        <div v-text="'TESTETSTET: ' +section" />
+
+        <div class="pa-5" style="width: 100%; min-height: 400px;">
+            <!-- Images --------------------------------------- --------------------------------------------- -->
+            <div v-if="entity === 'coins' && (!section || section === 'images')" style="width:100%">
+                <!-- Header -->
+                <subheader
+                    :label="labels.imagesets"
+                    add
+                    :count="item.images"
+                    class="mb-5"
+                    v-on:add="AddRelation('images', {
+                        id: null,
+                        kind: 'plastercast',
+                        obverse: {
+                            photographer: null,
+                            link: null,
+                            path: null,
+                            public: 1,
+                            copyright: 1
+                        },
+                        reverse: {
+                            photographer: null,
+                            link: null,
+                            path: null,
+                            public: 1,
+                            copyright: 1
+                        }
+                    });
+                    setImgIndex(item.images ? (item.images.length - 1) : 0)"
+                ></subheader>
+
+                <!-- Content -->
+                <v-row>
+                    <v-col
+                        cols=12
+                        sm=6
+                        v-for="(set, i) in item.images"
+                        :key="'set' + i + '-' + set.id"
+                    >
+                        <v-card tile class="pa-3">
+                            <div class="d-flex align-end mb-5">
+                                <div class="headline" v-text="set.id ? ('ID ' + set.id) : 'New Set'" />
+
+                                <!-- Kind -->
+                                <v-hover v-slot="{ hover }">
+                                    <div
+                                        class="ml-5 d-flex body-1"
+                                        style="cursor:pointer"
+                                        @click="item.images[i].kind = set.kind === 'original' ? 'plastercast' : 'original'"
+                                    >
+                                        <div v-text="set.kind" />
+                                        <v-icon class="ml-2" v-text="'swap_horiz'" />
+                                    </div>
+                                </v-hover>
+
+                                <v-spacer />
+
+                                <!-- Delete Record -->
+                                <v-btn
+                                    icon
+                                    class="ml-1 mr-n2"
+                                    @click="DeleteRelation('images', i)"
+                                >
+                                    <v-icon v-text="'delete'"></v-icon>
+                                </v-btn>
+                            </div>
+
+                            <div
+                                v-for="(img, side) in { obverse: set.obverse, reverse: set.reverse }"
+                                :key="'set' + i + '-' + set.id + side"
+                                class="d-flex"
+                            >
+                                <!-- Img -->
+                                <div style="width: 200px">
+                                    <adv-img contain square :src="img.link" :background="img.bg_color ? img.bg_color : (img.kind === 'plastercast' ? 'imgbg' : null)" />
+                                </div>
+
+                                <!-- edit -->
+                                <div class="pl-5" style="width: 100%">
+                                    <div class="body-1 text-uppercase mb-2" v-text="$root.label(side)" />
+
+                                    <!-- Path-->
+                                    <v-menu offset-y>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-hover v-slot="{ hover }">
+                                                <div
+                                                    v-bind="attrs"
+                                                    v-on="on"
+                                                    class="d-flex align-end pt-1 pb-1"
+                                                    style="border-bottom: 1px solid #eee;"
+                                                >
+                                                    <v-icon class="mr-1" v-text="'insert_drive_file'" />
+                                                    <div class="text-truncate" v-text="img.path" />
+                                                    <v-spacer />
+                                                    <v-icon class="ml-2" v-text="'expand_more'" />
+                                                </div>
+                                            </v-hover>
+                                        </template>
+
+                                        <v-card tile>
+                                            <v-list>
+                                                <v-list-item-group>
+                                                    <v-list-item
+                                                        v-text="'Open File Manager'"
+                                                        :disabled="img.path ? (img.path.substring(0, 4) === 'http' || !img.path.includes('/') ? true : false) : false"
+                                                        @click="files_dialog = { active: true, key: i + '_' + side, id: img.path }"
+                                                    ></v-list-item>
+                                                    <v-list-item
+                                                        v-text="'Upload new image'"
+                                                        @click="upload_dialog = { active: true, key: i + '_' + side }"
+                                                    ></v-list-item>
+                                                    <v-list-item
+                                                        v-text="'Link external image'"
+                                                        @click="ImgLinkDialog(i, side)"
+                                                    ></v-list-item>
+                                                    <v-list-item
+                                                        v-text="'Delete Relation'"
+                                                        :disabled="!img.link"
+                                                        @click="item.images[i][side].link = null; item.images[i][side].path = null"
+                                                    ></v-list-item>
+                                                </v-list-item-group>
+                                            </v-list>
+                                        </v-card>
+                                    </v-menu>
+
+                                    <!-- Photographer -->
+                                    <v-text-field dense clearable
+                                        v-model="item.images[i][side].photographer"
+                                        prepend-inner-icon="person"
+                                        class="mt-5"
+                                        hint="Click on arrow to copy obv./rev. photographer"
+                                    >
+                                        <template v-slot:append>
+                                            <v-icon
+                                                v-text="'call_received'"
+                                                @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].photographer = img.photographer"
+                                            ></v-icon>
+                                        </template>
+                                    </v-text-field>
+                                </div>
+                            </div>
+                        </v-card>
+                    </v-col>
+                </v-row>
+            </div>
+
+
+            <!-- Linked opposite Entities ----------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'coins' || (!section && entity === 'types') || section === 'types'" style="width: 100%">
+                <!-- Inheriting Type / Representing Coin -->
+                <ItemLink
+                    :entity="entity"
+                    :item="item"
+                    :key="entity + item.id + inheritance_refresh + (entity === 'types' ? item.image : item.id)"
+                    class="mb-6"
+                    v-on:inheritanceNew="(emit) => { inheritanceNew(emit) }"
+                    v-on:inheritanceOff="inheritanceOff()"
+                    v-on:inheritanceManage="inheritanceManage()"
+                    v-on:deleteImage="item.image = null; item.images = []"
+                ></ItemLink>
+                <!-- Coins / Types Gallery -->
+                <ItemGallery
+                    :key="item.id + entity + inheritance_refresh"
+                    :entity="entity"
+                    :search_key="'id_' + entity.slice(0, -1)"
+                    :search_val="item.id"
+                    :tiles="4"
+                    linking
+                    color_main="grey_trip"
+                    color_hover="grey_prim"
+                    v-on:image="(emit) => { setTypeImage(emit) }"
+                    v-on:inherit="(emit) => { inheritanceNew(emit.id) }"
+                ></ItemGallery>
+            </div>
+
+
+            <!-- Production ----------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'production'" style="width: 100%">
+
+                <!-- Issue -->
+                <div class="mb-2">
+                    <subheader :label="labels.issue" class="mb-3"></subheader>
+
+                    <v-row>
+                        <v-col v-if="entity === 'coins'" cols="12" sm="6" class="font-weight-bold">
+                            <div style="width: 0; white-space:nowrap">
+                                <v-checkbox
+                                    class="mb-2 mt-0"
+                                    v-model="item.forgery"
+                                >
+                                    <template v-slot:label>
+                                        <div
+                                            class="ml-4"
+                                            :class="item.forgery ? 'red--text' : ''"
+                                            v-text="'Coin is forgery'"
+                                        />
+                                    </template>
+                                </v-checkbox>
+                            </div>
+                        </v-col>
+
+                        <v-col cols=12 sm=6 class="text-end font-weight-bold orange--text">
+                            <template v-if="item.authority">
+                                <div
+                                    v-if="item.authority === 1 && !item.authority_person"
+                                    v-text="'Type of Coinage is Ruler - please select a Person'"
+                                />
+                                <div
+                                    v-if="item.authority === 2 && !item.authority_group"
+                                    v-text="'Type of Coinage is Tribe - please select a Tribe'"
+                                />
+                                <div
+                                    v-if="item.authority === 3 && !item.mint"
+                                    v-text="'Type of Coinage is Mint - please select a Mint'"
+                                />
+                            </template>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <div :class="wraped + ' mt-n5'">
+                                <InputForeignKey
+                                    entity="authorities"
+                                    label="Type of Coinage"
+                                    icon="toll"
+                                    :selected="item.authority"
+                                    :inherited="inherited.authority === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.authority = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.authority"
+                                    v-on:click="confirmInheritance('authority')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <div :class="wraped + ' mt-n5'">
+                                <InputForeignKey
+                                    entity="mints"
+                                    label="Mint"
+                                    icon="museum"
+                                    :selected="item.mint"
+                                    :key="item.mint + ' ' + inherited.mint"
+                                    :inherited="inherited.mint === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.mint = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.mint"
+                                    v-on:click="confirmInheritance('mint')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+
+                        <!--<v-col cols="12" sm="6">
+                            <div :class="wraped + ' mt-n5'">
+                                <InputForeignKey
+                                    entity="persons"
+                                    label="Issuer"
+                                    icon="record_voice_over"
+                                    :selected="item.issuer"
+                                    :inherited="inherited.issuer === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.issuer = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.issuer"
+                                    v-on:click="confirmInheritance('issuer')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>-->
+
+                        <v-col cols="12" sm="6">
+                            <div :class="wraped  + ' mt-n5'">
+                                <InputForeignKey
+                                    entity="persons"
+                                    label="Authority Person"
+                                    icon="how_to_reg"
+                                    :selected="item.authority_person"
+                                    :conditions="[{ authority: 1 }]"
+                                    :inherited="inherited.authority_person === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.authority_person = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.authority_person"
+                                    v-on:click="confirmInheritance('authority_person')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <div :class="wraped + ' mt-n5'">
+                                <InputForeignKey
+                                    entity="tribes"
+                                    label="Authority Group"
+                                    icon="sports_kabaddi"
+                                    :selected="item.authority_group"
+                                    :inherited="inherited.authority_group === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.authority_group = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.authority_group"
+                                    v-on:click="confirmInheritance('authority_group')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </div>
+
+
+                <!-- Date -->
+                <div>
+                    <subheader :label="labels.date" class="mb-3"></subheader>
+
+                    <v-row>
+                        <v-col cols="12" sm="6">
+                            <div :class="wraped">
+                                <InputForeignKey
+                                    entity="periods"
+                                    label="Epoch"
+                                    icon="watch_later"
+                                    :selected="item.period"
+                                    :key="item.period"
+                                    :inherited="inherited.period === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.period = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.period"
+                                    v-on:click="confirmInheritance('period')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                        </v-col>
+
+                        <v-col cols="12" sm="3" class="mt-n5" v-for="record in ['date_start', 'date_end']" :key="record">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item [record]"
+                                :label="'Date '+(record == 'date_start' ? 'Start' : 'End')"
+                                :prepend-icon="record == 'date_start' ? 'first_page' : 'last_page'"
+                                :disabled="inherited.date === 1"
+                                :hint="inherited.date === 1 ? 'Value inherited from type' : ''"
+                                :persistent-hint="inherited.date === 1"
+                                :rules="[rules.date, compare_dates]"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6" class="mt-n5">
+                            <div :class="wraped">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="item.date_text_de"
+                                    label="Date Text (DE)"
+                                    prepend-icon="settings_ethernet"
+                                    :disabled="inherited.date === 1"
+                                    :hint="inherited.date === 1 ? 'Value inherited from type' : ''"
+                                    :persistent-hint="inherited.date === 1"
+                                ></v-text-field>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.authority"
+                                    v-on:click="confirmInheritance('date')"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </div>
+
+            </div>
+
+
+            <!-- Basics ---------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'basics'" style="width: 100%">
+
+                <!-- Technical Parameters -->
+                <div class="mb-2">
+                    <subheader :label="labels.technical_parameters" class="mb-3"></subheader>
+
+                    <v-row>
+                        <v-col
+                            v-for="(key) in [
+                                { k: 'material', i: 'palette' },
+                                { k: 'denomination', i: 'bubble_chart' },
+                                { k: 'standard', i: 'group_work' }
+                            ]"
+                            :key="key.k"
+                            cols="12"
+                            sm="4"
+                        >
+                            <div :class="wraped">
+                                <InputForeignKey
+                                    :entity="key.k + 's'"
+                                    :label="labels[key.k]"
+                                    :icon="key.i"
+                                    :selected="item[key.k]"
+                                    :inherited="inherited[key.k] === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item[key.k] = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited[key.k]"
+                                    v-on:click="confirmInheritance(key.k)"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+                    </v-row>
+
+                    <!-- IF Coins: Weight, Diameter etc. -->
+                    <v-row v-if="entity === 'coins'">
+                        <v-col cols="12" sm="4" class="mt-n5">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.weight"
+                                label="Weight in g"
+                                prepend-icon="fitness_center"
+                                :rules="[rules.numeric_nz]"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="4" class="mt-n5">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.diameter_max"
+                                label="Diameter (Max) in mm"
+                                prepend-icon="fiber_manual_record"
+                                :rules="[rules.numeric_nz, compare_diameters]"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="4" class="mt-n5">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.diameter_min"
+                                label="Diameter (Min) in mm"
+                                prepend-icon="adjust"
+                                :rules="[rules.numeric_nz, compare_diameters]"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="4" class="mt-n5">
+                            <div :class="wraped">
+                                <v-icon class="mr-5 mt-1">not_interested</v-icon>
+                                <v-checkbox
+                                    v-model="item.weight_ignore"
+                                    label="Ignore Weight"
+                                    class="mt-0"
+                                ></v-checkbox>
+                                <v-checkbox
+                                    v-model="item.diameter_ignore"
+                                    label="Ignore Diameter"
+                                    class="ml-4 mt-0"
+                                ></v-checkbox>
+                            </div>
+                        </v-col>
+
+                        <v-col cols="12" sm="4" class="mt-n5">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.axis"
+                                label="Axis"
+                                prepend-icon="update"
+                                :rules="[rules.axis]"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="4" class="mt-n5">
+                            <v-select dense outlined filled
+                                v-model="item.centerhole"
+                                :items="select_centerhole"
+                                label="Centerhole"
+                                prepend-icon="album"
+                            ></v-select>
+                        </v-col>
+                    </v-row>
+
+                    <!-- If Types: weight, diameter etc. -->
+                    <v-row v-else class="mt-n2 mb-4">
+                        <v-col
+                            v-for="(key) in [
+                                { k: 'weight', i: 'fitness_center' },
+                                { k: 'diameter', i: 'adjust' },
+                                { k: 'axis', i: 'update' }
+                            ]"
+                            :key="key.k"
+                            cols="12"
+                            sm="4"
+                            class="mt-n5"
+                        >
+                            <div class="d-flex align-center">
+                                <v-icon class="mr-5" v-text="key.i"></v-icon>
+                                <div>
+                                    <div class="caption" v-text="labels[key.k]"></div>
+                                    <div class="body-1" v-html="$handlers.show_item_data(l, entity, item_data, key.k)"></div>
+                                </div>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </div>
+
+                <!-- Owners -->
+                <div v-if="entity === 'coins'" class="mb-2">
+                    <subheader :label="labels.owners" class="mb-3"></subheader>
+
+                    <v-row>
+                        <v-col cols="12" sm="6">
+                            <InputForeignKey
+                                entity="owners"
+                                label="Owner Original"
+                                icon="account_circle"
+                                :selected="item.owner_original"
+                                v-on:select="(emit) => { item.owner_original = emit }"
+                            ></InputForeignKey>
+                        </v-col>
+
+                        <v-col cols="12" sm="6">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.collection"
+                                label="Collection Nr."
+                                prepend-icon="label"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6" class="mt-n5">
+                            <InputForeignKey
+                                entity="owners"
+                                label="Owner Reproduction/Plastercast"
+                                icon="account_circle"
+                                :selected="item.owner_reproduction"
+                                v-on:select="(emit) => { item.owner_reproduction = emit }"
+                            ></InputForeignKey>
+                        </v-col>
+
+                        <v-col cols="12" sm="6" class="mt-n5">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.plastercast"
+                                label="Plastercast Nr."
+                                prepend-icon="label"
+                            ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="12" class="mt-n5">
+                            <div :class="wraped">
+                                <v-text-field dense outlined filled clearable
+                                    v-model="item.provenience"
+                                    label="Provenience"
+                                    prepend-icon="zoom_out_map"
+                                ></v-text-field>
+                                <v-checkbox
+                                    class="mt-0 mt-1 ml-5"
+                                    label="Owner of Original is unsure"
+                                    v-model="item.owner_unsure"
+                                ></v-checkbox>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </div>
+
+                <!-- IF Type: Type Variations -->
+                <div v-if="entity === 'types'">
+                    <!-- Header -->
+                    <subheader
+                        :label="labels.variations"
+                        :count="item.variation"
+                        add
+                        class="mb-5"
+                        v-on:add="AddRelation('variations', { de: null, en: null, comment: null })"
+                    ></subheader>
+
+                    <!-- Content -->
+                    <v-row v-for="(iterator, i) in item.variations" :key="i" class="mt-n3">
+
+                        <v-col cols="12" sm="12" class="mb-n3 mt-1">
+                            <div class="d-flex component-wrap">
+                                <span class="body-1" v-text="(i + 1) + '. Variation'"></span>
+                                <v-spacer></v-spacer>
+                                <v-btn icon
+                                    :disabled="!edit_relations.variations[i]"
+                                    @click="EditRelation('variations', i)"
+                                >
+                                    <v-icon>edit</v-icon>
+                                </v-btn>
+                                <v-btn icon class="ml-3" @click="DeleteRelation ('variations', i)" ><v-icon>delete</v-icon></v-btn>
+                            </div>
+                        </v-col>
+
+                        <v-col cols="12" sm="6" v-for="record in ['de', 'en']" :key="record">
+                            <v-textarea dense outlined filled clearable no-resize
+                                v-if="!edit_relations.variations[i]"
+                                :rows="2"
+                                v-model="item.variations[i][record]"
+                                :label="'Description ('+record.toUpperCase()+')'"
+                                prepend-icon="notes"
+                                counter=21845
+                            ></v-textarea>
+
+                            <div v-else class="d-flex component-wrap align-start mb-2">
+                                <v-icon class="mr-5">notes</v-icon>
+                                <div>
+                                    <div class="font-weight-thin text-uppercase" v-text="'Description ('+record.toUpperCase()+')'"></div>
+                                    {{ item.variations[i][record] ? item.variations[i][record] : '--'}}
+                                </div>
+                            </div>
+                        </v-col>
+
+                        <v-col cols="12" sm="12" class="mt-n5">
+                            <v-textarea dense outlined filled clearable no-resize
+                                v-if="!edit_relations.variations[i]"
+                                :rows="2"
+                                v-model="item.variations[i].comment"
+                                label="Comment"
+                                prepend-icon="drag_handle"
+                                counter=21845
+                            ></v-textarea>
+
+                            <div v-else class="d-flex component-wrap align-start mb-4">
+                                <v-icon class="mr-5">drag_handle</v-icon>
+                                <div>
+                                    <div class="font-weight-thin text-uppercase" v-text="'Comment'"></div>
+                                    {{ item.variations[i].comment ? item.variations[i].comment : '--' }}
+                                </div>
+                            </div>
+                        </v-col>
+
+                    </v-row>
+                </div>
+
+                <!-- Find Circumstances -->
+                <div v-if="entity === 'coins'">
+                    <subheader class="mb-3" :label="labels.find_circumstances"></subheader>
+
+                    <!-- IF coins -->
+                    <v-row>
+                        <v-col v-for="(key) in [{ k: 'findspot', i: 'pin_drop'}, { k: 'hoard', i: 'grain'}]" :key="key.k" cols="12" sm="6">
+                            <InputForeignKey
+                                :entity="key.k + 's'"
+                                :label="labels[key.k]"
+                                :icon="key.i"
+                                :selected="item[key.k]"
+                                v-on:select="(emit) => { item[key.k] = emit }"
+                            ></InputForeignKey>
+                        </v-col>
+                    </v-row>
+                </div>
+
+                <!-- IF types -->
+                <div v-else>
+                    <v-row>
+                        <v-col  v-for="(key) in [{ k: 'findspots', i: 'pin_drop'}, { k: 'hoards', i: 'grain'}]" :key="key.k" cols="12" sm="6">
+                            <!-- Header -->
+                            <subheader
+                                :label="labels[key.k]"
+                                :count="item[key.k]"
+                                add
+                                class="mb-5"
+                                v-on:add="AddRelation(key.k, { id: null })"
+                            ></subheader>
+
+                            <!-- Content -->
+                            <div>
+                                <div class="mt-n3" v-for="(iterator, i) in item[key.k]" :key="i">
+                                    <!-- Input -->
+                                    <div v-if="!edit_relations[key.k][i]" class="d-flex component-wrap">
+                                        <InputForeignKey
+                                            :entity="key.k"
+                                            :label="(i + 1) + '. ' + labels[key.k].slice(0, -1)"
+                                            :icon="key.i"
+                                            :selected="item[key.k][i].id"
+                                            v-on:select="(emit) => { item[key.k][i].id = emit }"
+                                        ></InputForeignKey>
+                                        <v-spacer></v-spacer>
+                                        <v-btn icon class="ml-3" @click="DeleteRelation(key.k, i)" ><v-icon>delete</v-icon></v-btn>
+                                    </div>
+
+                                    <!-- String -->
+                                    <div v-else class="d-flex component-wrap align-center mb-7 mt-3">
+                                        <v-icon class="mr-5">link</v-icon>
+                                        <div v-html="edit_relations[key.k][i]"></div>
+                                        <v-spacer></v-spacer>
+                                        <v-btn icon
+                                            :disabled="!edit_relations[key.k][i]"
+                                            @click="eEditRelation(key.k, i)"
+                                        >
+                                            <v-icon>edit</v-icon>
+                                        </v-btn>
+                                        <v-btn icon class="ml-3" @click="DeleteRelation(key.k, i)" ><v-icon>delete</v-icon></v-btn>
+                                    </div>
+                                </div>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </div>
+            </div>
+
+
+            <!-- Obverse / Reverse ----------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'obverse' || section === 'reverse'" style="width: 100%" >
+                <!-- Legends / Designs -->
+                <div :key="section">
+                    <subheader :label="labels[section] + ' ' + labels.depiction" class="mb-7"></subheader>
+
+                    <v-row>
+                        <v-col cols="12" sm="12" v-for="record in ['legend', 'design']" :key="record" class="mt-n5">
+                            <div :class="wraped">
+                                <InputForeignKey
+                                    :entity="record + 's'"
+                                    :label="labels[section] + ' ' + labels[record]"
+                                    :icon="record === 'legend' ? 'translate' : 'notes'"
+                                    :sk="record === 'legend' ? 'el_uc_adv' : null"
+                                    :selected="item[section.slice(0, 1) + '_' + record]"
+                                    :conditions="[{ side: section.slice(0, 1) }]"
+                                    :inherited="inherited[section.slice(0, 1) + '_' + record] === 1"
+                                    :disabled="item[section.slice(0, 1) + '_die'] ? (labels[record] + ' set by Die') : false"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record] = emit }"
+                                ></InputForeignKey>
+                                <inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited[section.slice(0, 1) + '_' + record]"
+                                    v-on:click="confirmInheritance(section.slice(0, 1) + '_' + record)"
+                                ></inheritButton>
+                            </div>
+                        </v-col>
+
+                        <!-- Die -->
+                        <v-col v-if="entity === 'coins'" cols="12" sm="6" class="mt-n5">
+                            <InputForeignKey
+                                :entity="'dies'"
+                                :label="(section === 'obverse' ? 'Ob' : 'Re')+'verse Die'"
+                                icon="gavel"
+                                :selected="item[section.slice(0, 1) + '_die']"
+                                :conditions="[{ side: section.slice(0, 1) }]"
+                                v-on:select="(emit) => { item[section.slice(0, 1)+'_die'] = emit }"
+                            ></InputForeignKey>
+                        </v-col>
+                    </v-row>
+                </div>
+
+                <!-- Symbols / Monograms -->
+                <div v-for="record in ['symbols', 'monograms']" :key="record" class="mb-2">
+                    <!-- Header -->
+                    <subheader
+                        :label="labels[section] + ' ' + labels[record]"
+                        :count="item[section.slice(0, 1) + '_' + record]"
+                        add
+                        :inherited="{ vif: entity === 'coins', disabled: !inherited.id_type, status: inherited[section.slice(0, 1) + '_' + record] }"
+                        class="mb-5"
+                        v-on:add="AddRelation((section.slice(0, 1) + '_' + record), {id: null, position: null, side: section.slice(0, 1) === 'o' ? 0 : 1})"
+                        v-on:inherit="confirmInheritance(section.slice(0, 1) + '_' + record)"
+                    ></subheader>
+
+                    <!-- Content -->
+                    <div v-for="(iterator, i) in item[section.slice(0, 1) + '_' + record]" :key="i" class="mt-n3">
+                        <!-- Input -->
+                        <v-row v-if="!edit_relations[section.slice(0, 1) + '_' + record][i]">
+                            <v-col cols="12" sm="8">
+                                <InputForeignKey
+                                    :entity="record"
+                                    :label="(i + 1)+'. '+(section == 'obverse' ? 'Ob' : 'Re') + 'verse ' + (record === 'monograms' ? 'Monogram' : 'Symbol')"
+                                    :icon="record == 'monograms' ? 'functions' : 'flare'"
+                                    :selected="item[section.slice(0, 1) + '_' + record][i].id"
+                                    :inherited="inherited[section.slice(0, 1) + '_' + record] === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record][i].id = emit }"
+                                ></InputForeignKey>
+                            </v-col>
+
+                            <v-col cols="12" sm="4">
+                                <div class="d-flex component-wrap">
+                                    <InputForeignKey
+                                        entity="positions"
+                                        label="Position"
+                                        icon="motion_photos_on"
+                                        :selected="item[section.slice(0, 1) + '_' + record][i].position"
+                                        :inherited="inherited[section.slice(0,1) + '_' + record] === 1"
+                                        style="width: 100%"
+                                        v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record][i].position = emit }"
+                                    ></InputForeignKey>
+
+                                    <v-btn icon
+                                        class="ml-3"
+                                        :disabled="inherited[section.slice(0, 1) + '_' + record] === 1"
+                                        @click="DeleteRelation((section.slice(0, 1) + '_' + record), i)"
+                                    ><v-icon>delete</v-icon></v-btn>
+                                </div>
+                            </v-col>
+                        </v-row>
+
+                        <!-- String -->
+                        <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
+                            <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
+                            <div
+                                style="width: 100%"
+                                v-html="edit_relations[section.slice(0, 1) + '_' + record][i]"
+                            ></div>
+                            <v-btn icon
+                                :disabled="inherited[section.slice(0, 1) + '_' + record] === 1 || !edit_relations[section.slice(0, 1) + '_' + record][i]"
+                                @click="EditRelation(section.slice(0, 1) + '_' + record, i)"
+                            >
+                                <v-icon>edit</v-icon>
+                            </v-btn>
+                            <v-btn icon class="ml-3"
+                                :disabled="inherited[section.slice(0, 1) + '_' + record] === 1"
+                                @click="DeleteRelation((section.slice(0, 1) + '_' + record), i)"
+                            >
+                                <v-icon>delete</v-icon>
+                            </v-btn>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controlmarks -->
+                <div v-if="entity === 'coins'" class="mb-2">
+                    <!-- Header -->
+                    <subheader
+                        :label="labels[section] + ' ' + labels.controlmarks"
+                        :count="item[section.slice(0, 1) + '_controlmarks']"
+                        add
+                        class="mb-5"
+                        v-on:add="AddRelation((section.slice(0, 1) + '_controlmarks'), {
+                            id: null,
+                            count: null,
+                            side: section.slice(0, 1) === 'o' ? 0 : 1
+                        })"
+                    ></subheader>
+
+                    <!-- Content -->
+                    <div v-for="(iterator, i) in item[section.slice(0, 1) + '_controlmarks']" :key="i" class="mt-n3">
+                        <v-row v-if="!edit_relations[section.slice(0, 1) + '_controlmarks'][i]">
+
+                            <v-col cols="12" sm="8">
+                                <InputForeignKey
+                                    entity="controlmarks"
+                                    :label="(i + 1) + '. ' + (section === 'obverse' ? 'Ob' : 'Re')+'verse Controlmark'"
+                                    icon="control_point"
+                                    :selected="item[section.slice(0, 1) + '_controlmarks'][i].id"
+                                    v-on:select="(emit) => { item[section.slice(0, 1) + '_controlmarks'][i].id = emit }"
+                                ></InputForeignKey>
+                            </v-col>
+
+                            <v-col cols="12" sm="4">
+                                <div class="d-flex component-wrap">
+                                    <v-text-field dense filled outlined clearable
+                                        v-model="item[section.slice(0, 1) + '_controlmarks'][i].count"
+                                        prepend-icon="filter_1"
+                                        label="count"
+                                        :rules="[rules.numeric_nz]"
+                                    ></v-text-field>
+
+                                    <v-btn icon
+                                        class="ml-3"
+                                        @click="DeleteRelation((section.slice(0, 1) + '_controlmarks'), i)"
+                                    ><v-icon>delete</v-icon></v-btn>
+                                </div>
+                            </v-col>
+                        </v-row>
+
+                        <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
+                            <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
+                            <div
+                                style="width: 100%"
+                                v-html="edit_relations[section.slice(0, 1) + '_controlmarks'][i]"
+                            ></div>
+                            <v-btn icon
+                                :disabled="!edit_relations[section.slice(0, 1) + '_controlmarks'][i]"
+                                @click="EditRelation(section.slice(0, 1) + '_controlmarks', i)"
+                            >
+                                <v-icon>edit</v-icon>
+                            </v-btn>
+                            <v-btn icon class="ml-3"
+                                @click="DeleteRelation((section.slice(0, 1) + '_controlmarks'), i)"
+                            >
+                                <v-icon>delete</v-icon>
+                            </v-btn>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Countermark / Undertype -->
+                <div v-if="entity === 'coins'">
+                    <div v-for="(record) in ['countermark', 'undertype']" :key="record">
+                        <subheader :label="labels[section] + ' ' + labels[record]" class="mb-2"></subheader>
+
+                        <v-row>
+                            <v-col cols="12" sm="6" v-for="(lang) in ['de', 'en']" :key="lang">
+                                <v-textarea dense outlined filled clearable no-resize
+                                    rows="2"
+                                    v-model="item[section.slice(0, 1) + '_' + record + '_' + lang]"
+                                    :label="labels['description'] + ' (' + lang.toUpperCase() + ')'"
+                                    prepend-icon="notes"
+                                    counter=21845
+                                ></v-textarea>
+                            </v-col>
+                        </v-row>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- References ----------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'references'" style="width: 100%">
+                <!-- Citations and Literature -->
+                <div v-for="record in ['citations', 'literature']" :key="record">
+                    <!-- Header -->
+                    <subheader
+                        :label="labels[record]"
+                        :count="item[record]"
+                        add
+                        class="mb-5"
+                        v-on:add="AddRelation (record, {
+                            id: null,
+                            page: null,
+                            number: null,
+                            plate: null,
+                            picture: null,
+                            annotation: null,
+                            comment_de: null,
+                            comment_en: null,
+                            this: record == 'citations' ? 1 : 0
+                        })"
+                    ></subheader>
+
+                    <!-- Content -->
+                    <div class="mt-n3" v-for="(iterator, i) in item[record]" :key="i">
+                        <!-- Input -->
+                        <v-row v-if="!edit_relations[record][i]">
+
+                            <v-col cols="12" sm="12" class="mb-n3 mt-1">
+                                <div class="d-flex component-wrap">
+                                    <span class="body-1" v-text="(i+1)+'. Reference'"></span>
+                                    <v-spacer></v-spacer>
+                                    <v-btn icon class="ml-3" @click="DeleteRelation (record, i)" ><v-icon>delete</v-icon></v-btn>
+                                </div>
+                            </v-col>
+
+                            <v-col cols="12" sm="12">
+                                <InputForeignKey
+                                    entity="references"
+                                    label="Title"
+                                    icon="menu_book"
+                                    :selected="item[record][i].id"
+                                    v-on:select="(emit) => { item[record][i].id = emit }"
+                                ></InputForeignKey>
+                            </v-col>
+
+                            <v-col cols="12" sm="2" v-for="q in ['page', 'number', 'plate', 'picture', 'annotation']" :key="q">
+                                <v-text-field dense outlined filled clearable class="mt-n5"
+                                    v-model="item[record][i][q]"
+                                    :label="q.slice(0, 1).toUpperCase() + q.slice(1)"
+                                    prepend-icon="south_east"
+                                ></v-text-field>
+                            </v-col>
+
+                            <v-col cols="12" sm="6">
+                                <v-textarea dense outlined filled clearable no-resize
+                                    height="100"
+                                    v-model="item[record][i].comment_de"
+                                    label="Comment (DE)"
+                                    prepend-icon="notes"
+                                    counter=21845
+                                ></v-textarea>
+                            </v-col>
+
+                            <v-col cols="12" sm="6">
+                                <v-textarea dense outlined filled clearable no-resize
+                                    height="100"
+                                    v-model="item[record][i].comment_en"
+                                    label="Comment (EN)"
+                                    prepend-icon="notes"
+                                    counter=21845
+                                ></v-textarea>
+                            </v-col>
+                        </v-row>
+
+                        <!-- String -->
+                        <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
+                            <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
+                            <div
+                                class="pr-7"
+                                style="width: 100%"
+                                v-html="edit_relations[record][i]"
+                            ></div>
+                            <v-btn icon
+                                :disabled="!edit_relations[record][i]"
+                                @click="EditRelation(record, i)"
+                            >
+                                <v-icon>edit</v-icon>
+                            </v-btn>
+                            <v-btn icon class="ml-3" @click="DeleteRelation(record, i)" ><v-icon>delete</v-icon></v-btn>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Web Links -->
+                <div>
+                    <!-- Header -->
+                    <subheader
+                        :label="labels.links"
+                        :count="item.links"
+                        add
+                        class="mb-5"
+                        v-on:add="AddRelation ('links', {
+                            id: null,
+                            semantics: null,
+                            comment_de: null,
+                            comment_en: null
+                        })"
+                    ></subheader>
+
+                    <!-- Content -->
+                    <div>
+                        <div class="mt-n3" v-for="(iterator, i) in item.links" :key="i">
+                            <!-- Input -->
+                            <v-row v-if="!edit_relations.links[i]">
+
+                                <v-col cols="12" sm="12" class="mb-n3 mt-1">
+                                    <div class="d-flex component-wrap">
+                                        <span class="body-1" v-text="(i+1)+'. Reference'"></span>
+                                        <v-spacer></v-spacer>
+                                        <v-btn icon class="ml-3" @click="DeleteRelation ('links', i)" ><v-icon>delete</v-icon></v-btn>
+                                    </div>
+                                </v-col>
+
+                                <v-col cols="12" sm="8">
+                                    <v-text-field dense outlined filled clearable
+                                        v-model="item.links[i].link"
+                                        prepend-icon="link"
+                                        label="URL"
+                                        :rules="[rules.link]"
+                                        @click:prepend="$root.openInNewsection(item.links[i].link)"
+                                    ></v-text-field>
+                                </v-col>
+
+                                <v-col cols="12" sm="4">
+                                    <v-select dense outlined filled
+                                        v-model="item.links[i].semantics"
+                                        label="Semantics"
+                                        :items="$store.state.lists.dropdowns.link_semantics"
+                                    ></v-select>
+                                </v-col>
+
+                                <v-col cols="12" sm="6">
+                                    <v-textarea dense outlined filled clearable no-resize
+                                        height="100"
+                                        v-model="item.links[i].comment_de"
+                                        label="Comment (DE)"
+                                        prepend-icon="notes"
+                                        counter=21845
+                                    ></v-textarea>
+                                </v-col>
+
+                                <v-col cols="12" sm="6">
+                                    <v-textarea dense outlined filled clearable no-resize
+                                        height="100"
+                                        v-model="item.links[i].comment_en"
+                                        label="Comment (EN)"
+                                        prepend-icon="notes"
+                                        counter=21845
+                                    ></v-textarea>
+                                </v-col>
+                            </v-row>
+
+                            <!-- String -->
+                            <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
+                                <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
+                                <div
+                                    class="pr-7"
+                                    style="width: 100%"
+                                    v-html="edit_relations.links[i]"
+                                ></div>
+                                <v-btn icon
+                                    :disabled="!edit_relations.links[i]"
+                                    @click="EditRelation('links', i)"
+                                >
+                                    <v-icon>edit</v-icon>
+                                </v-btn>
+                                <v-btn icon class="ml-3" @click="DeleteRelation('links', i)" ><v-icon>delete</v-icon></v-btn>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Literature from Type -->
+                <div v-if="entity === 'coins'">
+                    <!-- Header -->
+                    <subheader
+                        :label="labels.literature_type"
+                        :count="item.literature_type"
+                        class="mb-1"
+                    ></subheader>
+
+                    <div class="d-flex component-wrap align-end mb-6 caption">
+                        <div>These titles are linked on the related type(s).</div>
+                        <v-spacer></v-spacer>
+                        <div>To edit these records check the linked types.</div>
+                    </div>
+
+                    <!-- Content -->
+                    <div>
+                        <div v-for="(iterator, i) in item_data.type_literature" :key="i" class="d-flex component-wrap align-center mb-7 mt-3">
+                            <v-icon class="mr-5">menu_book</v-icon>
+                            <div
+                                class="pr-7"
+                                style="width: 100%"
+                                v-html="to_string.reference(iterator, l)"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Individuals ----------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'individuals'" style="width: 100%">
+                <!-- Header -->
+                <subheader
+                    :label="labels.persons"
+                    :count="item.persons"
+                    add
+                    :inherited="{ vif: entity === 'coins', disabled: !inherited.id_type, status: inherited.persons }"
+                    class="mb-5"
+                    v-on:add="AddRelation('persons', { id: null, function: null })"
+                    v-on:inherit="confirmInheritance('persons')"
+                ></subheader>
+
+                <!-- Content -->
+                <div v-for="(iterator, i) in item.persons" :key="i" class="mt-n3">
+                    <!-- Input -->
+                    <v-row v-if="!edit_relations.persons[i]">
+
+                        <v-col cols="12" sm="8">
+                            <InputForeignKey
+                                entity="persons"
+                                :label="(i + 1) + '. Person'"
+                                icon="emoji_people"
+                                sk="el_uc_adv"
+                                :selected="item.persons[i].id"
+                                :inherited="inherited.persons === 1"
+                                style="width: 100%"
+                                v-on:select="(emit) => { item.persons[i].id = emit }"
+                            ></InputForeignKey>
+                        </v-col>
+
+                        <v-col cols="12" sm="4">
+                            <div class="d-flex component-wrap">
+                                <InputForeignKey
+                                    entity="functions"
+                                    label="Function"
+                                    icon="event_seat"
+                                    :selected="item.persons[i].function"
+                                    :inherited="inherited.persons === 1"
+                                    style="width: 100%"
+                                    v-on:select="(emit) => { item.persons[i].function = emit }"
+                                ></InputForeignKey>
+
+                                <v-btn icon class="ml-3"
+                                    :disabled="inherited.persons === 1"
+                                    @click="DeleteRelation('persons', i)"
+                                >
+                                    <v-icon>delete</v-icon>
+                                </v-btn>
+                            </div>
+                        </v-col>
+                    </v-row>
+
+                    <!-- String -->
+                    <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
+                        <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
+                        <div
+                            class="pr-7"
+                            style="width: 100%"
+                            v-html="edit_relations.persons[i]"
+                        ></div>
+                        <v-btn icon
+                            :disabled="inherited.persons === 1 || !edit_relations.persons[i]"
+                            @click="EditRelation('persons', i)"
+                        >
+                            <v-icon>edit</v-icon>
+                        </v-btn>
+                        <v-btn icon class="ml-3"
+                            :disabled="inherited.persons === 1"
+                            @click="DeleteRelation('persons', i)"
+                        >
+                            <v-icon>delete</v-icon>
+                        </v-btn>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Miscellaneous ----------------------------------------- -------------------------------------------- -->
+            <div v-else-if="section === 'miscellaneous'" style="width: 100%">
+                <!-- Remarks -->
+                <div>
+                    <!-- Header -->
+                    <subheader :label="labels.remarks" class="mb-1"></subheader>
+
+                    <!-- Description and Source Link -->
+                    <v-row>
+                        <v-col cols="12" sm="12">
+                            <v-text-field dense outlined filled clearable
+                                v-model="item.source"
+                                label="Source Link"
+                                prepend-icon="link"
+                                hint="The actual source of the imported data. Please provide any other links to the References Tab."
+                                :rules="[rules.link]"
+                                @click:prepend="() => {
+                                    if (item.source) {
+                                        const source = item.source.trim()
+                                        if (source.slice(0, 7) === 'http://' || source.slice(0, 8) === 'https://') { $root.openInNewTab(source) }
+                                    }
+                                }"
+                            ></v-text-field>
+
+                            <v-textarea dense outlined filled clearable no-resize
+                                :rows="2"
+                                v-model="item.description"
+                                label="Private Description"
+                                prepend-icon="notes"
+                                counter=21845
+                                class="mt-2"
+                            ></v-textarea>
+
+                            <v-text-field
+                                v-if="entity === 'types'"
+                                dense outlined filled clearable
+                                v-model="item.name"
+                                label="Private Name"
+                                prepend-icon="label"
+                                class="mt-2"
+                            ></v-text-field>
+                        </v-col>
+
+                        <!-- Pecularities -->
+                        <v-col v-for="record in ['de', 'en']" :key="'p' + record" cols=12 sm=6>
+                            <v-textarea dense outlined filled clearable no-resize
+                                :rows="2"
+                                v-model="item['pecularities_' + record]"
+                                :label="$root.label('pecularities') + ' (' + record.toUpperCase() + ')'"
+                                prepend-icon="brightness_7"
+                                counter=21845
+                            ></v-textarea>
+                        </v-col>
+
+                        <!-- Comments -->
+                        <v-col v-for="record in ['de', 'en']" :key="'c' + record" cols=12 sm=6 xl=4>
+                            <div :class="wraped">
+                                <v-textarea dense outlined filled clearable no-resize
+                                    :rows="4"
+                                    v-model="item['comment_public_' + record]"
+                                    :label="$root.label('comment_public') + ' (' + record.toUpperCase() + ')'"
+                                    prepend-icon="chat_bubble_outline"
+                                    counter=21845
+                                    :DIS-disabled="inherited.comment_public === 1"
+                                    :DIS-hint="inherited.comment_public === 1 ? 'Value inherited from type' : ''"
+                                    :DIS-persistent-hint="inherited.comment_public === 1"
+                                ></v-textarea>
+                                <!--<inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.comment_public"
+                                    v-on:click="confirmInheritance('comment_public')"
+                                ></inheritButton>-->
+                            </div>
+                            <div v-if="entity === 'coins' && item_data.types" class="ml-9 caption">
+                                <div v-if="item_data.type_comment && item_data.type_comment[record]" v-text="'Type Comment: ' + item_data.type_comment[record]"></div>
+                                <div v-else v-text="'No comments on linked Types'"></div>
+                            </div>
+                        </v-col>
+                        <v-col cols=12 xl=4>
+                            <div :class="wraped">
+                                <v-textarea dense outlined filled clearable no-resize
+                                    :rows="$vuetify.breakpoint.xl ? 4 : 2"
+                                    v-model="item.comment_private"
+                                    :label="$root.label('comment_private')"
+                                    prepend-icon="chat_bubble"
+                                    counter=21845
+                                    :DIS-disabled="inherited.comment_private === 1"
+                                    :DIS-hint="inherited.comment_private === 1 ? 'Value inherited from type' : ''"
+                                    :DIS-persistent-hint="inherited.comment_private === 1"
+                                ></v-textarea>
+                                <!--<inheritButton
+                                    v-if="entity === 'coins'"
+                                    :disabled="!inherited.id_type"
+                                    :inherited="inherited.comment_private"
+                                    v-on:click="confirmInheritance('comment_private')"
+                                ></inheritButton>-->
+                            </div>
+                            <div v-if="entity === 'coins' && item_data.types" class="ml-9 caption">
+                                <div v-if="item_data.dbi && item_data.dbi.type_comment" v-text="'Type Comment: ' + item_data.dbi.type_comment"></div>
+                                <div v-else v-text="'No comments on linked Types'"></div>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </div>
+
+                <!-- Groups -->
+                <div class="mt-2">
+                    <subheader
+                        :label="labels.objectgroups"
+                        :count="item.groups"
+                        add
+                        class="mb-5"
+                        v-on:add="AddRelation('groups', { id: null, name: null, comment: null })"
+                    ></subheader>
+
+                    <div class="mt-n3" v-for="(iterator, i) in item.groups" :key="i">
+                        <div v-if="!edit_relations.groups[i]" class="d-flex component-wrap">
+                            <InputForeignKey
+                                entity="objectgroups"
+                                label="Object Group"
+                                icon="control_camera"
+                                :selected="item.groups[i].id"
+                                v-on:select="(emit) => { item.groups[i].id = emit }"
+                            ></InputForeignKey>
+                            <v-spacer></v-spacer>
+                            <v-btn icon class="ml-3" @click="DeleteRelation('groups', i)" ><v-icon>delete</v-icon></v-btn>
+                        </div>
+
+                        <div v-else class="d-flex component-wrap align-center mb-7 mt-3">
+                            <v-icon class="mr-5">link</v-icon>
+                            <div v-html="edit_relations.groups[i]"></div>
+                            <v-spacer></v-spacer>
+                            <v-btn icon
+                                :disabled="!edit_relations.groups[i]"
+                                @click="EditRelation('groups', i)"
+                            >
+                                <v-icon>edit</v-icon>
+                            </v-btn>
+                            <v-btn icon class="ml-3" @click="DeleteRelation('groups', i)" ><v-icon>delete</v-icon></v-btn>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Data -->
+        <v-expand-transition>
+            <div v-if="showImported" class="pa-5" style="width: 100%">
+                <imported :data="item_data.dbi ? item_data.dbi.submitted : {}" />
+            </div>
+        </v-expand-transition>
 
 
     </div>
@@ -186,10 +1551,10 @@ export default {
             refresh:            0,
             gallery_refresh:    0,
 
-            tab:                null,
-            imgId:              null,
+            //tab:                null,
+            //imgId:              null,
             //img_refresh:        0,
-            show_imported:      false,
+            showImported:      false,
 
             item:               {}, // processed item
             item_data:          {}, // raw DBI data

@@ -120,23 +120,23 @@
                 :text="$root.language.toUpperCase()"
                 :tooltip="$root.language === 'de' ? 'Switch to English' : 'Zu Deutsch wechseln'"
                 medium
-                colorHover="marked"
-                v-on:click="$root.changeSettings('language', $root.language === 'de' ? 'en' : 'de')"
+                color-hover="header_hover"
+                @click="$root.changeSettings('language', $root.language === 'de' ? 'en' : 'de')"
             />
             <adv-btn
                 :icon="$vuetify.theme.dark ? 'invert_colors' : 'invert_colors_off'"
                 :tooltip="$vuetify.theme.dark ? 'Switch to light Theme' : 'Switch to dark Theme'"
                 medium
-                colorHover="marked"
-                v-on:click="$root.changeSettings('color_theme', $vuetify.theme.dark === true ? 0 : 1)"
+                color-hover="header_hover"
+                @click="$root.changeSettings('color_theme', $vuetify.theme.dark === true ? 0 : 1)"
             />
             <!-- Logout -->
             <adv-btn
                 icon="power_settings_new"
                 tooltip="Logout"
                 medium
-                colorHover="marked"
-                v-on:click="logout()"
+                color-hover="header_hover"
+                @click="logout()"
                 class="mr-n4"
             />
 

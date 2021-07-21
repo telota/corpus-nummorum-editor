@@ -97,7 +97,8 @@ export default {
                 'right: 0',
                 'width: 200px',
                 'height: calc(100vh - 90px)',
-                'overflow-y: auto'
+                'overflow-y: auto',
+                'z-index: 98'
             ].join(';\n')
         }
     }

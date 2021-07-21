@@ -400,6 +400,7 @@
                                                 <v-select dense outlined filled
                                                     :items="selects.state_public"
                                                     v-model="search.state_public"
+                                                    :menu-props="{ offsetY: true }"
                                                     v-on:keyup.enter="runQuery()"
                                                 />
                                             </v-col>
