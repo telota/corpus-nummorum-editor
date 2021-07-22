@@ -68,23 +68,25 @@ export default {
             const computed = []
 
             data.forEach((img) => {
-                const set = {
-                    id: img.id,
-                    label: img.kind + '&nbsp;(ID&nbsp;' + img.id + ')',
-                    files: []
-                }
+                if (img.id) {
+                    const set = {
+                        id: img.id,
+                        label: img.kind + '&nbsp;(ID&nbsp;' + img.id + ')',
+                        files: []
+                    }
 
-                ;['obverse', 'reverse'].forEach((side) => {
-                    const file = img[side] ?? {}
-                    set.files.push({
-                        src: file.link ?? null,
-                        bg: file.bg_color ?? (file.kind === 'plastercast' ? 'imgbg' : null),
-                        href: file.digilib ?? file.link,
-                        text: side
+                    ;['obverse', 'reverse'].forEach((side) => {
+                        const file = img[side] ?? {}
+                        set.files.push({
+                            src: file.link ?? null,
+                            bg: file.bg_color ?? (file.kind === 'plastercast' ? 'imgbg' : null),
+                            href: file.digilib ?? file.link,
+                            text: side
+                        })
                     })
-                })
 
-                computed.push(set)
+                    computed.push(set)
+                }
             })
 
             return computed

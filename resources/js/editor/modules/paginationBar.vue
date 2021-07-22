@@ -87,86 +87,15 @@
     </div>
 
     <!-- Pagination -->
-    <div class="d-flex" style="width: 324px">
-        <adv-btn
-            icon="first_page"
-            :disabled="loading || offset < 1"
-            :color-hover="colorHover"
-            @click="$emit('offset', 0)"
-        />
-
-        <adv-btn
-            icon="navigate_before"
-            :disabled="loading || offset < 1"
-            :color-hover="colorHover"
-            @click="$emit('offset', offset - limit)"
-        />
-
-        <v-menu
-            tile
-            offset-y
-            :close-on-content-click="false"
-            transition="expand-transition"
-        >
-            <template v-slot:activator="{ on: menu }">
-                <v-tooltip bottom>
-                    <template v-slot:activator="{ on: tooltip }">
-                        <v-btn
-                            v-on="{ ...tooltip, ...menu }"
-                            class="transparent"
-                            depressed
-                            :disabled="loading || count < limit"
-                            :text="count < limit"
-                            :tile="count >= limit"
-                            height="50px"
-                            width="124px"
-                        >
-                            <v-progress-linear
-                                v-if="loading"
-                                indeterminate
-                                :height="1"
-                            />
-                            <div v-else class="text-center" style="font-size: 12px; line-height: 12px;">
-                                <div v-html="counted" class="font-weight-bold ma-2" />
-                                <div v-html="page.text.current + '&nbsp;/&nbsp;' + page.text.total" class="ma-2" />
-                            </div>
-                        </v-btn>
-                    </template>
-                    <span>Go to specific page</span>
-                </v-tooltip>
-            </template>
-
-            <v-card
-                tile
-                :width="124"
-                class="pa-2"
-                :class="color"
-                raised
-            >
-                <div class="caption text-center font-weight-bold pb-2" v-text="'Page Number'" />
-                <v-text-field
-                    dense autofocus
-                    v-model="pageSelector"
-                    :rules="[checkSelectedPage]"
-                />
-                <div class="caption text-center mt-1" v-text="'CLEAR'" style="cursor:pointer" @click="pageSelector = null" />
-            </v-card>
-        </v-menu>
-
-        <adv-btn
-            icon="navigate_next"
-            :disabled="loading || offset >= count - limit"
-            :color-hover="colorHover"
-            @click="$emit('offset', offset + limit)"
-        />
-
-        <adv-btn
-            icon="last_page"
-            :disabled="loading || offset >= count - limit"
-            :color-hover="colorHover"
-            @click="$emit('offset', (Math.ceil(count / limit) - 1) * limit)"
-        />
-    </div>
+    <pagination
+        :offset="offset"
+        :limit="limit"
+        :count="count"
+        :color-hover="colorHover"
+        color="header_bg"
+        :loading="loading"
+        v-on:offset="(emit) => { this.$emit('offset', emit) }"
+    />
 
     <!-- Right -->
     <div class="d-flex justify-end" style="width: 200px">
@@ -193,14 +122,6 @@
 export default {
     data () {
         return {
-            pageSelector:          null,
-            checkSelectedPage:     (v) => {
-                if (!v) return true
-                const parsed = parseInt(v)
-                if (!parsed) return 'No valid Number'
-                if (parsed > this.page.int.total) return 'Max is ' + this.page.int.total
-                return true
-            }
         }
     },
 
@@ -217,40 +138,9 @@ export default {
         colorHover: { type: [String], default: 'header_hover' },
     },
 
-    watch: {
-        pageSelector () {
-            if (this.pageSelector) {
-                const parsed = parseInt(this.pageSelector)
-                if (parsed && parsed !== this.page.int.current && parsed <= this.page.int.total) {
-                    this.$emit('offset', (parsed - 1) * this.limit)
-                }
-            }
-        }
-    },
-
     computed: {
         loading () {
             return this.$root.loading
-        },
-
-        page () {
-            const page = {
-                int: { current: 0, total: 0},
-                text: { current: 0, total: 0}
-            }
-
-            if (this.count > 0) {
-                page.int.current    = Math.ceil(this.offset / this.limit) + 1
-                page.int.total      = Math.ceil(this.count / this.limit)
-                page.text.current   = this.$editor_format.number(this.$root.language, page.int.current)
-                page.text.total     = this.$editor_format.number(this.$root.language, page.int.total)
-            }
-
-            return page
-        },
-
-        counted () {
-            return this.$editor_format.number(this.$root.language, this.count)
         },
 
         sorted () {

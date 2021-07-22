@@ -1,6 +1,6 @@
 <template>
 <div class="d-flex component-wrap align-center" style="width: 100%">
-    
+
     <div class="d-flex component-wrap align-center" style="width: 100%">
         <!-- Label -->
         <div
@@ -8,7 +8,7 @@
             class="title text-uppercase"
             style="white-space: nowrap"
             v-html="header"
-        ></div>        
+        ></div>
         <inheritButton
             v-if="inheritor.vif"
             :disabled="inheritor.disabled"
@@ -16,13 +16,13 @@
             no_margin_top
             v-on:click="$emit('inherit')"
         ></inheritButton>
-        <v-divider 
-            v-if="!loading" 
+        <v-divider
+            v-if="!loading"
             class="ml-4"
         ></v-divider>
-        <v-progress-linear 
-            v-else 
-            indeterminate 
+        <v-progress-linear
+            v-else
+            indeterminate
             class="ml-4"
         ></v-progress-linear>
     </div>
@@ -33,6 +33,7 @@
         fab
         x-small
         depressed
+        dark
         color="blue_prim"
         class="ml-3"
         :disabled="add === false || inheritor.status === 1"
@@ -63,16 +64,16 @@ export default {
     },
 
     computed: {
-        header () { 
-            return this.label + this.counter() 
+        header () {
+            return this.label + this.counter()
         },
 
         inheritor () {
             if (this.inherited === undefined) {
-                return { 
-                    vif: false, 
-                    disabled: true, 
-                    status: 0 
+                return {
+                    vif: false,
+                    disabled: true,
+                    status: 0
                 }
             }
             else {
@@ -80,14 +81,14 @@ export default {
             }
         }
     },
-    
+
     methods: {
         counter () {
-            if (this.count === undefined) { 
-                return '' 
+            if (this.count === undefined) {
+                return ''
             }
-            else { 
-                return this.$handlers.format.counter(this.count) 
+            else {
+                return this.$handlers.format.counter(this.count)
             }
         }
     }

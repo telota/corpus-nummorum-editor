@@ -1,13 +1,12 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import store from './Store';
+//import store from './Store';
 
 Vue.use(Router);
 
-const router = new Router (
-{
-    routes:
-    [
+const router = new Router({
+    routes: [
+
         { path: '/', redirect: '/dashboard', },
 
         // Contributions
@@ -50,32 +49,6 @@ const router = new Router (
             })
         },
 
-        // Edit
-        /*{
-            path: '/types/edit',
-            name: 'types-new',
-            component: require('./../pages/entities_primary/ItemEdit').default,
-            props: { entity: 'types'}
-        },
-        {
-            path: '/types/edit/:id/:section?',
-            name: 'types-edit',
-            component: require('./../pages/entities_primary/ItemEditInput').default,
-            props: { entity: 'types'}
-        },
-        {
-            path: '/coins/edit',
-            name: 'coins-new',
-            component: require('./../pages/entities_primary/ItemEdit').default,
-            props: { entity: 'coins'}
-        },
-        {
-            path: '/coins/edit/:id/:section?',
-            name: 'coins-edit',
-            component: require('./../pages/entities_primary/ItemEditInput').default,
-            props: { entity: 'coins'}
-        },*/
-
         // Details
         {
             path: '/types/show/:id',
@@ -108,18 +81,6 @@ const router = new Router (
                 routedQuery: route.query || {}
             })
         },
-        /*{
-            path: '/coins/search',
-            name: 'coins-search',
-            component: require('./../pages/entities_primary/ItemSearch').default,
-            props: { entity: 'coins'}
-        },
-        {
-            path: '/types/search',
-            name: 'types-search',
-            component: require('./../pages/entities_primary/ItemSearch').default,
-            props: { entity: 'types'}
-        },*/
 
         // Copy
         {

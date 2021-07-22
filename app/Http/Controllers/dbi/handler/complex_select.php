@@ -324,11 +324,12 @@ class complex_select {
             foreach ($item as $key => $val) {
                 if ($key === 'dbi') {
                     $val = json_decode($val, true);
-                    $val['images'] = $this->handleImages($val['images'], true);
+                    if (!empty($val['images'])) $val['images'] = $this->handleImages($val['images'], true);
                     $rows[$key] = $val;
                 }
                 else if ($key === 'images') {
-                    $val = $this->handleImages(json_decode($val, true));
+                    $val = json_decode($val, true);
+                    if (!empty($val)) $val = $this->handleImages($val);
                     $rows[$key] = $val;
                 }
                 else if ($val === '') {

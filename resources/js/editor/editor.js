@@ -78,6 +78,8 @@ Vue.component('pagination-bar',     require('./modules/paginationBar.vue').defau
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
 Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
 Vue.component('drawer',             require('./modules/drawer.vue').default);
+Vue.component('small-dialog',       require('./modules/dialogSmall.vue').default);
+
 
 // Primary Entities
 //Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);
@@ -239,6 +241,25 @@ const editor = new Vue({
             user: {},
             log: {},
             settings: {},
+            digilib: (path) => 'https://digilib.bbaw.de/digitallibrary/servlet/Scaler?fn=silo10/thrakien/' + path + '&dw=500&dh=500'
+        }
+    },
+
+    computed: {
+        labels () {
+            return this.$localization[this.language]
+        },
+
+        colors () {
+            const dark = this.$vuetify.theme.dark
+
+            return {
+                input: {
+                    hover: dark ? '#eee' : '#111',
+                    main: dark ? '#bcbcbc' : '#838383',
+                    bg: dark ? '#303030' : '#d4d4d4'
+                }
+            }
         }
     },
 
@@ -264,12 +285,6 @@ const editor = new Vue({
                 el.style.opacity = 0
                 setTimeout(() => { el.remove() }, 501);
             }, 250);
-        }
-    },
-
-    computed: {
-        labels() {
-            return this.$localization[this.language]
         }
     },
 

@@ -66,17 +66,18 @@
                     >
                         <v-card tile class="pa-3">
                             <div class="d-flex align-end mb-5">
-                                <div class="headline" v-text="set.id ? ('ID ' + set.id) : 'New Set'" />
+                                <div class="headline" v-text="set.id ? ('ID ' + set.id) : 'New Set'" style="width: 160px" />
 
                                 <!-- Kind -->
                                 <v-hover v-slot="{ hover }">
                                     <div
-                                        class="ml-5 d-flex body-1"
+                                        class="d-flex body-1 font-weight-bold text-uppercase ml-5"
                                         style="cursor:pointer"
+                                        :style="'color:' + $root.colors.input[hover ? 'hover' : 'main']"
                                         @click="item.images[i].kind = set.kind === 'original' ? 'plastercast' : 'original'"
                                     >
                                         <div v-text="set.kind" />
-                                        <v-icon class="ml-2" v-text="'swap_horiz'" />
+                                        <v-icon class="ml-2" v-text="'swipe'" />
                                     </div>
                                 </v-hover>
 
@@ -96,15 +97,30 @@
                                 v-for="(img, side) in { obverse: set.obverse, reverse: set.reverse }"
                                 :key="'set' + i + '-' + set.id + side"
                                 class="d-flex"
+                                :class="side === 'obverse' ? 'mb-5' : ''"
                             >
                                 <!-- Img -->
-                                <div style="width: 200px">
-                                    <adv-img contain square :src="img.link" :background="img.bg_color ? img.bg_color : (img.kind === 'plastercast' ? 'imgbg' : null)" />
+                                <div style="width: 160px" :key="'set' + i + '-' + set.id + side + '_' + img.path">
+                                    <adv-img
+                                        contain
+                                        square
+                                        :src="img.link"
+                                        :background="img.bg_color ? img.bg_color : (img.kind === 'plastercast' ? 'imgbg' : 'grey')"
+                                    />
                                 </div>
 
                                 <!-- edit -->
-                                <div class="pl-5" style="width: 100%">
-                                    <div class="body-1 text-uppercase mb-2" v-text="$root.label(side)" />
+                                <div class="pl-5" style="width: calc(100% - 160px)">
+                                    <div class="d-flex justify-space-between">
+                                        <div class="body-1 text-uppercase" v-text="$root.label(side)" />
+                                        <v-checkbox
+                                            class="mt-0 ml-2"
+                                            label="public"
+                                            v-model="item.images[i][side].public"
+                                            disabled
+                                            dense
+                                        />
+                                    </div>
 
                                     <!-- Path-->
                                     <v-menu offset-y>
@@ -114,61 +130,142 @@
                                                     v-bind="attrs"
                                                     v-on="on"
                                                     class="d-flex align-end pt-1 pb-1"
-                                                    style="border-bottom: 1px solid #eee;"
+                                                    :style="'border-bottom: 1px solid ' + $root.colors.input[hover ? 'hover' : 'main']"
                                                 >
                                                     <v-icon class="mr-1" v-text="'insert_drive_file'" />
-                                                    <div class="text-truncate" v-text="img.path" />
+                                                    <div class="text-truncate" :class="img.path ? '' : 'grey--text'" v-text="img.path ? img.path : 'no file'" />
                                                     <v-spacer />
                                                     <v-icon class="ml-2" v-text="'expand_more'" />
                                                 </div>
                                             </v-hover>
                                         </template>
 
-                                        <v-card tile>
-                                            <v-list>
-                                                <v-list-item-group>
-                                                    <v-list-item
-                                                        v-text="'Open File Manager'"
-                                                        :disabled="img.path ? (img.path.substring(0, 4) === 'http' || !img.path.includes('/') ? true : false) : false"
-                                                        @click="files_dialog = { active: true, key: i + '_' + side, id: img.path }"
-                                                    ></v-list-item>
-                                                    <v-list-item
-                                                        v-text="'Upload new image'"
-                                                        @click="upload_dialog = { active: true, key: i + '_' + side }"
-                                                    ></v-list-item>
-                                                    <v-list-item
-                                                        v-text="'Link external image'"
-                                                        @click="ImgLinkDialog(i, side)"
-                                                    ></v-list-item>
-                                                    <v-list-item
-                                                        v-text="'Delete Relation'"
-                                                        :disabled="!img.link"
-                                                        @click="item.images[i][side].link = null; item.images[i][side].path = null"
-                                                    ></v-list-item>
-                                                </v-list-item-group>
-                                            </v-list>
-                                        </v-card>
+                                        <v-list>
+                                            <v-list-item-group>
+                                                <v-list-item
+                                                    v-text="'Open File Manager'"
+                                                    :disabled="img.path ? (img.path.substring(0, 4) === 'http' || !img.path.includes('/') ? true : false) : false"
+                                                    @click="files_dialog = { active: true, key: i + '_' + side, id: img.path }"
+                                                />
+                                                <v-list-item
+                                                    v-text="'Upload new image'"
+                                                    @click="upload_dialog = { active: true, key: i + '_' + side }"
+                                                />
+                                                <v-list-item
+                                                    v-text="'Link external image'"
+                                                    @click="ImgLinkDialog(i, side)"
+                                                />
+                                                <v-list-item
+                                                    v-text="'Delete Relation'"
+                                                    :disabled="!img.link"
+                                                    @click="item.images[i][side].link = null; item.images[i][side].path = null"
+                                                />
+                                            </v-list-item-group>
+                                        </v-list>
+
                                     </v-menu>
 
-                                    <!-- Photographer -->
-                                    <v-text-field dense clearable
-                                        v-model="item.images[i][side].photographer"
-                                        prepend-inner-icon="person"
-                                        class="mt-5"
-                                        hint="Click on arrow to copy obv./rev. photographer"
-                                    >
-                                        <template v-slot:append>
-                                            <v-icon
-                                                v-text="'call_received'"
-                                                @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].photographer = img.photographer"
-                                            ></v-icon>
-                                        </template>
-                                    </v-text-field>
+                                    <div class="mt-5" :class="$vuetify.breakpoint.xlOnly ? 'd-flex' : ''">
+                                        <!-- Photographer -->
+                                        <v-text-field dense clearable
+                                            v-model="item.images[i][side].photographer"
+                                            :placeholder="side + ' photographer'"
+                                            prepend-inner-icon="person"
+                                            :style="$vuetify.breakpoint.xlOnly ? 'width: 50%' : ''"
+                                        >
+                                            <template v-slot:append>
+                                                <v-icon
+                                                    v-text="side === 'obverse' ? 'arrow_downward' : 'arrow_upward'"
+                                                    @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].photographer = img.photographer"
+                                                ></v-icon>
+                                            </template>
+                                        </v-text-field>
+
+                                        <!-- Copyright -->
+                                        <v-select dense
+                                            v-model="item.images[i][side].copyright"
+                                            :placeholder="side + ' copyright'"
+                                            prepend-inner-icon="copyright"
+                                            disabled
+                                            :class="$vuetify.breakpoint.xlOnly ? 'ml-5' : ''"
+                                            :style="$vuetify.breakpoint.xlOnly ? 'width: 50%' : ''"
+                                        >
+                                            <template v-slot:append>
+                                                <v-icon
+                                                    v-text="side === 'obverse' ? 'arrow_downward' : 'arrow_upward'"
+                                                    @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].copyright = img.copyright"
+                                                ></v-icon>
+                                            </template>
+                                        </v-select>
+                                    </div>
                                 </div>
                             </div>
                         </v-card>
                     </v-col>
                 </v-row>
+
+                <!-- Image File Browser -->
+                <ChildDialog v-if="files_dialog.active"
+                    :prop_active="files_dialog.active"
+                    prop_component="files"
+                    :prop_item="{ parent: 'coins', key: files_dialog.key, id: files_dialog.id }"
+                    v-on:assignment="ImgBrowser"
+                    v-on:close="files_dialog = { active: false, key: null, id: null }"
+                />
+
+                <!-- Image Direct Upload -->
+                <upload
+                    :prop_active="upload_dialog.active"
+                    prop_target="storage/coins"
+                    :prop_key="upload_dialog.key"
+                    v-on:ChildEmit="ImgUpload"
+                    v-on:close="upload_dialog = { active: false, key: null }"
+                />
+
+                <!-- Image Links -->
+                <small-dialog
+                    :show="link_dialog.active"
+                    icon="link"
+                    text="Link external image"
+                    v-on:close="CloseLink()"
+                >
+                    <template v-slot>
+
+                        <p>Please provide a valid external Link for the {{ link_dialog.side }} image.</p>
+
+                        <v-text-field dense outlined filled clearable class="mt-2"
+                            v-model="link_dialog.input"
+                            label="External link"
+                            prepend-icon="link"
+                            counter=255
+                            :rules="[rules.link]"
+                        />
+
+                        <div class="d-flex mt-5">
+                            <v-spacer></v-spacer>
+                            <v-btn @click="CloseLink()" icon class="mr-3">
+                                <v-icon>clear</v-icon>
+                            </v-btn>
+
+                            <v-tooltip bottom>
+                                <template v-slot:activator="{ on }">
+                                    <a :href="link_dialog.input" target="_blank" class="mr-3">
+                                        <v-btn v-on="on" icon>
+                                            <v-icon>link</v-icon>
+                                        </v-btn>
+                                    </a>
+                                </template>
+                                <span>Check the link in a new browser tab.</span>
+                            </v-tooltip>
+
+                            <v-btn @click="SetLink()" icon>
+                                <v-icon>done</v-icon>
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                        </div>
+
+                    </template>
+                </small-dialog>
             </div>
 
 
@@ -191,9 +288,9 @@
                     :entity="entity"
                     :search_key="'id_' + entity.slice(0, -1)"
                     :search_val="item.id"
-                    :tiles="4"
+                    :tiles="$vuetify.breakpoint.lgAndDown ? 4 : 6"
                     linking
-                    color_main="grey_trip"
+                    color_main="app_bg"
                     color_hover="grey_prim"
                     v-on:image="(emit) => { setTypeImage(emit) }"
                     v-on:inherit="(emit) => { inheritanceNew(emit.id) }"
@@ -779,77 +876,85 @@
                 </div>
 
                 <!-- Symbols / Monograms -->
-                <div v-for="record in ['symbols', 'monograms']" :key="record" class="mb-2">
-                    <!-- Header -->
-                    <subheader
-                        :label="labels[section] + ' ' + labels[record]"
-                        :count="item[section.slice(0, 1) + '_' + record]"
-                        add
-                        :inherited="{ vif: entity === 'coins', disabled: !inherited.id_type, status: inherited[section.slice(0, 1) + '_' + record] }"
-                        class="mb-5"
-                        v-on:add="AddRelation((section.slice(0, 1) + '_' + record), {id: null, position: null, side: section.slice(0, 1) === 'o' ? 0 : 1})"
-                        v-on:inherit="confirmInheritance(section.slice(0, 1) + '_' + record)"
-                    ></subheader>
+                <v-row no-gutters>
+                    <v-col
+                        cols=12
+                        xl=6
+                        v-for="(record, r) in ['symbols', 'monograms']"
+                        :key="record"
+                        :class="$vuetify.breakpoint.lgAndDown ? '' : (r === 0 ? 'pr-3' : 'pl-3')"
+                    >
+                        <!-- Header -->
+                        <subheader
+                            :label="labels[section] + ' ' + labels[record]"
+                            :count="item[section.slice(0, 1) + '_' + record]"
+                            add
+                            :inherited="{ vif: entity === 'coins', disabled: !inherited.id_type, status: inherited[section.slice(0, 1) + '_' + record] }"
+                            class="mb-5"
+                            v-on:add="AddRelation((section.slice(0, 1) + '_' + record), {id: null, position: null, side: section.slice(0, 1) === 'o' ? 0 : 1})"
+                            v-on:inherit="confirmInheritance(section.slice(0, 1) + '_' + record)"
+                        ></subheader>
 
-                    <!-- Content -->
-                    <div v-for="(iterator, i) in item[section.slice(0, 1) + '_' + record]" :key="i" class="mt-n3">
-                        <!-- Input -->
-                        <v-row v-if="!edit_relations[section.slice(0, 1) + '_' + record][i]">
-                            <v-col cols="12" sm="8">
-                                <InputForeignKey
-                                    :entity="record"
-                                    :label="(i + 1)+'. '+(section == 'obverse' ? 'Ob' : 'Re') + 'verse ' + (record === 'monograms' ? 'Monogram' : 'Symbol')"
-                                    :icon="record == 'monograms' ? 'functions' : 'flare'"
-                                    :selected="item[section.slice(0, 1) + '_' + record][i].id"
-                                    :inherited="inherited[section.slice(0, 1) + '_' + record] === 1"
-                                    style="width: 100%"
-                                    v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record][i].id = emit }"
-                                ></InputForeignKey>
-                            </v-col>
-
-                            <v-col cols="12" sm="4">
-                                <div class="d-flex component-wrap">
+                        <!-- Content -->
+                        <div v-for="(iterator, i) in item[section.slice(0, 1) + '_' + record]" :key="i" class="mt-n3">
+                            <!-- Input -->
+                            <v-row v-if="!edit_relations[section.slice(0, 1) + '_' + record][i]">
+                                <v-col cols="12" :sm="$vuetify.breakpoint.lgAndDown ? 8 : 6">
                                     <InputForeignKey
-                                        entity="positions"
-                                        label="Position"
-                                        icon="motion_photos_on"
-                                        :selected="item[section.slice(0, 1) + '_' + record][i].position"
-                                        :inherited="inherited[section.slice(0,1) + '_' + record] === 1"
+                                        :entity="record"
+                                        :label="(i + 1)+'. '+(section == 'obverse' ? 'Ob' : 'Re') + 'verse ' + (record === 'monograms' ? 'Monogram' : 'Symbol')"
+                                        :icon="record == 'monograms' ? 'functions' : 'flare'"
+                                        :selected="item[section.slice(0, 1) + '_' + record][i].id"
+                                        :inherited="inherited[section.slice(0, 1) + '_' + record] === 1"
                                         style="width: 100%"
-                                        v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record][i].position = emit }"
+                                        v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record][i].id = emit }"
                                     ></InputForeignKey>
+                                </v-col>
 
-                                    <v-btn icon
-                                        class="ml-3"
-                                        :disabled="inherited[section.slice(0, 1) + '_' + record] === 1"
-                                        @click="DeleteRelation((section.slice(0, 1) + '_' + record), i)"
-                                    ><v-icon>delete</v-icon></v-btn>
-                                </div>
-                            </v-col>
-                        </v-row>
+                                <v-col cols="12" :sm="$vuetify.breakpoint.lgAndDown ? 4 : 6">
+                                    <div class="d-flex component-wrap">
+                                        <InputForeignKey
+                                            entity="positions"
+                                            label="Position"
+                                            icon="motion_photos_on"
+                                            :selected="item[section.slice(0, 1) + '_' + record][i].position"
+                                            :inherited="inherited[section.slice(0,1) + '_' + record] === 1"
+                                            style="width: 100%"
+                                            v-on:select="(emit) => { item[section.slice(0, 1) + '_' + record][i].position = emit }"
+                                        ></InputForeignKey>
 
-                        <!-- String -->
-                        <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
-                            <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
-                            <div
-                                style="width: 100%"
-                                v-html="edit_relations[section.slice(0, 1) + '_' + record][i]"
-                            ></div>
-                            <v-btn icon
-                                :disabled="inherited[section.slice(0, 1) + '_' + record] === 1 || !edit_relations[section.slice(0, 1) + '_' + record][i]"
-                                @click="EditRelation(section.slice(0, 1) + '_' + record, i)"
-                            >
-                                <v-icon>edit</v-icon>
-                            </v-btn>
-                            <v-btn icon class="ml-3"
-                                :disabled="inherited[section.slice(0, 1) + '_' + record] === 1"
-                                @click="DeleteRelation((section.slice(0, 1) + '_' + record), i)"
-                            >
-                                <v-icon>delete</v-icon>
-                            </v-btn>
+                                        <v-btn icon
+                                            class="ml-3"
+                                            :disabled="inherited[section.slice(0, 1) + '_' + record] === 1"
+                                            @click="DeleteRelation((section.slice(0, 1) + '_' + record), i)"
+                                        ><v-icon>delete</v-icon></v-btn>
+                                    </div>
+                                </v-col>
+                            </v-row>
+
+                            <!-- String -->
+                            <div v-else class="d-flex component-wrap align-start mb-7 mt-3">
+                                <div class="body-2 mr-5" v-text="(i + 1) + '.'"></div>
+                                <div
+                                    style="width: 100%"
+                                    v-html="edit_relations[section.slice(0, 1) + '_' + record][i]"
+                                ></div>
+                                <v-btn icon
+                                    :disabled="inherited[section.slice(0, 1) + '_' + record] === 1 || !edit_relations[section.slice(0, 1) + '_' + record][i]"
+                                    @click="EditRelation(section.slice(0, 1) + '_' + record, i)"
+                                >
+                                    <v-icon>edit</v-icon>
+                                </v-btn>
+                                <v-btn icon class="ml-3"
+                                    :disabled="inherited[section.slice(0, 1) + '_' + record] === 1"
+                                    @click="DeleteRelation((section.slice(0, 1) + '_' + record), i)"
+                                >
+                                    <v-icon>delete</v-icon>
+                                </v-btn>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </v-col>
+                </v-row>
 
                 <!-- Controlmarks -->
                 <div v-if="entity === 'coins'" class="mb-2">
@@ -919,8 +1024,14 @@
                 </div>
 
                 <!-- Countermark / Undertype -->
-                <div v-if="entity === 'coins'">
-                    <div v-for="(record) in ['countermark', 'undertype']" :key="record">
+                <v-row v-if="entity === 'coins'" no-gutters>
+                    <v-col
+                        cols=12
+                        xl=6
+                        v-for="(record, r) in ['countermark', 'undertype']"
+                        :key="record"
+                        :class="$vuetify.breakpoint.lgAndDown ? '' : (r === 0 ? 'pr-3' : 'pl-3')"
+                    >
                         <subheader :label="labels[section] + ' ' + labels[record]" class="mb-2"></subheader>
 
                         <v-row>
@@ -934,8 +1045,8 @@
                                 ></v-textarea>
                             </v-col>
                         </v-row>
-                    </div>
-                </div>
+                    </v-col>
+                </v-row>
             </div>
 
 
@@ -1237,7 +1348,7 @@
                 <!-- Remarks -->
                 <div>
                     <!-- Header -->
-                    <subheader :label="labels.remarks" class="mb-1"></subheader>
+                    <subheader :label="labels.remarks" class="mb-5"></subheader>
 
                     <!-- Description and Source Link -->
                     <v-row>
@@ -1805,39 +1916,38 @@ export default {
 
         // Image Handler -----------------------------------------------------------------------
         ImgBrowser (emit) {
-            const explode = emit.key.split('_');
-            this.item.images[explode[0]] [explode [1]].link = emit.id;
+            const split = emit.key.split('_');
+            this.item.images[split[0]][split[1]].path = emit.id;
+            this.item.images[split[0]][split[1]].link = emit.id;
             this.files_dialog = { active: false, key: null, id: null };
         },
 
         // JK: Upload Dialog
         ImgUpload (emit) {
-            const explode = emit.key.split('_')
-            this.item.images[explode[0]][explode[1]].link = emit.url
+            const split = emit.key.split('_')
+            this.item.images[split[0]][split[1]].path = emit.url
+            this.item.images[split[0]][split[1]].link = emit.url
             this.upload_dialog = { active: false, key: null }
         },
 
         // Image Links Methods
         ImgLinkDialog (index, side) {
-            let input = this.item.images[index][side].link;
+            let input = this.item.images[index][side].path;
 
             // Check if set input is a valid link - if not set input to null
-            if (input) {
-                if (input.substring (0, 4) != 'http') {
-                    input = null;
-                }
-            }
+            if (input && input.slice(0, 4) !== 'http') input = null
 
-            this.link_dialog = {active: true, index: index, side: side, input: input}
+            this.link_dialog = { active: true, index, side, input }
         },
 
         SetLink () {
             this.item.images[this.link_dialog.index][this.link_dialog.side].link = this.link_dialog.input.trim()
-            this.CloseLink ()
+            this.item.images[this.link_dialog.index][this.link_dialog.side].path = this.link_dialog.input.trim()
+            this.CloseLink()
         },
 
         CloseLink () {
-            this.link_dialog = {active: false, index: null, side: null, input: null}
+            this.link_dialog = { active: false, index: null, side: null, input: null }
         },
 
         setImgIndex (i) {

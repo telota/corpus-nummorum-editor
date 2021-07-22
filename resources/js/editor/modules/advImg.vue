@@ -51,42 +51,37 @@ export default {
         src:                { type: [String, Boolean], default: null },
         square:             { type: Boolean, default: false },
         contain:            { type: Boolean, default: false },
-        size:               { type: Number, default: 300 },
         height:             { type: Number, default: 0 },
         background:         { type: String, default: 'grey' },
     },
 
     computed: {
         baseURL () { return this.$root.baseURL },
-        digilib () { return this.$root.digilib },
-        ratio () {return this.square ? 1 : 4/3 }
+        ratio () { return this.square ? 1 : 4/3 }
     },
 
     watch: {
         src () {
             this.setImg()
-        },
-        selcted () {
-            console.log(this.selected)
         }
     },
 
     mounted () {
-        if (this.src) this.setImg()
+        this.setImg()
     },
 
     methods: {
         setImg () {
-            if (this.src) {
-                const src = this.setImgSrc(this.src, this.size)
+            //if (this.src) {
+                const src = this.setImgSrc(this.src)
                 this.img = {
                     loading: src ? true : false,
                     src: src ? src : null,
                     icon: this.setIcon(src),
-                    name: this.text ?? this.src.split('/').pop()
+                    name: this.text ?? this.src?.split('/')?.pop()
                 }
-            }
-            else Object.keys(this.img).forEach((key) => this.img[key] = null)
+            /*}
+            else Object.keys(this.img).forEach((key) => this.img[key] = null)*/
         },
 
         handleError (error) {
@@ -94,11 +89,12 @@ export default {
             this.img.loading = false
         },
 
-        setImgSrc (src, size) {
+        setImgSrc (src) {
             src = src?.trim()
 
             if (src) {
                 if (src.slice(0, 5) === 'blob:' || src.slice(0,4) === 'http') return src
+                if (src.toLowerCase().includes('.tif')) return this.$root.digilib(src)
                 return this.baseURL + '/' + (src.includes('storage/') ? '' : 'storage/') + src
             }
             else return null

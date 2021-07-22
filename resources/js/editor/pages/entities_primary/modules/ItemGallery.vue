@@ -7,22 +7,12 @@
             :class="i === 1 ? 'mt-5' : ''"
         >
             <!-- Header -->
-            <div class="mb-1" style="width: 100%">
+            <div style="width: 100%;">
+
                 <div
-                    class="d-flex justify-center"
-                    :style="($vuetify.breakpoint.mdAndUp ? ' position: absolute; left: 0; right: 0' : '')"
+                    class="d-flex align-center justify-center"
+                    style="width: 100%; height: 40px;"
                 >
-                    <div :class="color_main" style="z-index:1">
-                        <pagination
-                            :offset="data[e].offset"
-                            :limit="limit"
-                            :count="data[e].count"
-                            :color="color_main"
-                            v-on:offset="(emit) => { setOffset(e, emit) }"
-                        ></pagination>
-                    </div>
-                </div>
-                <div class="d-flex align-center justify-center" style="width: 100%">
                     <!-- Label -->
                     <v-hover>
                         <template v-slot:default="{ hover }" >
@@ -71,140 +61,157 @@
                 </div>
             </div>
 
+            <div
+                class="d-flex justify-center align-center"
+                style="width: 100%; height: 40px;"
+                :style="($vuetify.breakpoint.mdAndUp ? 'margin-top: -40px;' : '')"
+            >
+                <div :class="color_main">
+                    <pagination
+                        :offset="data[e].offset"
+                        :limit="limit"
+                        :count="data[e].count"
+                        :color="color_main"
+                        :loading="data[e].loading"
+                        dense
+                        v-on:offset="(emit) => { setOffset(e, emit) }"
+                    />
+                </div>
+            </div>
+
             <!-- Content -->
-            <v-expand-transition>
-                <div
-                    v-if="!data[e].items[0]"
-                    v-text="'--'"
-                ></div>
+            <div class="mt-3">
+                <v-expand-transition>
+                    <div v-if="!data[e].items[0]" v-text="'--'" />
 
-                <v-row v-else-if="data[e].expand">
-                    <v-col
-                        v-for="(item, i) in data[e].items"
-                        :key="i"
-                        cols="12"
-                        :sm="cols.sm"
-                        :md="cols.md"
-                        :xl="cols.xl"
-                    >
-                        <v-card tile class="appbar">
-                            <!-- Image -->
-                            <Imager
-                                coin hide_text contain
-                                :key="item.id"
-                                :item="item.images ? item : {images: []}"
-                                :color_background="(item.images ? (item.images[0].obverse.bg_color == 'white' ? 'white' : null) : null)"
-                                :class="(item.images ? (item.images[0].obverse.bg_color == 'white' ? 'white' : 'imgbg') : 'imgbg')+' pa-1'"
-                            ></Imager>
+                    <v-row v-else-if="data[e].expand">
+                        <v-col
+                            v-for="(item, i) in data[e].items"
+                            :key="i"
+                            cols="12"
+                            :sm="cols.sm"
+                            :md="cols.md"
+                            :xl="cols.xl"
+                        >
+                            <v-card tile class="appbar">
+                                <!-- Image -->
+                                <Imager
+                                    coin hide_text contain
+                                    :key="item.id"
+                                    :item="item.images ? item : {images: []}"
+                                    :color_background="(item.images ? (item.images[0].obverse.bg_color == 'white' ? 'white' : null) : null)"
+                                    :class="(item.images ? (item.images[0].obverse.bg_color == 'white' ? 'white' : 'imgbg') : 'imgbg')+' pa-1'"
+                                ></Imager>
 
-                            <!-- Content -->
-                            <v-card-text class="pa-3 caption">
-                                <div class="mt-n1 mb-1">
-                                    <!-- Name -->
-                                    <div class="body-1 font-weight-black d-flex">
-                                        <div
-                                            class="text-truncate"
-                                            v-text="'cn ' + e.slice(0, -1)"
-                                        ></div>
-                                        <div class="d-flex">
-                                            <div v-html="'&nbsp;' + item.id"></div>
-                                            <div v-html="$handlers.format.cn_public_link(item)"></div>
+                                <!-- Content -->
+                                <v-card-text class="pa-3 caption">
+                                    <div class="mt-n1 mb-1">
+                                        <!-- Name -->
+                                        <div class="body-1 font-weight-black d-flex">
+                                            <div
+                                                class="text-truncate"
+                                                v-text="'cn ' + e.slice(0, -1)"
+                                            ></div>
+                                            <div class="d-flex">
+                                                <div v-html="'&nbsp;' + item.id"></div>
+                                                <div v-html="$handlers.format.cn_public_link(item)"></div>
+                                            </div>
                                         </div>
+                                        <!-- Types / Coins -->
+                                        <linkedInherited
+                                            :entity="e"
+                                            :item="item"
+                                            v-on:details="(emit) => { dialog_details = { entity: emit.entity, id: emit.id, public: 0 }}"
+                                        ></linkedInherited>
+                                        <!-- Mint -->
+                                        <div
+                                            v-if="item.mint.text[l]"
+                                            class="text-truncate"
+                                            v-text="item.mint.text[l]"
+                                        ></div>
                                     </div>
-                                    <!-- Types / Coins -->
-                                    <linkedInherited
-                                        :entity="e"
-                                        :item="item"
-                                        v-on:details="(emit) => { dialog_details = { entity: emit.entity, id: emit.id, public: 0 }}"
-                                    ></linkedInherited>
-                                    <!-- Mint -->
+
+                                    <!-- Diameter and Weight -->
                                     <div
-                                        v-if="item.mint.text[l]"
-                                        class="text-truncate"
-                                        v-text="item.mint.text[l]"
+                                        class="caption"
+                                        v-html="$handlers.show_item_data(l, e, item, 'card_header')"
                                     ></div>
-                                </div>
 
-                                <!-- Diameter and Weight -->
-                                <div
-                                    class="caption"
-                                    v-html="$handlers.show_item_data(l, e, item, 'card_header')"
-                                ></div>
+                                    <!-- Inherited from Type
+                                    <v-card
+                                        v-if="entity === 'coins' && inheritingType(item)"
+                                        tile
+                                        flat
+                                        class="transparent mt-1"
+                                        v-text="'Inherited from Type ' + inheritingType(item)"
+                                        @click="details_dialog = { entity: 'types', id: inheritingType(item), public: 0 }"
+                                    ></v-card> -->
 
-                                <!-- Inherited from Type
-                                <v-card
-                                    v-if="entity === 'coins' && inheritingType(item)"
-                                    tile
-                                    flat
-                                    class="transparent mt-1"
-                                    v-text="'Inherited from Type ' + inheritingType(item)"
-                                    @click="details_dialog = { entity: 'types', id: inheritingType(item), public: 0 }"
-                                ></v-card> -->
-
-                                <!-- Depiction -->
-                                <v-divider class="mb-2 mt-1"></v-divider>
-                                    <v-tooltip bottom v-for="(s) in ['obverse', 'reverse']" :key="s">
-                                        <template v-slot:activator="{ on }">
-                                            <div v-on="on" class="caption mb-2">
+                                    <!-- Depiction -->
+                                    <v-divider class="mb-2 mt-1"></v-divider>
+                                        <v-tooltip bottom v-for="(s) in ['obverse', 'reverse']" :key="s">
+                                            <template v-slot:activator="{ on }">
+                                                <div v-on="on" class="caption mb-2">
+                                                    <div
+                                                        class="font-weight-bold text-uppercase"
+                                                        v-text="s.slice(0, 1)"
+                                                        style="position: absolute"
+                                                    ></div>
+                                                    <div
+                                                        class="pl-4 font-weight-thin text-truncate"
+                                                        v-text="item[s].legend && item[s].legend.string ? item[s].legend.string : '--'"
+                                                    ></div>
+                                                    <div
+                                                        class="pl-4 text-truncate"
+                                                        v-text="item[s].design && item[s].design.text[l] ? item[s].design.text[l] : '--'"
+                                                    ></div>
+                                                </div>
+                                            </template>
+                                            <div>
                                                 <div
-                                                    class="font-weight-bold text-uppercase"
-                                                    v-text="s.slice(0, 1)"
-                                                    style="position: absolute"
+                                                    class="font-weight-bold"
+                                                    v-text="$root.label(s)"
                                                 ></div>
                                                 <div
-                                                    class="pl-4 font-weight-thin text-truncate"
+                                                    class="font-weight-thin"
                                                     v-text="item[s].legend && item[s].legend.string ? item[s].legend.string : '--'"
                                                 ></div>
-                                                <div
-                                                    class="pl-4 text-truncate"
-                                                    v-text="item[s].design && item[s].design.text[l] ? item[s].design.text[l] : '--'"
-                                                ></div>
+                                                <div v-text="item[s].design && item[s].design.text[l] ? item[s].design.text[l] : '--'"></div>
                                             </div>
+                                        </v-tooltip>
+
+                                    <!-- Footer -->
+                                    <v-divider class="mt-1"></v-divider>
+                                    <v-tooltip bottom>
+                                        <template v-slot:activator="{ on }">
+                                            <div
+                                                v-on="on"
+                                                class="caption mt-1 text-truncate"
+                                                v-html="$handlers.show_item_data(l, e, item, 'card_footer')"
+                                            ></div>
                                         </template>
-                                        <div>
-                                            <div
-                                                class="font-weight-bold"
-                                                v-text="$root.label(s)"
-                                            ></div>
-                                            <div
-                                                class="font-weight-thin"
-                                                v-text="item[s].legend && item[s].legend.string ? item[s].legend.string : '--'"
-                                            ></div>
-                                            <div v-text="item[s].design && item[s].design.text[l] ? item[s].design.text[l] : '--'"></div>
-                                        </div>
+                                        <div v-html="$handlers.show_item_data(l, e, item, 'card_footer')"></div>
                                     </v-tooltip>
+                                </v-card-text>
 
-                                <!-- Footer -->
-                                <v-divider class="mt-1"></v-divider>
-                                <v-tooltip bottom>
-                                    <template v-slot:activator="{ on }">
-                                        <div
-                                            v-on="on"
-                                            class="caption mt-1 text-truncate"
-                                            v-html="$handlers.show_item_data(l, e, item, 'card_footer')"
-                                        ></div>
-                                    </template>
-                                    <div v-html="$handlers.show_item_data(l, e, item, 'card_footer')"></div>
-                                </v-tooltip>
-                            </v-card-text>
-
-                            <!-- Actions -->
-                            <v-divider></v-divider>
-                            <commandbar
-                                :entity="e"
-                                small
-                                :id="item.id"
-                                :link_off="linking"
-                                :key="e + item.id"
-                                v-on:details="dialog_details = { entity: e, id: item.id, public: item.public }"
-                                v-on:unlink="linkItem('unlink', e, { id: item.id })"
-                                v-on:inherit="newInheritingType(item)"
-                                v-on:represent="newRepresentingCoin(item)"
-                            ></commandbar>
-                        </v-card>
-                    </v-col>
-                </v-row>
-            </v-expand-transition>
+                                <!-- Actions -->
+                                <v-divider></v-divider>
+                                <commandbar
+                                    :entity="e"
+                                    small
+                                    :id="item.id"
+                                    :link_off="linking"
+                                    :key="e + item.id"
+                                    v-on:details="dialog_details = { entity: e, id: item.id, public: item.public }"
+                                    v-on:unlink="linkItem('unlink', e, { id: item.id })"
+                                    v-on:inherit="newInheritingType(item)"
+                                    v-on:represent="newRepresentingCoin(item)"
+                                ></commandbar>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-expand-transition>
+            </div>
         </div>
     </template>
 

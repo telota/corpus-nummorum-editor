@@ -205,6 +205,7 @@ class request_parametric_select {
             // Images
             $select['images'] = ['raw' => '(SELECT JSON_ARRAYAGG( JSON_OBJECT(
                 "id",             img.ImageID,
+                "kind",           IFNULL(img.ObjectType, "unknown"),
                 "obverse",        JSON_OBJECT(
                     "link",       IF( img.ObverseImageFilename > "", CONCAT( IF( img.Path > "", IF( SUBSTRING( img.Path, -1, 1 ) != "/", CONCAT( img.Path, "/" ), img.Path ),""), img.ObverseImageFilename ), null),
                     "kind",       IF( img.ObverseImageFilename > "", img.ObjectType, null),

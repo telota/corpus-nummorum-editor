@@ -51,7 +51,7 @@ a {
 }
 
 .component-content {
-    position:fixed;
+    position:absolute;
     top: 90px;
     height: calc(100vh - 90px);
     width: 100%;
@@ -64,4 +64,31 @@ a {
 
 .width-1px {
     width: 1px;
+}
+
+.dialog-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 40px;
+    width: 100vw;
+    height: calc(100vh - 40px);
+    overflow: hidden;
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog-overlay {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 40px;
+    width: 100vw;
+    height: calc(100vh - 40px);
+    z-index: 199;
+    background-color: rgba(0,0,0,0.5);
 }
