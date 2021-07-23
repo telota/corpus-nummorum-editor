@@ -6,33 +6,29 @@
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            :defaultSortBy="'name_' + language"
-            cards
-            smallCards
+            :defaultSortBy="'name_' + language + '.ASC'"
+            smallTiles
             gallery="id_material"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
             v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row>
-                    <template v-for="(item, i) in attributes">
-                        <v-col
-                            v-if="item.filter !== undefined"
-                            :key="i"
-                            cols=12 
-                            sm=4 
-                            md=3
-                        >
-                            <v-text-field dense outlined filled clearable
-                                v-model="attributes[i].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, i) in attributes">
+                    <div
+                        v-if="item.filter !== undefined"
+                        :key="'filter' + i"
+                    >
+                        <v-text-field dense outlined filled clearable
+                            v-model="attributes[i].filter"
+                            :label="item.text"
+                            :prepend-icon="item.icon"
+                        />
+                    </div>
+                </template>
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
@@ -55,7 +51,7 @@
             </template>
 
             <template v-slot:editor-body="slot">
-                <v-row>                    
+                <v-row>
                     <v-col cols=12 md=6>
                         <!-- JK: Name DE -->
                         <v-text-field dense outlined filled clearable
@@ -66,7 +62,7 @@
                             class="mb-3"
                             counter=255
                         ></v-text-field>
-                    
+
                         <!-- JK: Name EN -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.name_en"
@@ -76,7 +72,7 @@
                             class="mb-3"
                             counter=255
                         ></v-text-field>
-                    
+
                         <!-- JK: Nomsima -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.nomisma"
@@ -89,7 +85,7 @@
 
                     <!-- JK: Comment -->
                     <v-col cols=12 md=6>
-                        <v-textarea dense outlined filled clearable 
+                        <v-textarea dense outlined filled clearable
                             no-resize
                             rows=3
                             v-model="slot.item.comment"
@@ -109,9 +105,9 @@
 
 <script>
 
-export default { 
+export default {
     data () {
-        return { 
+        return {
             component:          'material',
             entity:             'materials',
             attributes:         {},
@@ -120,15 +116,16 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null },
     },
 
     computed: {
         l () { return this.$root.language },
         labels () { return this.$root.labels },
         language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+
         headline () {
             return this.$root.label(this.entity)
         }
@@ -139,18 +136,14 @@ export default {
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // JK: Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -186,7 +179,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) } 
+                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
                 },
                 comment: {
                     default: null,

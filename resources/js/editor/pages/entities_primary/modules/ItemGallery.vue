@@ -4,14 +4,18 @@
         <div
             :key="e"
             class="mb-2"
-            :class="i === 1 ? 'mt-5' : ''"
+            :class="i === 1 ? ' mt-10' : ''"
         >
             <!-- Header -->
-            <div style="width: 100%;">
-
+            <div
+                :class="header.class"
+                style="width: 100%;"
+                :style="header.style"
+            >
                 <div
                     class="d-flex align-center justify-center"
-                    style="width: 100%; height: 40px;"
+                    style="width: 100%;"
+                    :style="'height:' + (cardHeader ? 50 : 40) + 'px;'"
                 >
                     <!-- Label -->
                     <v-hover>
@@ -59,23 +63,23 @@
                         <v-icon>exposure_plus_1</v-icon>
                     </v-btn>
                 </div>
-            </div>
 
-            <div
-                class="d-flex justify-center align-center"
-                style="width: 100%; height: 40px;"
-                :style="($vuetify.breakpoint.mdAndUp ? 'margin-top: -40px;' : '')"
-            >
-                <div :class="color_main">
-                    <pagination
-                        :offset="data[e].offset"
-                        :limit="limit"
-                        :count="data[e].count"
-                        :color="color_main"
-                        :loading="data[e].loading"
-                        dense
-                        v-on:offset="(emit) => { setOffset(e, emit) }"
-                    />
+                <div
+                    class="d-flex justify-center align-center"
+                    style="width: 100%;"
+                    :style="'height:' + (cardHeader ? 50 : 40) + 'px;' + ($vuetify.breakpoint.mdAndUp ? ('margin-top: -' + (cardHeader ? 50 : 40) + 'px;') : '')"
+                >
+                    <div :class="cardHeader ? color_main : color_bg">
+                        <pagination
+                            :offset="data[e].offset"
+                            :limit="limit"
+                            :count="data[e].count"
+                            :color="cardHeader ? color_main : color_bg"
+                            :loading="data[e].loading"
+                            :dense="!cardHeader"
+                            v-on:offset="(emit) => { setOffset(e, emit) }"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -93,7 +97,7 @@
                             :md="cols.md"
                             :xl="cols.xl"
                         >
-                            <v-card tile class="appbar">
+                            <v-card tile :class="color_main">
                                 <!-- Image -->
                                 <Imager
                                     coin hide_text contain
@@ -392,15 +396,17 @@ export default {
         hide:           { type: String, default: null },
         search_key:     { type: String },
         search_val:     { type: [String, Number] },
-        color_main:     { type: String, default: 'appbar' },
-        color_hover:    { type: String, default: 'sysbar' },
+        color_main:     { type: String, default: 'grey_sec' },
+        color_bg:       { type: String, default: 'app_bg' },
+        color_hover:    { type: String, default: 'grey_prim' },
         limit:          { type: [String, Number], default: 12 },
         tiles:          { type: [String, Number], default: 6 },
         //options:        { type: Boolean, default: false },
         //image_select:   { type: Boolean, default: false },
         //inherit_select: { type: Boolean, default: false },
         //no_inherited:   { type: Boolean, default: false },
-        linking:        { type: Boolean, default: false }
+        linking:        { type: Boolean, default: false },
+        cardHeader:     { type: Boolean, default: false }
     },
 
     computed: {
@@ -461,6 +467,15 @@ export default {
 
         linkHeader () {
             return 'New Linking between ' + this.$handlers.format.cn_entity(this.entity, this.search_val) + ' and '  + this.$root.label(this.dialog_link.entity?.slice(0, -1))
+        },
+
+        header () {
+            const data = { class: '', style: '' }
+            if (this.cardHeader) {
+                data.class = 'pl-4 mb-6 ' + this.color_main
+                data.style = 'box-shadow: 1px 1px 2px rgba(0,0,0,0.5);'
+            }
+            return data
         }
     },
 

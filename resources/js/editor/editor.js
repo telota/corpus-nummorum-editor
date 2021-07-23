@@ -149,7 +149,7 @@ const editor = new Vue({
                     grey_sec:   '#f5f5f5',
                     grey_trip:  '#e1e1e1',
 
-                    app_bg:     '#717171',
+                    app_bg:     '#aaaaaa',
                     header_bg:  '#e6e6e6',
                     header_hover:'#d2d2d2',
                     header_marked:'#0099cc',

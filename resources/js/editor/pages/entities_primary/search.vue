@@ -7,15 +7,16 @@
                 :offset="pagination.offset"
                 :limit="pagination.limit"
                 :count="pagination.count"
-                :sortby="pagination.sort_by + ' ' + pagination.sort_by_op"
+                :sortby="pagination.sort_by"
                 :sorters="sorters"
-                :layout="display"
-                :layouts="display_mode"
+                :layout="layout"
+                :layouts="layouts"
+                :loading="loading"
                 v-on:reload="queryIncrement(); processQuery()"
                 v-on:offset="(emit) => { pagination.offset = emit; processQuery() }"
                 v-on:limit="(emit) => { pagination.limit = emit; processQuery() }"
-                v-on:sortby="OrderBy"
-                v-on:layout="setDisplayMode"
+                v-on:sortby="setSortBy"
+                v-on:layout="setLayout"
             >
                 <template v-slot:right>
                     <template v-if="routed && $root.user.level > 17">
@@ -81,19 +82,19 @@
         <div v-else-if="items[0]">
 
             <!-- Trading Cards || Index Cards -->
-            <div v-if="[0, 1, 2].includes(display)" style="padding-left: 43px; padding-top: 3px">
+            <div v-if="['tiles', 'cards', 'table'].includes(layout)" style="padding-left: 43px; padding-top: 3px">
                 <v-row class="ma-0 pa-0">
                     <v-col
                         v-for="(item, i) in items"
-                        :key="i + ' ' + display"
+                        :key="i + ' ' + layout"
                         cols="12"
-                        :sm="display === 0 ? 6 : 12"
-                        :md="display === 0 ? 3 : 12"
-                        :lg="display === 0 ? 2 : 12"
+                        :sm="layout === 'tiles' ? 6 : 12"
+                        :md="layout === 'tiles' ? 3 : 12"
+                        :lg="layout === 'tiles' ? 2 : 12"
                     >
                         <component
-                            :is="display_mode[display].component"
-                            :key="display + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
+                            :is="layouts[layout].component"
+                            :key="layout + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
                             :entity="entity"
                             :item="item"
                             :publisher="publisher"
@@ -1147,12 +1148,12 @@ export default {
             cachedTab:          1,
             activeTab:          null,
 
-            display:            this.$store.state.displayMode,
-            display_mode:       [
-                {value: 0, component: 'tradingcard',    text: 'Tiles',   icon: 'view_comfy'},
-                {value: 1, component: 'indexcard',      text: 'Cards',     icon: 'view_list'},
-                {value: 2, component: 'tablerow',       text: 'Text',      icon: 'view_column'}
-            ],
+            layout:             this.$store.state.searchLayout,
+            layouts:            {
+                tiles: { component: 'tradingcard',    text: 'Tiles',   icon: 'view_comfy' },
+                cards: { component: 'indexcard',      text: 'Cards',   icon: 'view_list' },
+                table: { component: 'tablerow',       text: 'Text',    icon: 'view_column' }
+            },
 
             // selectlists
             selects:            {
@@ -1202,14 +1203,18 @@ export default {
             ]
 
             if (this.entity === 'coins') {
-                sorters.push({ value: 'weight', text: this.labels['weight'] }),
-                sorters.push({ value: 'diameter', text: this.labels['diameter'] })
+                sorters.push(
+                    { value: 'weight', text: this.labels['weight'] },
+                    { value: 'diameter', text: this.labels['diameter'] }
+                )
             }
 
-            sorters.push({ value: 'mint', text: this.labels['mint'] })
-            sorters.push({ value: 'ruler', text: this.labels['authority_person'] })
-            sorters.push({ value: 'created', text: this.labels['created_at'] })
-            sorters.push({ value: 'updated', text: this.labels['updated_at'] })
+            sorters.push(
+                { value: 'mint', text: this.labels['mint'] },
+                { value: 'ruler', text: this.labels['authority_person'] },
+                { value: 'created', text: this.labels['created_at'] },
+                { value: 'updated', text: this.labels['updated_at'] }
+            )
 
             return sorters
         },
@@ -1376,17 +1381,11 @@ export default {
             this.checked = checkers
         },
 
-        OrderBy (input) {
-            if (input === this.pagination.sort_by) {
-                this.pagination.sort_by_op = this.pagination.sort_by_op != 'ASC' ? 'ASC' : 'DESC'
-            }
-            else {
-                this.pagination.sort_by = input
-                this.pagination.sort_by_op = 'ASC'
-            }
+        setSortBy (input) {
+            this.pagination.sort_by = input
             this.pagination.offset = 0
             this.cacheCurrentQuery()
-            this.processQuery();
+            this.processQuery()
         },
 
         togglePublisher () {
@@ -1436,9 +1435,9 @@ export default {
             }
         },
 
-        setDisplayMode (value) {
-            this.$store.commit('set_display_mode', value)
-            this.display = value
+        setLayout (value) {
+            this.$store.commit('set_searchLayout', value)
+            this.layout = value
         },
 
         getQueryString (page) {

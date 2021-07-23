@@ -397,6 +397,21 @@ export default {
                     return 'cn ' + entity + (id ? (' ' + id) : '')
                 },
                 email_link:     (link, showLink)            => { return make_element.email_link(link, showLink) },
+                query: (query) => {
+                    const printed = []
+
+                    if (query) {
+                        Object.keys(query).forEach((key) => {
+                            let value = query[key]
+                            if (key !== 'i' && value !== undefined && value !== null && value !== []) {
+                                if (typeof value === 'object') value = value.join(', ')
+                                printed.push(key + ': ' + value)
+                            }
+                        })
+                    }
+
+                    return printed.join('; ')
+                }
             },
 
             // Constants

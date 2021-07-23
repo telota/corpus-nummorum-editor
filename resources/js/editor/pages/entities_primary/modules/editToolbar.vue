@@ -92,7 +92,7 @@
         <!-- Save -->
         <v-hover v-slot="{ hover }">
             <div
-                class="d-flex align-center justify-center headline font-weight-bold"
+                class="d-flex align-center justify-center headline font-weight-bold text-uppercase"
                 :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
                 style="width: 200px; height: 50px;"
                 :style="saveDisabled ? 'cursor: default:' : 'cursor: pointer'"
