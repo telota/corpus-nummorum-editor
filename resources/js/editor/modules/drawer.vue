@@ -13,8 +13,6 @@
     <div
         :class="color"
         :style="styling"
-
-        dis-mouseleave="onDrawerExpand(false)"
     >
         <div v-if="header" style="height: 80px">
             <v-hover v-slot="{ hover }">
@@ -71,6 +69,7 @@ export default {
     props: {
         top: { type: Number, default: 90 },
         header: { type: Boolean, default: false },
+        dialog: { type: Boolean, default: false },
         costumHeader: { type: Number, default: 0 },
         zIndex: { type: Number, default: 98 },
         maxWidth:  { type: [Number, String], default: 700 },
@@ -95,9 +94,8 @@ export default {
         styling () {
             return [
                 'position: fixed',
-                'padding-top:' + this.top + 'px',
-                'height: 100vh',
-                //'overflow-y: auto',
+                'padding-top:' + (this.dialog ? 80 : this.top) + 'px',
+                'height: calc(100vh - ' + (this.dialog ? 90 : 0) + 'px)',
                 'overflow-y: hidden',
                 'overflow-x: hidden',
                 'z-index:' + this.zIndex,
@@ -114,10 +112,10 @@ export default {
 
         stylingContent () {
             return [
-                'height: calc(100vh - ' + (this.top + (this.header ? 80 : this.costumHeader)) + 'px)',
+                'height: calc(100vh - ' + ((this.dialog ? 170 : this.top) + (this.header ? 80 : this.costumHeader)) + 'px)',
                 'width: 100%',
                 'overflow-y: auto',
-                'overflow-x: hidden',
+                'overflow-x: hidden'
             ].join(';\n')
         },
 
@@ -128,8 +126,9 @@ export default {
                     'position: fixed',
                     'z-index:' + (this.zIndex - 10),
                     'top: calc(50vh - 40px)',
-                    'max-width: calc(' + this.max_width + ' + 33px)',
-                    'width:' + (this.expanded ? ('calc(' + this.drawerWidth + ' + 33px)') : '0'),
+                    'left:' + (this.dialog ? 50 : 0) + 'px;',
+                    'max-width: calc(' + this.max_width + ' + ' + (this.dialog ? 8 : 33) + 'px)',
+                    'width:' + (this.expanded ? ('calc(' + this.drawerWidth + ' + ' + (this.dialog ? 8 : 33) + 'px)') : '0'),
                     'height: 80px',
                     'cursor: pointer',
                     'transition: width ' + this.delay + 'ms ease-out',

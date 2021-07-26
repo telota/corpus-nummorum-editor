@@ -11,6 +11,14 @@ a {
     text-decoration: none;
 }
 
+.whitespace-nowrap {
+    white-space: nowrap;
+}
+
+.width-1px {
+    width: 1px;
+}
+
 #app-snack {
     position: fixed;
     left: 50%;
@@ -28,27 +36,37 @@ a {
 }
 
 #routed-component {
-    position:fixed;
+    position:absolute;
     top: 40px;
     height: calc(100vh - 40px);
     width: 100%;
 }
 
 .component-toolbar {
-    position:fixed;
+    position:absolute;
     top: 40px;
     height: 50px;
     width: 100%;
     z-index: 100;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
 
-.component-toolbar-shadow {
+.component-toolbar-dialog {
+    position:absolute;
+    top: 30px;
+    height: 50px;
+    width: 100%;
+    z-index: 100;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+}
+
+/*.component-toolbar-shadow {
     z-index: 99;
     width: 120%;
     left: -20px;
     z-index: 90;
     box-shadow: 0px 0px 10px rgba(0,0,0,0.75);
-}
+}*/
 
 .component-content {
     position:absolute;
@@ -58,12 +76,37 @@ a {
     overflow-y: scroll;
 }
 
-.whitespace-nowrap {
-    white-space: nowrap;
+.component-content-dialog {
+    position:absolute;
+    top: 80px;
+    height: calc(100vh - 170px);
+    width: 100%;
+    overflow-y: scroll;
 }
 
-.width-1px {
-    width: 1px;
+.component-dialog {
+    position: fixed;
+    left: 25px;
+    top: 65px;
+    height: calc(100vh - 90px);
+    width: calc(100% - 50px);
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.67);
+}
+
+.component-dialog-outline {
+    outline: 1px solid #222;
+}
+
+.component-dialog-outline-dark {
+    outline: 1px solid #999;
+}
+
+.component-dialog-sysbar {
+    background-color: #222;
+}
+
+.component-dialog-sysbar-dark {
+    background-color: #999;
 }
 
 .dialog-container {
@@ -90,5 +133,5 @@ a {
     width: 100vw;
     height: calc(100vh - 40px);
     z-index: 199;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.34);
 }

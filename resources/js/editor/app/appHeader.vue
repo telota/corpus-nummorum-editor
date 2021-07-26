@@ -50,7 +50,7 @@
                 <v-menu
                     :key="'route' + r"
                     offset-y
-                    disabled-open-on-hover
+                    :open-on-hover="hovering"
                     tile
                 >
                     <template v-slot:activator="{ on, attrs }">
@@ -61,6 +61,7 @@
                                 class="pr-2 pl-2 d-flex align-center"
                                 :class="hover ? 'header_hover' : ''"
                                 style="height: 40px;"
+                                @click="hovering = true"
                             >
                                 <div v-if="$vuetify.breakpoint.mdAndUp" v-text="route.text" />
                                 <v-icon v-else :small="$vuetify.breakpoint.xsOnly" v-text="route.icon" />
@@ -73,6 +74,7 @@
                         class="header_bg"
                         :max-width="400"
                         :min-width="200"
+                        @click="hovering = false"
                     >
                         <template v-for="(item, i) in route.children">
                             <v-divider v-if="!item" :key="'route' + r + '.' + i" />
@@ -214,11 +216,12 @@
 export default {
     data () {
         return {
-            showAccount: false,
+            showAccount:    false,
+            hovering:       false,
 
             favorites:      [],
-            selectedFavs: [],
-            showFavorites: false,
+            selectedFavs:   [],
+            showFavorites:  false,
             additionalFavs: [
                 { text: 'CN Website', icon: 'language', link: 'https://www.corpus-nummorum.eu'},
                 { text: 'IKMK', icon: 'language', link: 'https://ikmk.smb.museum/home?lang=de' }

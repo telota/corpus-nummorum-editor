@@ -143,7 +143,16 @@
                 <span v-text="'Click to open ' + entity_label + '-Dialog.'"></span>
             </v-tooltip>
 
-            <!-- Dialog -->
+            <component
+                v-if="dialog"
+                :is="entity"
+                dialog
+                select
+                :selected="selected"
+                v-on:select="forwardSelection"
+                v-on:close="dialog = false"
+            />
+            <!-- Dialog
             <simpleSelectDialog
                 :active="dialog"
                 :text="$root.label(entity)"
@@ -158,7 +167,7 @@
                         v-on:close="dialog = false"
                     ></component>
                 </template>
-            </simpleSelectDialog>
+            </simpleSelectDialog> -->
         </template>
 
     </v-autocomplete>

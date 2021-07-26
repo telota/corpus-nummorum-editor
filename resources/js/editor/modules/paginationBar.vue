@@ -1,23 +1,23 @@
 <template>
-<div class="d-flex justify-space-between align-center" style="width: 100%; height: 50px">
+<div class="d-flex justify-space-between align-center" style="width: 100%; height: 50px;" :style="'z-index:' + zIndex">
     <!-- Left -->
     <div class="d-flex" style="width: 200px">
 
         <!-- Reload -->
         <adv-btn
             icon="sync"
-            :tooltip="'Reload Search'"
+            :dis-tooltip="'Reload Search'"
             :color-hover="colorHover"
             @click="$emit('reload')"
         />
 
         <!-- Sort by -->
-        <v-menu tile absolute :position-x="50" :position-y="90">
+        <v-menu tile absolute :position-x="50 + menuOffset.x" :position-y="90 + menuOffset.y">
             <template v-slot:activator="{ on }">
                 <adv-btn
                     v-on="on"
                     icon="sort_by_alpha"
-                    :tooltip="'Sorted by'"
+                    :dis-tooltip="'Sorted by'"
                     :color-hover="colorHover"
                 />
             </template>
@@ -37,12 +37,12 @@
         </v-menu>
 
         <!-- Limit -->
-        <v-menu tile absolute :position-x="100" :position-y="90">
+        <v-menu tile absolute :position-x="100 + menuOffset.x" :position-y="90 + menuOffset.y">
             <template v-slot:activator="{ on }">
                 <adv-btn
                     v-on="on"
                     :text="'' + limit"
-                    :tooltip="'Items per page'"
+                    :dis-tooltip="'Items per page'"
                     :color-hover="colorHover"
                 />
             </template>
@@ -67,12 +67,12 @@
         </v-menu>
 
         <!-- Layout -->
-        <v-menu v-if="layout !== null" tile absolute :position-x="150" :position-y="90">
+        <v-menu v-if="layout !== null" tile absolute :position-x="150 + menuOffset.x" :position-y="90 + menuOffset.y">
             <template v-slot:activator="{ on }">
                 <adv-btn
                     v-on="on"
                     :icon="layouts[layout].icon"
-                    tooltip="Select Layout"
+                    dis-tooltip="Select Layout"
                     :color-hover="colorHover"
                 />
             </template>
@@ -114,7 +114,7 @@
                     style="width: 200px; height: 50px; cursor: pointer;'"
                     @click="$emit('add')"
                 >
-                    <v-icon v-text="'add'" class="mr-2 light-blue--text text--darken-2'" />
+                    <v-icon v-text="'add'" class="mr-2" color="light-blue darken-2" />
                     <div v-text="'New Item'" />
                 </div>
             </v-hover>
@@ -144,7 +144,8 @@ export default {
         color:      { type: [String], default: 'header_bg' },
         colorHover: { type: [String], default: 'header_hover' },
 
-        loading:    { type: Boolean, default: false }
+        loading:    { type: Boolean, default: false },
+        dialog:     { type: Boolean, default: false }
     },
 
     computed: {
@@ -154,6 +155,14 @@ export default {
                 value: split[0],
                 desc: split[1] && split[1]?.toLowerCase() === 'desc'
             }
+        },
+
+        zIndex () {
+            return this.dialog ? 203 : 103
+        },
+
+        menuOffset () {
+            return { x: this.dialog ? 25 : 0, y: this.dialog ? 55 : 0 }
         }
     },
 

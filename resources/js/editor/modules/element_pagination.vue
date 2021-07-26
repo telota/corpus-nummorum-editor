@@ -24,7 +24,7 @@
         :disabled="loading || count < limit"
     >
         <template v-slot:activator="{ on: menu }">
-            <v-tooltip bottom :disabled="loading || count < limit">>
+            <v-tooltip bottom :disabled="true /*loading || count < limit*/">>
                 <template v-slot:activator="{ on: tooltip }">
                     <v-hover v-slot="{ hover }">
                         <div

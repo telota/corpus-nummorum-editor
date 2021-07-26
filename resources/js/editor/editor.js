@@ -56,6 +56,8 @@ Vue.component('component-content',  require('./templates/componentContent.vue').
 Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').default);
 Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
 
+Vue.component('generic-entity-template',      require('./templates/genericEntityTemplate.vue').default);
+
 Vue.component('Imager',             require('./modules/Imager.vue').default);
 //Vue.component('coin-images',        require('./modules/coinImages.vue').default);
 Vue.component('adv-img',            require('./modules/advImg.vue').default);
@@ -92,7 +94,10 @@ Vue.component('detailsdialog',      require('./pages/entities_primary/modules/de
 Vue.component('ItemGallery',           require('./pages/entities_primary/modules/ItemGallery.vue').default);
 Vue.component('commandbar',         require('./pages/entities_primary/modules/commandBar.vue').default);
 
-// Secondary Entities
+// Entities
+Vue.component('coins',              require('./pages/entities_primary/search/searchCoins.vue').default);
+Vue.component('types',              require('./pages/entities_primary/search/searchTypes.vue').default);
+
 Vue.component('denominations',      require('./pages/entities_secondary/denominations.vue').default);
 Vue.component('designs',            require('./pages/entities_secondary/designs.vue').default);
 Vue.component('dies',               require('./pages/entities_secondary/dies.vue').default);
@@ -139,7 +144,7 @@ const editor = new Vue({
                     sysbar:     '#d8d8d8',
                     appbar:     '#f5f5f5',
                     invert:     '#111111',
-                    marked:     '#666666',
+                    marked:     '#aaa',
                     imgbg:      '#606060',
 
                     blue_prim:  '#006699',

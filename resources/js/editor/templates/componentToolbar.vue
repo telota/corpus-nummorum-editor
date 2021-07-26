@@ -1,6 +1,6 @@
 <template>
 <div class="component-tb">
-    <div v-if="!flat" class="component-toolbar component-toolbar-shadow" :style="styling" />
+    <!--<div v-if="!flat" class="component-toolbar component-toolbar-shadow" :style="styling" />-->
     <div class="component-toolbar header_bg" :style="styling">
         <div :class="classes" :style="'width: 100%; height:' + (this.height ? this.height: 50) + 'px;'">
             <slot name="toolbar" />

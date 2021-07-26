@@ -86,9 +86,8 @@
             <!-- Content -->
             <div class="mt-3">
                 <v-expand-transition>
-                    <div v-if="!data[e].items[0]" v-text="'--'" />
 
-                    <v-row v-else-if="data[e].expand">
+                    <v-row v-if="data[e].items[0] && data[e].expand">
                         <v-col
                             v-for="(item, i) in data[e].items"
                             :key="i"
@@ -214,6 +213,8 @@
                             </v-card>
                         </v-col>
                     </v-row>
+
+                    <div v-else-if="!data[e].items[0] && data[e].expand && !cardHeader" v-text="'--'" />
                 </v-expand-transition>
             </div>
         </div>
@@ -473,7 +474,7 @@ export default {
             const data = { class: '', style: '' }
             if (this.cardHeader) {
                 data.class = 'pl-4 mb-6 ' + this.color_main
-                data.style = 'box-shadow: 1px 1px 2px rgba(0,0,0,0.5);'
+                data.style = 'box-shadow: 0px 1px 2px rgba(0,0,0,0.3);'
             }
             return data
         }

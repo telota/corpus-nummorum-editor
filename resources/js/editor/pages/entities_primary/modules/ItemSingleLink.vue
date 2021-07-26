@@ -1,9 +1,9 @@
 <template>
 <div>
-    
+
     <!-- Header -->
     <div class="d-flex align-center mb-4">
-        <subheader 
+        <subheader
             :label="header"
             :loading="loading"
             style="width: 100%"
@@ -79,19 +79,19 @@
             <div class="ml-n6" style="position: absolute; width: 100%; bottom: 0">
                 <div class="pa-2 d-flex align-center">
                     <v-spacer></v-spacer>
-                    <v-btn 
-                        fab 
-                        x-small 
-                        color="grey_sec" 
-                        class="mr-3" 
+                    <v-btn
+                        fab
+                        x-small
+                        color="grey_sec"
+                        class="mr-3"
                         @click="dialog = { active: false, id: null }"
                     >
                         <v-icon v-text="'clear'"></v-icon>
                     </v-btn>
-                    <v-btn 
-                        fab 
-                        small 
-                        color="blue_prim" 
+                    <v-btn
+                        fab
+                        small
+                        color="blue_prim"
                         class="ml-3"
                         :disabled="!dialog.id"
                         @click="$emit('inheritanceNew', dialog.id); dialog = { active: false, id: null }"
@@ -110,7 +110,7 @@
 
 
 <script>
-import indexcard    from './searchLayoutIndexcard.vue'
+import indexcard    from './../search/searchLayoutIndexcard.vue'
 
 export default {
     components: {
@@ -125,7 +125,7 @@ export default {
                 active: false,
                 id: null
             }
-        }        
+        }
     },
 
     props: {
@@ -168,13 +168,13 @@ export default {
             }
 
             const search = this.computed_entity === 'types' ? { id: this.item.inherited.id_type } : { img_id: this.item.image }
-            
+
             const dbi = await this.$root.DBI_SELECT_POST(this.computed_entity, params, search)
-            
+
             if (dbi?.contents?.[0]) {
                 this.dbi_item = dbi.contents[0]
             }
-            
+
             this.loading = false;
         },
 

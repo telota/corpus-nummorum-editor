@@ -1,6 +1,6 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
@@ -12,7 +12,8 @@
             :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
             v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
             <!-- Filter ---------------------------------------------------------------------------------------------------- -->
@@ -32,11 +33,11 @@
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
+            <template v-slot:search-tile-header="slot">
                 {{ 'ID&nbsp;' + slot.item.id }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:search-tile-body="slot">
                 <div class="body-2 mb-3">
                     <div class="font-weight-bold" v-html="attributes['name_' + language].content(slot.item)"></div>
                     <div class="caption" v-html="attributes.nomisma.content(slot.item)"></div>
@@ -46,11 +47,7 @@
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
+            <template v-slot:editor="slot">
                 <v-row>
                     <v-col cols=12 md=6>
                         <!-- JK: Name DE -->
@@ -97,7 +94,7 @@
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 

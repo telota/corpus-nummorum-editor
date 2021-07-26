@@ -10,11 +10,11 @@ const router = new Router({
         { path: '/', redirect: '/dashboard', },
 
         // Contributions
-        {
+        /*{
             path: '/contributions',
             name: 'contributions',
             component: require ('./../contributions/contributions').default,
-        },
+        },*/
 
         // Dashboard
         {
@@ -24,12 +24,13 @@ const router = new Router({
         },
 
         // ----------------------------------------------------------------------------------------------
+        // Primary Entities
 
         // New
         {
             path: '/(coins|types)/edit',
             name: 'coins-types-new',
-            component: require('./../pages/entities_primary/editNew').default,
+            component: require('./../pages/entities_primary/edit/editNew').default,
             props: (route) => ({
                 routed: true,
                 entity: route.params.pathMatch
@@ -40,7 +41,7 @@ const router = new Router({
         {
             path: '/(coins|types)/edit/:id/:section?',
             name: 'coins-types-edit',
-            component: require('./../pages/entities_primary/edit').default,
+            component: require('./../pages/entities_primary/edit/index').default,
             props: (route) => ({
                 routed: true,
                 entity: route.params.pathMatch,
@@ -49,8 +50,8 @@ const router = new Router({
             })
         },
 
-        // Details
-        {
+        // Show
+        /*{
             path: '/types/show/:id',
             name: 'types-details',
             component: require('./../pages/entities_primary/ItemDetails').default,
@@ -61,24 +62,27 @@ const router = new Router({
             name: 'coins-details',
             component: require('./../pages/entities_primary/ItemDetails').default,
             props: (route) => ({ entity: 'coins', id: parseInt(route.params.id) })
-        },
-        /*{
-            path: '/coins/show/:id',
-            name: 'coins-details',
-            component: require('./../pages/entities_primary/ItemDetails').default,
-            props: { entity: 'coins'}
         },*/
+        {
+            path: '/(coins|types)/show/:id',
+            name: 'coins-types-show',
+            component: require('./../pages/entities_primary/show/index').default,
+            props: (route) => ({
+                entity: route.params.pathMatch,
+                id: parseInt(route.params.id)
+            })
+        },
 
         // Search
         {
             path: '/(coins|types)/(search|publish)',
             name: 'coins-types-search',
-            component: require('./../pages/entities_primary/search').default,
+            component: require('./../pages/entities_primary/search/index').default,
             props: (route) => ({
-                routed: true,
+                dialog: false,
                 entity: route.params.pathMatch,
                 publisher: route.params["1"] === 'publish',
-                routedQuery: route.query || {}
+                routedQuery: route.query ?? {}
             })
         },
 
@@ -112,17 +116,7 @@ const router = new Router({
 
 
         // ----------------------------------------------------------------------------------------------
-
-        // Importer
-        /*{
-            path: '/importer',
-            name: 'importer',
-            component: require ('./../pages/entities_primary/importer').default,
-        },*/
-
-
-        // ----------------------------------------------------------------------------------------------
-        // Helper Tables
+        // Secondary Entities
         {
             path: '/denominations/:id?',
             name: 'denominations',
@@ -138,11 +132,6 @@ const router = new Router({
             name: 'dies',
             component: require ('./../pages/entities_secondary/dies').default,
         },
-        /*{
-            path: '/emissions/:id?',
-            name: 'emissions',
-            component: require ('./../pages/entities_secondary/emissions').default,
-        },*/
         {
             path: '/findspots/:id?',
             name: 'findspots',
@@ -289,13 +278,21 @@ const router = new Router({
             name: 'logs',
             component: require ('./../pages/administrator/logs').default,
         },
+        {
+            path: '/test',
+            name: 'test',
+            component: require ('./../pages/administrator/test').default,
+        },
 
-        // Administrator
-        /*{
-            path: '/pdp',
-            name: 'pdp',
-            component: require ('./../pages/tools/pdp').default,
-        },*/
+
+        // ----------------------------------------------------------------------------------------------
+        // 404
+        {
+            path: '*',
+            name: 'not-found',
+            component: require ('./../pages/404').default,
+            props: (route) => ({ path: route.params.pathMatch })
+        },
     ],
 });
 
