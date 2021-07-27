@@ -61,58 +61,15 @@
 
                 <app-header></app-header>
 
-
                 <div id="app-routed-component">
-                    <!--<v-main class="pa-0 red">-->
-                        <!--<v-fade-transition>-->
-                            <router-view class="pa-0 ma-0" ></router-view>
-                        <!--</v-fade-transition>-->
-                    <!--</v-main>-->
+                    <router-view class="pa-0 ma-0" ></router-view>
                 </div>
 
-                <!--<app-loader></app-loader>-->
-                <!--<app-dialog></app-dialog>-->
                 <app-about></app-about>
-                <!--<app-context-menu></app-context-menu>-->
+                <coin-type-details></coin-type-details>
 
             </v-app>
         </template>
-
-        <!-- Error Dialog -->
-        <Error-Dialog v-if="error.active" :error="error" v-on:close="error = {active: false}"></Error-Dialog>
-
-        <!-- 403 -->
-        <v-dialog
-            v-if="parseInt({!! $data['user']['level'] !!}) < 9 && $route.name !== 'contributions'"
-            value="true"
-            fullscreen
-            persistent
-        >
-            <div class="app_bg d-flex align-center justify-center" style="height: 100%">
-                <div class="text-center">
-                    <div
-                        v-html="'Sorry, this area is restricted to CN staff.<br />Please return to the previous page.'"
-                        class="mb-5"
-                    ></div>
-                    <div class="d-flex justify-center">
-                        <a href="/editor#/contributions">
-                            <v-btn
-                                tile
-                                color="blue_prim"
-                                class="mr-2"
-                                v-text="'Back'"
-                            ></v-btn>
-                        </a>
-                        <v-btn
-                            tile
-                            class="ml-2"
-                            v-text="'logout'"
-                            @click="logout()"
-                        ></v-btn>
-                    </div>
-                </div>
-            </div>
-        </v-dialog>
 
     </div>
 

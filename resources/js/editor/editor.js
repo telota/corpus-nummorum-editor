@@ -97,6 +97,7 @@ Vue.component('commandbar',         require('./pages/entities_primary/modules/co
 // Entities
 Vue.component('coins',              require('./pages/entities_primary/search/searchCoins.vue').default);
 Vue.component('types',              require('./pages/entities_primary/search/searchTypes.vue').default);
+Vue.component('coin-type-details',  require('./pages/entities_primary/show/dialog.vue').default);
 
 Vue.component('denominations',      require('./pages/entities_secondary/denominations.vue').default);
 Vue.component('designs',            require('./pages/entities_secondary/designs.vue').default);
@@ -117,6 +118,9 @@ Vue.component('tribes',             require('./pages/entities_secondary/tribes.v
 
 Vue.component('references',         require('./pages/tools/bibliography.vue').default);
 Vue.component('objectgroups',       require('./pages/tools/objectgroups.vue').default);
+
+// Templates
+Vue.component('dialog-template',    require('./templates/dialogTemplate.vue').default);
 
 
 // Own global JS variables/functions
@@ -159,6 +163,8 @@ const editor = new Vue({
                     header_hover:'#d2d2d2',
                     header_marked:'#0099cc',
                     drawer_bg:  '#d0d0d0',
+                    sheet_bg:   '#fff',
+                    tile_bg:    '#e6e6e6'
                 },
                 dark: {
                     app_bg:     '#181818',
@@ -184,6 +190,8 @@ const editor = new Vue({
                     header_hover:'#666666',
                     header_marked:'#0099cc',
                     drawer_bg:  '#262626',
+                    sheet_bg:    '#181818',
+                    tile_bg:    '#363636'
                 },
             },
         },

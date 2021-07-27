@@ -6,6 +6,8 @@
 
         <v-btn tile v-text="'switch entity'" @click="entity = entity === 'coins' ? 'materials' : 'coins'" />
         <v-btn tile v-text="'open Dialog'" @click="dialog = true" />
+        <v-btn tile v-text="'open Details for CN coin 41'" @click="$store.commit('setDetailsDialog', { entity: 'coins', id: 41 })" />
+
 
 
         <InputForeignKey
@@ -35,7 +37,7 @@
 export default {
     data () {
         return {
-            selected: null,
+            selected: 41,
             entity: 'coins',
             dialog: false
         }

@@ -9,7 +9,7 @@
         v-on:close="$emit('close')"
     >
         <!-- Toolbar -->
-        <div class="header_bg" :class="'component-toolbar' + (dialog ? '-dialog' : '')">
+        <div class="header_bg" :class="'component-toolbar' + (dialog ? ' component-toolbar-dialog' : '')">
 
             <!-- Search -->
             <pagination-bar
@@ -95,7 +95,7 @@
         </drawer>
 
         <!-- Results Content -->
-        <div :class="'component-content' + (dialog ? '-dialog' : '')" style="padding-left: 40px;">
+        <div :class="'component-content' + (dialog ? ' component-content-dialog' : '')" style="padding-left: 40px;">
             <v-fade-transition>
                 <!-- Error -->
                 <div

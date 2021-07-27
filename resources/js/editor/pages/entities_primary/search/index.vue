@@ -9,7 +9,7 @@
         v-on:close="$emit('close')"
     >
         <!-- Toolbar -->
-        <div class="header_bg" :class="'component-toolbar' + (dialog ? '-dialog' : '')">
+        <div class="header_bg" :class="'component-toolbar' + (dialog ? ' component-toolbar-dialog' : '')">
             <pagination-bar
                 :offset="pagination.offset"
                 :limit="pagination.limit"
@@ -971,7 +971,7 @@
         <!-- Results Content ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
         <div
             id="primary-results-container"
-            :class="'component-content' + (dialog ? '-dialog' : '')"
+            :class="'component-content' + (dialog ? ' component-content-dialog' : '')"
             style="padding-left: 40px;"
         >
             <v-fade-transition>
@@ -1332,6 +1332,11 @@ export default {
         if (!this.dialog) {
             this.$refs.stringSearchInput.$refs.input.focus()
             this.handleQuery()
+        }
+        else if (this.selected) {
+            this.filters.id = 41
+            this.layout = 'cards'
+            this.runQuery()
         }
     },
 

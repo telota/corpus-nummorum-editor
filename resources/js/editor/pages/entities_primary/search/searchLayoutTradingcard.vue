@@ -74,19 +74,10 @@
             :public_state="item.public"
             :publisher="publisher"
             :key="item.id + entity + (publisher ? 1 : 0) + item.public"
-            v-on:details="details_dialog = { entity: entity, id: item.id, public: item.public }"
+            v-on:details="$store.commit('setDetailsDialog', { entity: entity, id: item.id })"
             v-on:publish="(emit) => { $emit('publish') }"
         ></commandbar>
     </v-card>
-
-    <!-- Details Dialog -->
-    <detailsdialog
-        v-if="details_dialog.entity"
-        :entity="details_dialog.entity"
-        :id="details_dialog.id"
-        :public_state="details_dialog.public"
-        v-on:close="details_dialog = { entity: null, id: null, public: 0 }"
-    ></detailsdialog>
 
 </div>
 </template>
@@ -102,10 +93,6 @@ export default {
 
     data () {
         return {
-            details_dialog: {
-                entity: null,
-                id: null
-            }
         }
     },
 

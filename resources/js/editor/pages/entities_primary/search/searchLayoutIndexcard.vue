@@ -162,13 +162,12 @@
                     </div>
 
                     <!-- Body expanded -->
-                    <v-card v-else tile flat style="width: 100%;">
-                        <detailscontent
-                            :entity="entity"
-                            :id="item.id"
-                            style="width: 100%"
-                        ></detailscontent>
-                    </v-card>
+                    <div v-else class="sheet_bg pa-5">
+                    <details-content
+                        :entity="entity"
+                        :id="item.id"
+                    />
+                    </div>
 
                 </v-col>
             </v-row>
@@ -176,37 +175,24 @@
 
     </v-card>
 
-    <!-- Details Dialog -->
-    <detailsdialog
-        v-if="details_dialog.entity"
-        :entity="details_dialog.entity"
-        :id="details_dialog.id"
-        :public_state="details_dialog.public"
-        v-on:close="details_dialog = { entity: null, id: null, public: 0 }"
-    ></detailsdialog>
-
 </div>
 </template>
 
 
 <script>
 
-import detailscontent from './../modules/detailsContent.vue'
+import detailsContent from './../show/content.vue'
 import linkedInherited from './../modules/linkedInherited.vue'
 
 export default {
     components: {
-        detailscontent,
+        detailsContent,
         linkedInherited
     },
 
     data () {
         return {
-            expanded: false,
-            details_dialog: {
-                entity: null,
-                id: null
-            }
+            expanded: false
         }
     },
 

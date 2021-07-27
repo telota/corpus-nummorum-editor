@@ -50,11 +50,18 @@ export default new Vuex.Store ({
 
         cache: {
             coins: [],
-            types: []
+            types: [],
+            details: []
         },
 
         searchLayout:   'tiles',
         itemsPerPage:   [6, 12, 18, 24, 36, 48],
+
+        detailsDialog: {
+            show: false,
+            entity: null,
+            id: null
+        }
     },
 
     actions: {
@@ -79,7 +86,7 @@ export default new Vuex.Store ({
 
         setSnack (state, input) {
             state.snack = {
-                message: input?.message ? (typeof input.message === 'string' ? input.message : (input.message[state.language] ? message[state.language] : message.en)) : null,
+                message: input?.message ? (typeof input.message === 'string' ? input.message : (input.message[state.language] ?? input.message.en)) : null,
                 color: input?.color ?? null
             }
         },
@@ -91,8 +98,34 @@ export default new Vuex.Store ({
             else console.log('ERROR: Store-setCache requires { key, value }')
         },
 
+        pushToCache (state, input) {
+            if (input.key && input.value) {
+                const history = [ ...state.cache[input.key] ]
+                history.unshift({ ...input.value })
+                state.cache[input.key] = history
+            }
+            else console.log('ERROR: Store-setCache requires { key, value }')
+        },
+
         set_searchLayout (state, input) {
             state.searchLayout = input
+        },
+
+        setDetailsDialog (state, input) {
+            if (!input) state.detailsDialog = {
+                show: false,
+                entity: null,
+                id: null
+            }
+            else if (!['types', 'coins'].includes(input.entity)) console.error('Store: Details Dialog: invalid entity ' + input.entity)
+            else {
+                state.detailsDialog = {
+                    show: true,
+                    entity: input.entity,
+                    id: input.id
+                }
+                //state.cache.details.unshift({ entity: input.entity, id: input.id })
+            }
         },
     },
 

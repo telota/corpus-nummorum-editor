@@ -1,7 +1,7 @@
 <template>
 <div>
     <!-- Toolbar -->
-    <div class="header_bg" :class="'component-toolbar' + (dialog ? '-dialog' : '')">
+    <div class="header_bg" :class="'component-toolbar' + (dialog ? ' component-toolbar-dialog' : '')">
 
         <div class="d-flex align-center" style="width: 100%; height: 50px">
 
@@ -77,10 +77,10 @@
     </div>
 
     <!-- Content -->
-    <div :class="'component-content' + (dialog ? '-dialog' : '')">
+    <div :class="'sheet_bg component-content' + (dialog ? ' component-content-dialog' : '')">
 
         <div class="pa-5">
-            <v-card tile class="pa-5 mb-10 grey_sec">
+            <!--<v-card tile class="pa-5 mb-10 grey_sec">-->
                 <!-- Editor -->
                 <template v-if="mode === 'edit'">
                     <div
@@ -147,7 +147,7 @@
                         </template>
                     </v-row>
                 </template>
-            </v-card>
+            <!--</v-card>-->
 
             <!-- Gallery -->
             <v-expand-transition>
@@ -158,7 +158,7 @@
                     :search_key="gallery"
                     :search_val="editorItem.id ? editorItem.id : 0"
                     :linking="linking"
-                    card-header
+                    dis-card-header
                 >
                     <template v-slot:link="slot">
                         <div :key="slot.link.active">

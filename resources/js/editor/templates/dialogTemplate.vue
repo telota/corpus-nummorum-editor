@@ -4,7 +4,7 @@
     <!-- Full Screen -->
     <template v-if="!dialog">
         <!-- Slot -->
-        <div style="">
+        <div>
             <slot />
         </div>
     </template>
@@ -15,7 +15,7 @@
             <div
                 v-if="show"
                 class="dialog-overlay"
-                :style="'z-index:' + (zIndex - 1)"
+                :style="'z-index:' + ((zIndex - 1) + (small ? 10 : 0))"
             />
         </v-fade-transition>
 
@@ -23,15 +23,15 @@
             <div
                 v-if="show"
                 class="component-dialog app_bg"
-                :class="'component-dialog-outline' + ($vuetify.theme.dark ? '-dark' : '')"
-                :style="'z-index:' + zIndex"
+                :class="'component-dialog-outline' + ($vuetify.theme.dark ? '-dark' : '') + (small ? ' component-dialog-small' : '')"
+                :style="'z-index:' + (zIndex + (small ? 10 : 0))"
             >
                 <!-- Dialog Sysbar -->
                 <div
                     class="d-flex align-center justify-space-between"
                     :class="'component-dialog-sysbar' + ($vuetify.theme.dark ? '-dark' : '')"
                     style="position: absolute; width: 100%; height: 30px;"
-                    :style="'z-index:' + (zIndex + 1)"
+                    :style="'z-index:' + ((zIndex + 1) + (small ? 10 : 0))"
                 >
                     <div class="d-flex align-center" style="width: 150px;">
                         <v-icon :dark="!$vuetify.theme.dark" :light="$vuetify.theme.dark" small class="ml-2 mr-2" v-text="icon" />
@@ -80,6 +80,7 @@ export default {
 
     props: {
         dialog:     { type: Boolean, default: false },
+        small:      { type: Boolean, default: false },
         icon:       { type: String, default: 'launch' },
         text:       { type: String, default: 'Dialog' },
         select:     { type: Boolean, default: false },

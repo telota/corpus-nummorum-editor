@@ -601,7 +601,7 @@ const to_string = {
             make_element.resource_link(data.link) +
             (data.is_unsure ? '&nbsp;(?)' : '') +
             (data.city ? (', ' + data.city) : '') +
-            (data.country ? (', ' + data.country) : '')
+            (data.country ? (', ' + data.country.toUpperCase()) : '')
         }
 
     },

@@ -42,6 +42,8 @@ a {
     width: 100%;
 }
 
+/* Layout */
+
 .component-toolbar {
     position:absolute;
     top: 40px;
@@ -52,21 +54,10 @@ a {
 }
 
 .component-toolbar-dialog {
-    position:absolute;
     top: 30px;
     height: 50px;
-    width: 100%;
     z-index: 100;
-    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
-
-/*.component-toolbar-shadow {
-    z-index: 99;
-    width: 120%;
-    left: -20px;
-    z-index: 90;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.75);
-}*/
 
 .component-content {
     position:absolute;
@@ -77,11 +68,15 @@ a {
 }
 
 .component-content-dialog {
-    position:absolute;
     top: 80px;
     height: calc(100vh - 170px);
     width: 100%;
-    overflow-y: scroll;
+}
+
+.component-content-dialog-small {
+    top: 80px;
+    height: calc(100vh - 240px);
+    width: 100%;
 }
 
 .component-dialog {
@@ -91,6 +86,13 @@ a {
     height: calc(100vh - 90px);
     width: calc(100% - 50px);
     box-shadow: 5px 5px 20px rgba(0,0,0,0.67);
+}
+
+.component-dialog-small {
+    left: 60px;
+    top: 100px;
+    height: calc(100vh - 160px);
+    width: calc(100% - 120px);
 }
 
 .component-dialog-outline {
@@ -129,9 +131,17 @@ a {
     left: 0;
     right: 0;
     bottom: 0;
-    top: 40px;
+    top: 41px;
     width: 100vw;
-    height: calc(100vh - 40px);
+    height: calc(100vh - 41px);
     z-index: 199;
     background-color: rgba(0,0,0,0.34);
 }
+
+/*.component-toolbar-shadow {
+    z-index: 99;
+    width: 120%;
+    left: -20px;
+    z-index: 90;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.75);
+}*/

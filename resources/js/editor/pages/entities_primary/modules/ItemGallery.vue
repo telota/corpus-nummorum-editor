@@ -205,7 +205,7 @@
                                     :id="item.id"
                                     :link_off="linking"
                                     :key="e + item.id"
-                                    v-on:details="dialog_details = { entity: e, id: item.id, public: item.public }"
+                                    v-on:details="$store.commit('setDetailsDialog', { entity: e, id: item.id })"
                                     v-on:unlink="linkItem('unlink', e, { id: item.id })"
                                     v-on:inherit="newInheritingType(item)"
                                     v-on:represent="newRepresentingCoin(item)"
@@ -397,8 +397,8 @@ export default {
         hide:           { type: String, default: null },
         search_key:     { type: String },
         search_val:     { type: [String, Number] },
-        color_main:     { type: String, default: 'grey_sec' },
-        color_bg:       { type: String, default: 'app_bg' },
+        color_main:     { type: String, default: 'tile_bg' },
+        color_bg:       { type: String, default: 'sheet_bg' },
         color_hover:    { type: String, default: 'grey_prim' },
         limit:          { type: [String, Number], default: 12 },
         tiles:          { type: [String, Number], default: 6 },

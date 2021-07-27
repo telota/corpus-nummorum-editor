@@ -1,7 +1,7 @@
 <template>
 <div>
     <!-- Toolbar -->
-    <div class="header_bg" :class="'component-toolbar' + (dialog ? '-dialog' : '')">
+    <div class="header_bg" :class="'component-toolbar' + (dialog ? ' component-toolbar-dialog' : '')">
 
         <!-- Search -->
         <pagination-bar
@@ -50,7 +50,7 @@
     </drawer>
 
     <!-- Content -->
-    <div :class="'component-content' + (dialog ? '-dialog' : '')" style="padding-left: 40px;">
+    <div :class="'component-content' + (dialog ? ' component-content-dialog' : '')" style="padding-left: 40px;">
         <v-fade-transition>
 
             <!-- Search-Table -->
@@ -66,7 +66,7 @@
                             <td
                                 v-for="(header, i) in headers"
                                 :key="i + 'h'"
-                                class="pb-2 pr-2"
+                                class="pb-2 pl-3 pr-1"
                             >
                                 <div class="d-flex">
                                     <div
@@ -103,7 +103,7 @@
                                 <td
                                     v-for="(header, i) in headers"
                                     :key="i + 'r'"
-                                    class="pa-3 pl-0"
+                                    class="pa-3 pr-1"
                                     style="vertical-align: top"
                                     v-html="header.content(item)"
                                 />
@@ -112,13 +112,13 @@
                                     <div class="d-md-flex justify-end">
                                         <adv-btn
                                             icon="preview"
-                                            tooltip="View/Edit Details"
+                                            dis-tooltip="View/Edit Details"
                                             medium
                                             @click="editItem(item)"
                                         />
                                         <adv-btn
                                             icon="library_add"
-                                            tooltip="Copy Record"
+                                            dis-tooltip="Copy Record"
                                             medium
                                             @click="cloneItem(item)"
                                         />
@@ -175,12 +175,12 @@
                                 <v-divider vertical />
                                 <adv-btn
                                     icon="preview"
-                                    tooltip="View/Edit Details"
+                                    dis-tooltip="View/Edit Details"
                                     @click="editItem(item)"
                                 />
                                 <adv-btn
                                     icon="library_add"
-                                    tooltip="Copy Record"
+                                    dis-tooltip="Copy Record"
                                     @click="cloneItem(item)"
                                 />
                             </div>

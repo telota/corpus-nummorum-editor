@@ -1,8 +1,8 @@
 <template>
-<div>
+<div id="app-header">
 
     <!-- Header -->
-    <div id="app-header">
+    <div>
         <!-- Snack -->
         <v-fade-transition>
             <div
