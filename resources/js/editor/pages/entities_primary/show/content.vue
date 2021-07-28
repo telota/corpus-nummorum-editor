@@ -56,24 +56,13 @@
 
                     <!-- Image -->
                     <v-col cols="12" sm="3">
-                        <a :href="images[0] ? images[0][side].link : null" target="_blank">
-                            <v-card tile>
-                                <adv-img
-                                    contain
-                                    square
-                                    :src="images[0] ? images[0][side].src : null"
-                                    :background="images[0] ? images[0][side].bg : null"
-                                />
-                                <!--<Imager
-                                    hide_text contain
-                                    :item="item.images ? item.images[0][side] : { link: null }"
-                                    name="link"
-                                    :key="item.id"
-                                    :color_background="(item.images ? (item.images[0][side].bg_color === 'white' ? 'white' : null) : null)"
-                                    class="mb-n2"
-                                ></Imager>-->
-                            </v-card>
-                        </a>
+                        <v-card tile>
+                            <coin-images
+                                :images="images"
+                                link
+                                :side="side"
+                            />
+                        </v-card>
                     </v-col>
 
                     <!-- Information -->
@@ -323,22 +312,11 @@
                 <v-row>
                     <v-col cols="12" sm="2" md="4" xl="3" v-for="(img, i) in images" :key="i">
                         <v-card tile class="tile_bg">
-                            <div class="d-flex">
-                                <div
-                                    v-for="(side) in ['obverse', 'reverse']"
-                                    :key="i + side"
-                                    style="width: 50%"
-                                >
-                                    <a :href="img[side].link" target="_blank">
-                                        <adv-img
-                                            contain
-                                            square
-                                            :src="img ? img[side].src : null"
-                                            :background="img ? img[side].bg : null"
-                                        />
-                                    </a>
-                                </div>
-                            </div>
+                            <coin-images
+                                :images="images"
+                                :index="i"
+                                link
+                            />
                             <div
                                 class="caption text-center text-truncate pa-2"
                                 v-text="img.kind + ' (ID' + img.id + ')'"
@@ -410,21 +388,9 @@ export default {
         labels () { return this.$root.labels },
 
         images () {
-            let images = []
-            if (this.entity === 'types' && this.item?.images?.[0]?.id) images = this.item.images
-            else if (this.entity === 'coins' && this.item?.dbi?.images?.[0]?.id) images = this.item.dbi.images
-
-            return images.map((img) => {
-                const obj = { id: img.id, kind: img.kind }
-                ;['obverse', 'reverse'].forEach((side) => {
-                    obj[side] = {
-                        src: img[side].link ?? null,
-                        link: img[side].digilib ?? img[side].link,
-                        bg: img[side].bg ?? (img[side].kind === 'plastercast' ? 'imgbg' : null)
-                    }
-                })
-                return obj
-            })
+            if (this.entity === 'types' && this.item?.images?.[0]?.id) return this.item.images
+            if (this.entity === 'coins' && this.item?.dbi?.images?.[0]?.id) return this.item.dbi.images
+            return []
         },
 
         to_string () { return this.$handlers.format.stringify_data },

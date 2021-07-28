@@ -47,6 +47,7 @@ Vue.component('app-dialog',         require('./app/appDialog.vue').default);
 //Vue.component('app-navigation',     require('./app/appNavigation.vue').default);
 //Vue.component('app-context-menu',   require('./app/appContextMenu.vue').default);
 Vue.component('app-about',          require('./app/appAbout.vue').default);
+Vue.component('app-eye-protection', require('./app/appEyeProtection.vue').default);
 
 Vue.component('simpleDataTemplate', require('./templates/simpleDataTemplate.vue').default);
 Vue.component('simpleSelectDialog', require('./templates/simpleDataSelectDialog.vue').default);
@@ -57,6 +58,8 @@ Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').defau
 Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
 
 Vue.component('generic-entity-template',      require('./templates/genericEntityTemplate.vue').default);
+Vue.component('sheet-template',      require('./templates/sheetTemplate.vue').default);
+Vue.component('small-dialog',       require('./templates/dialogSmall.vue').default);
 
 Vue.component('Imager',             require('./modules/Imager.vue').default);
 //Vue.component('coin-images',        require('./modules/coinImages.vue').default);
@@ -75,12 +78,11 @@ Vue.component('keyboard',           require('./modules/keyboard.vue').default);
 // Elements
 Vue.component('advbtn',             require('./modules/advbtn.vue').default);
 Vue.component('adv-btn',            require('./modules/btnAdv.vue').default);
-Vue.component('pagination',         require('./modules/element_pagination.vue').default);
+Vue.component('pagination',         require('./modules/pagination.vue').default);
 Vue.component('pagination-bar',     require('./modules/paginationBar.vue').default);
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
 Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
 Vue.component('drawer',             require('./modules/drawer.vue').default);
-Vue.component('small-dialog',       require('./modules/dialogSmall.vue').default);
 
 
 // Primary Entities
@@ -91,8 +93,9 @@ Vue.component('ItemInputTemplate',  require('./templates/itemInputTemplate.vue')
 Vue.component('ItemCopy',           require('./pages/entities_primary/ItemCopy.vue').default);
 Vue.component('ItemDetails',        require('./pages/entities_primary/ItemDetails.vue').default);
 Vue.component('detailsdialog',      require('./pages/entities_primary/modules/detailsDialog.vue').default);
-Vue.component('ItemGallery',           require('./pages/entities_primary/modules/ItemGallery.vue').default);
+Vue.component('ItemGallery',        require('./pages/entities_primary/modules/coinsTypesGallery.vue').default);
 Vue.component('commandbar',         require('./pages/entities_primary/modules/commandBar.vue').default);
+Vue.component('coin-images',        require('./pages/entities_primary/modules/coinImages.vue').default);
 
 // Entities
 Vue.component('coins',              require('./pages/entities_primary/search/searchCoins.vue').default);
@@ -158,6 +161,10 @@ const editor = new Vue({
                     grey_sec:   '#f5f5f5',
                     grey_trip:  '#e1e1e1',
 
+                    input_hover: '#111',
+                    input_main: '#838383',
+                    input_bg: '#d4d4d4',
+
                     app_bg:     '#aaaaaa',
                     header_bg:  '#e6e6e6',
                     header_hover:'#d2d2d2',
@@ -185,12 +192,16 @@ const editor = new Vue({
                     grey_sec:   '#272727',
                     grey_trip:  '#1e1e1e',
 
-                    app_bg:     '#181818',
+                    input_hover: '#eee',
+                    input_main: '#bcbcbc',
+                    input_bg: '#303030',
+
+                    app_bg:     '#101010',
                     header_bg:  '#363636',
                     header_hover:'#666666',
                     header_marked:'#0099cc',
                     drawer_bg:  '#262626',
-                    sheet_bg:    '#181818',
+                    sheet_bg:    '#1c1c1c',
                     tile_bg:    '#363636'
                 },
             },
@@ -264,15 +275,7 @@ const editor = new Vue({
         },
 
         colors () {
-            const dark = this.$vuetify.theme.dark
-
-            return {
-                input: {
-                    hover: dark ? '#eee' : '#111',
-                    main: dark ? '#bcbcbc' : '#838383',
-                    bg: dark ? '#303030' : '#d4d4d4'
-                }
-            }
+            return this.$vuetify.theme?.themes?.[this.$vuetify.theme.dark ? 'dark' : 'light'] ?? {}
         }
     },
 

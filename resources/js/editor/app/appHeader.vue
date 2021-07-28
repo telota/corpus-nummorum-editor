@@ -132,6 +132,13 @@
                 color-hover="header_hover"
                 @click="$root.changeSettings('color_theme', $vuetify.theme.dark === true ? 0 : 1)"
             />
+            <adv-btn
+                :icon="nightMode ? 'brightness_5' : 'brightness_4'"
+                :tooltip="(nightMode ? 'Disabled' : 'Enabled') + ' night mode'"
+                medium
+                color-hover="header_hover"
+                @click="$root.changeSettings('night', nightMode ? 0 : 1)"
+            />
             <!-- Logout -->
             <adv-btn
                 icon="power_settings_new"
@@ -243,6 +250,9 @@ export default {
         },
         rank () {
             return this.$root.user?.level ? this.$root.user.level : 10
+        },
+        nightMode () {
+            return this.$root.settings?.night ? true : false
         },
         routes (){
             const favorites = this.favorites.slice(0)

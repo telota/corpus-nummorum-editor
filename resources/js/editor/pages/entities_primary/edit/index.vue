@@ -24,9 +24,8 @@
     />
 
     <!-- Content -->
-    <div id="edit-form-container" class="component-content" style="padding-left: 43px; width: calc(100vw - 200px);">
-
-        <div class="pa-5" style="width: 100%; min-height: 400px;">
+    <div id="edit-form-container" class="component-content" style="padding-left: 40px; width: calc(100vw - 200px);">
+        <sheet-template>
             <!-- Images --------------------------------------- --------------------------------------------- -->
             <div v-if="entity === 'coins' && (!section || section === 'images')" style="width:100%">
                 <!-- Header -->
@@ -73,7 +72,7 @@
                                     <div
                                         class="d-flex body-1 font-weight-bold text-uppercase ml-5"
                                         style="cursor:pointer"
-                                        :style="'color:' + $root.colors.input[hover ? 'hover' : 'main']"
+                                        :style="'color:' + $root.colors[hover ? 'input_hover' : 'input_main']"
                                         @click="item.images[i].kind = set.kind === 'original' ? 'plastercast' : 'original'"
                                     >
                                         <div v-text="set.kind" />
@@ -130,7 +129,7 @@
                                                     v-bind="attrs"
                                                     v-on="on"
                                                     class="d-flex align-end pt-1 pb-1"
-                                                    :style="'border-bottom: 1px solid ' + $root.colors.input[hover ? 'hover' : 'main']"
+                                                    :style="'border-bottom: 1px solid ' + $root.colors[hover ? 'input_hover' : 'input_main']"
                                                 >
                                                     <v-icon class="mr-1" v-text="'insert_drive_file'" />
                                                     <div class="text-truncate" :class="img.path ? '' : 'grey--text'" v-text="img.path ? img.path : 'no file'" />
@@ -1489,16 +1488,15 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Import Data -->
-        <v-expand-transition>
-            <div v-if="showImported" class="pa-5" style="width: 100%">
-                <imported :data="item_data.dbi ? item_data.dbi.submitted : {}" />
-            </div>
-        </v-expand-transition>
+            <!-- Import Data -->
+            <v-expand-transition>
+                <div v-if="showImported" class="pa-5" style="width: 100%">
+                    <imported :data="item_data.dbi ? item_data.dbi.submitted : {}" />
+                </div>
+            </v-expand-transition>
 
-
+        </sheet-template>
     </div>
 
 

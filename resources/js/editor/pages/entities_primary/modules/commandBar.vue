@@ -1,89 +1,91 @@
 <template>
-<div class="d-flex flex-wrap justify-end">
+<div class="d-flex flex-wrap">
 
-    <div v-if="link_off" class="d-flex">
-        <advbtn
+    <div v-if="linking" class="d-flex">
+        <adv-btn
             icon="link_off"
-            :tooltip="'Unlink cn ' + entity.slice(0, -1) + ' ' + id"
-            color_main="red darken-4"
-            color_hover="red darken-1"
+            :tooltip="'Unlink ' + name"
+            color-main="red darken-4"
+            color-hover="red darken-1"
+            color-text="white"
             :small="small"
-            v-on:click="$emit('unlink')"
-        ></advbtn>
-        <advbtn
-            v-if="$route.name === 'coins-edit'"
-            icon="sync"
-            :tooltip="'Set cn ' + entity.slice(0, -1) + ' ' + id + ' as inheriting Type.'"
-            color_main="blue_prim"
-            color_hover="blue_sec"
+            @click="$emit('unlink')"
+        />
+        <adv-btn
+            v-if="$route.name === 'coins-types-edit'"
+            :icon="entity === 'types' ? 'sync' : 'camera_alt'"
+            :tooltip="'Set ' + name + ' as ' + (entity === 'types' ? 'inheriting Type.' : 'representing Coin.')"
+            color-main="blue_prim"
+            color-hover="blue_sec"
+            color-text="white"
             :small="small"
-            v-on:click="$emit('inherit')"
-        ></advbtn>
-        <advbtn
-            v-if="$route.name === 'types-edit'"
-            icon="camera_alt"
-            :tooltip="'Set cn ' + entity.slice(0, -1) + ' ' + id + ' as representing Coin.'"
-            color_main="blue_prim"
-            color_hover="blue_sec"
-            :small="small"
-            v-on:click="$emit('represent')"
-        ></advbtn>
-
-        <vertdivider />
+            @click="entity === 'types' ? $emit('inherit') : $emit('represent')"
+        />
+        <div :class="divider" />
     </div>
 
-    <advbtn
+    <adv-btn
         v-else-if="publisher"
-        :icon="public_state === 1 ? 'get_app' : 'publish'"
-        :color_main="public_state === 1 ? 'red darken-4' : 'blue_prim'"
-        :color_hover="public_state === 1 ? 'red darken-1' : 'blue_sec'"
-        :tooltip="(public_state === 1 ? 'Unpublish' : 'Publish') + ' cn ' + entity.slice(0, -1) + ' ' + id"
-        :disabled="public_state === 3"
+        :icon="status === 1 ? 'get_app' : 'publish'"
+        :color-main="status === 1 ? 'red darken-4' : 'blue_prim'"
+        :color-hover="status === 1 ? 'red darken-1' : 'blue_sec'"
+        color-text="white"
+        :tooltip="(status === 1 ? 'Unpublish' : 'Publish') + ' cn ' + entity.slice(0, -1) + ' ' + id"
+        :disabled="!is_publisher || status === 3"
         :small="small"
         v-on:click="$emit('publish')"
-    ></advbtn>
+    />
 
-    <v-spacer></v-spacer>
+    <adv-btn
+        v-else-if="select"
+        icon="touch_app"
+        :tooltip="'Select ' + name"
+        color-main="blue_prim"
+        color-hover="blue_sec"
+        color-text="white"
+        :small="small"
+        :disabled="slected == id"
+        v-on:click="$emit('select')"
+    />
+
+    <v-spacer />
 
     <div class="d-flex">
-        <advbtn v-if="!disable_details"
+        <adv-btn
             icon="preview"
-            :tooltip="'Show Details of cn ' + entity.slice(0, -1) + ' ' + id"
+            :tooltip="'Show Details of ' + name"
             :small="small"
-            v-on:click="$emit('details')"
-        ></advbtn>
-        <a v-else :href="'/editor#/' + entity + '/search'">
-            <advbtn
-                icon="search"
-                :tooltip="'Search ' + labels[entity]"
+            :color-hover="colorHover"
+            @click="$store.commit('setDetailsDialog', { entity: entity, id: id })"
+        />
+        <a :href="'/editor#/' + entity + '/edit/' + id">
+            <adv-btn
+                icon="edit"
+                :tooltip="'edit ' + name"
                 :small="small"
-            ></advbtn>
-        </a>
-        <a :href="this.$route.name != entity + '-edit' ? ('/editor#/' + entity + '/edit/' + id) : ('/editor#/' + entity + '/search')">
-            <advbtn
-                :icon="this.$route.name != entity + '-edit' ? 'edit' : 'search'"
-                :tooltip="(this.$route.name != entity + '-edit' ? ('Edit cn ' + entity.slice(0, -1) + ' ' + id) : ('Search ' + labels[entity.slice(0, -1)]))"
-                :small="small"
-            ></advbtn>
+                :color-hover="colorHover"
+            />
         </a>
 
-        <vertdivider />
+        <div :class="divider" />
     </div>
 
     <div class="d-flex">
         <a :href="'/editor#/types/copy/' + entity + '/' + id">
-            <advbtn
+            <adv-btn
                 icon="add_circle_outline"
-                :tooltip="'Copy cn ' + entity.slice(0, -1) + ' ' + id + ' as new ' + labels['type']"
+                :tooltip="'Copy ' + name + ' as new ' + $root.label('type')"
                 :small="small"
-            ></advbtn>
+                :color-hover="colorHover"
+            />
         </a>
         <a :href="'/editor#/coins/copy/' + entity + '/' + id">
-            <advbtn
+            <adv-btn
                 icon="add_circle"
-                :tooltip="'Copy cn ' + entity.slice(0, -1) + ' ' + id + ' as new ' + labels['coin']"
+                :tooltip="'Copy ' + name + ' as new ' + $root.label('coin')"
                 :small="small"
-            ></advbtn>
+                :color-hover="colorHover"
+            />
         </a>
     </div>
 
@@ -94,28 +96,31 @@
 <script>
 
 export default {
+    data () {
+        return {
+            divider: 'header_hover fill-height width-1px'
+        }
+    },
 
     props: {
-        entity:         { type: String },
-        id:             { type: (String, Number) },
+        entity:         { type: String, required: true },
+        id:             { type: [String, Number], default: null },
         publisher:      { type: Boolean, default: false },
-        public_state:   { type: Number, default: 0 },
-        disable_details:{ type: Boolean, default: false },
-        link_off:       { type: Boolean, default: false },
-        small:          { type: Boolean, default: false }
+        status:         { type: Number, default: 0 },
+        linking:        { type: Boolean, default: false },
+        small:          { type: Boolean, default: false },
+        select:         { type: Boolean, default: false },
+        selected:       { type: [String, Number], default: null },
+        colorHover:     { type: String, default: 'header_hover' }
     },
 
     computed: {
-        // Localization
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
+        name () {
+            return 'cn ' + this.entity.slice(0, -1) + ' ' + this.id
+        },
 
-        is_publisher () { return this.$root.user.level > 12 ? true : false }
-    },
-
-    methods: {
-        showcn () {
-            window.open('https://www.corpus-nummorum.eu/' + (this.entity === 'coins' ? 'coins?id=' : 'types/') + this.id, '_blank')
+        is_publisher () {
+            return this.$root.user.level > 17 ? true : false
         }
     }
 }

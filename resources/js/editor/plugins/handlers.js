@@ -323,7 +323,7 @@ export default {
                         return header.join('&ensp;')
                     }
                     else if (key === 'card_footer') {
-                        const footer = []
+                        let footer = []
 
                         if (d?.is_forgery) { footer.push('<span class="red--text">' + (language === 'de' ? 'Fälschung' : 'Forgery') + '</span>') }
                         if (d?.date?.text?.[language] || d?.date?.text?.de) { footer.push(d?.date?.text?.[language] ? d.date.text[language] : d.date.text.de) }
@@ -331,7 +331,8 @@ export default {
                         if (d?.denomination?.text?.[language]) { footer.push(d.denomination.text[language].split('(')[0].trim()) }
                         if (d?.owner?.city) { footer.push(d.owner.city.split('(')[0].trim()) }
 
-                        return footer.join('; ')
+                        footer = footer.join('; ')
+                        return footer.length > 1 ? footer : '--'
                     }
                 }
                 else {

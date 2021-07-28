@@ -70,7 +70,7 @@ export default {
             }
         },
         height () {
-            if (this.small) return 25
+            if (this.small) return 30
             if (this.medium) return 40
             if (this.large) return 70
             return 50

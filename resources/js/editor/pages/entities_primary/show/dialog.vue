@@ -8,11 +8,11 @@
         v-on:close="$store.commit('setDetailsDialog')"
     >
         <div class="app_bg">
-        <details-content
-            dialog
-            :entity="entity"
-            :id="id"
-        />
+            <details-content
+                dialog
+                :entity="entity"
+                :id="id"
+            />
         </div>
     </dialog-template>
 

@@ -104,65 +104,73 @@
 
                         <!-- Content -->
                         <v-expansion-panel-content>
-                            <!-- Cache -->
-                            <div class="d-flex">
-                                <v-icon v-text="'history'" />
-                                <div class="font-weight-bold ml-2" v-html="'Session&nbsp;History&nbsp;(' + cachedQueries.length + ')' " />
-                            </div>
-                            <div class="ml-8 mt-2 mb-2">
-                                <v-divider />
-                                <div style="height: 110px; overflow-y: scroll; overflow-x: hidden">
-                                    <template v-if="cachedQueries[0]">
-                                        <div
-                                            v-for="(q, i) in cachedQueries"
-                                            :key="'storedQ' + i"
-                                            class="pt-1 pb-1 pr-5"
-                                        >
-                                            <div
-                                                class="text-truncate" v-text="q.text"
-                                                style="cursor: pointer"
-                                                @click="restoreCachedQuery(q.value)"
-                                            />
-                                        </div>
-                                    </template>
-                                    <div v-else class="pt-1 pb-1" v-text="'No cached queries, yet'" />
-                                </div>
-                                <v-divider />
+                            <div v-if="dialog">
+                                Favorites are not yet available in dialog mode, but routed mode only.
                             </div>
 
-                            <!-- Favorites -->
-                            <div class="d-flex mt-8">
-                                <v-icon v-text="'star'" />
-                                <div class="font-weight-bold ml-2" v-html="'Favorites&nbsp;(' + Object.keys(storedQueries).length + ')'" />
-                                <v-spacer />
-                                <div
-                                    v-text="'+ Add current Query to Favorites'"
-                                    class="caption"
-                                    style="cursor: pointer;"
-                                    @click="showQueryDialog"
-                                />
-                            </div>
-                            <div class="ml-8 mt-2 mb-2">
-                                <v-divider />
-                                <div style="height: 110px; overflow-y: scroll; overflow-x: hidden">
-                                    <template v-if="Object.keys(storedQueries)[0]">
-                                        <div
-                                            v-for="(value, name, i) in storedQueries"
-                                            :key="'storedQ' + i"
-                                            class="d-flex justify-space-between pt-1 pb-1"
-                                        >
-                                            <div
-                                                class="text-truncate" v-text="name"
-                                                style="cursor: pointer"
-                                                @click="restoreCachedQuery(value)"
-                                            />
-                                            <v-icon v-text="'delete'" class="ml-5 mr-2" @click="deleteStoredQuery(name)" />
-                                        </div>
-                                    </template>
-                                    <div v-else class="pt-1 pb-1" v-text="'No favorite queries, yet'" />
+                            <template v-else>
+
+                                <!-- Cache -->
+                                <div class="d-flex">
+                                    <v-icon v-text="'history'" />
+                                    <div class="font-weight-bold ml-2" v-html="'Session&nbsp;History&nbsp;(' + cachedQueries.length + ')' " />
                                 </div>
-                                <v-divider />
-                            </div>
+                                <div class="ml-8 mt-2 mb-2">
+                                    <v-divider />
+                                    <div style="height: 110px; overflow-y: scroll; overflow-x: hidden">
+                                        <template v-if="cachedQueries[0]">
+                                            <div
+                                                v-for="(q, i) in cachedQueries"
+                                                :key="'storedQ' + i"
+                                                class="pt-1 pb-1 pr-5"
+                                            >
+                                                <div
+                                                    class="text-truncate" v-text="q.text"
+                                                    style="cursor: pointer"
+                                                    @click="restoreCachedQuery(q.value)"
+                                                />
+                                            </div>
+                                        </template>
+                                        <div v-else class="pt-1 pb-1" v-text="'No cached queries, yet'" />
+                                    </div>
+                                    <v-divider />
+                                </div>
+
+                                <!-- Favorites -->
+                                <div class="d-flex mt-8">
+                                    <v-icon v-text="'star'" />
+                                    <div class="font-weight-bold ml-2" v-html="'Favorites&nbsp;(' + Object.keys(storedQueries).length + ')'" />
+                                    <v-spacer />
+                                    <div
+                                        v-text="'+ Add current Query to Favorites'"
+                                        class="caption"
+                                        style="cursor: pointer;"
+                                        @click="showQueryDialog"
+                                    />
+                                </div>
+                                <div class="ml-8 mt-2 mb-2">
+                                    <v-divider />
+                                    <div style="height: 110px; overflow-y: scroll; overflow-x: hidden">
+                                        <template v-if="Object.keys(storedQueries)[0]">
+                                            <div
+                                                v-for="(value, name, i) in storedQueries"
+                                                :key="'storedQ' + i"
+                                                class="d-flex justify-space-between pt-1 pb-1"
+                                            >
+                                                <div
+                                                    class="text-truncate" v-text="name"
+                                                    style="cursor: pointer"
+                                                    @click="restoreCachedQuery(value)"
+                                                />
+                                                <v-icon v-text="'delete'" class="ml-5 mr-2" @click="deleteStoredQuery(name)" />
+                                            </div>
+                                        </template>
+                                        <div v-else class="pt-1 pb-1" v-text="'No favorite queries, yet'" />
+                                    </div>
+                                    <v-divider />
+                                </div>
+
+                            </template>
                         </v-expansion-panel-content>
                     </v-expansion-panel>
 
@@ -983,12 +991,12 @@
                 />
 
                 <!-- Results -->
-                <div v-else-if="items[0] && ['tiles', 'cards', 'table'].includes(layout)" style="padding-top: 3px">
+                <div v-else-if="items[0] && ['tiles', 'cards', 'table'].includes(layout)" class="pa-3">
                     <v-row class="ma-0 pa-0">
                         <v-col
                             v-for="(item, i) in items"
                             :key="i + ' ' + layout"
-                            cols="12"
+                            :cols="12"
                             :sm="layout === 'tiles' ? 6 : 12"
                             :md="layout === 'tiles' ? 3 : 12"
                             :lg="layout === 'tiles' ? 2 : 12"
@@ -1011,7 +1019,7 @@
 
                 <!-- No results -->
                 <div
-                    v-else-if="queried"
+                    v-else-if="loading || queried"
                     class="mt-10 headline d-flex justify-center"
                     v-html="loading ? 'Loading ...' : 'Sorry, no matching Records!'"
                 />
@@ -1055,7 +1063,7 @@
                                         small
                                         hide_options
                                         v-on:input="(emit) => { filters.q = emit }"
-                                    ></keyboard>
+                                    />
                                 </div>
                             </v-expand-transition>
                         </div>
@@ -1097,7 +1105,7 @@
                 text="Query Favorites"
                 :fullscreen="null"
                 v-on:close="queryDialog.show = false"
-            ></dialogbartop>
+            />
 
             <v-card-text>
 
@@ -1133,9 +1141,9 @@
 
 import dialogTemplate from '../../../templates/dialogTemplate.vue'
 import h            from './search.js'
-import tradingcard  from './searchLayoutTradingcard.vue'
-import indexcard    from './searchLayoutIndexcard.vue'
-import tablerow     from './searchLayoutTablerow.vue'
+import tradingcard  from './../modules/layoutTradingcard.vue'
+import indexcard    from './../modules/layoutIndexcard.vue'
+import tablerow     from './../modules/layoutTablerow.vue'
 
 export default {
     components: {
@@ -1164,7 +1172,7 @@ export default {
             cachedTab:          1,
             activeTab:          null,
 
-            layout:             this.$store.state.searchLayout,
+            layout:             this.select ? 'cards' : this.$store.state.searchLayout,
             layouts:            {
                 tiles: { component: 'tradingcard',    text: 'Tiles',   icon: 'view_comfy' },
                 cards: { component: 'indexcard',      text: 'Cards',   icon: 'view_list' },
@@ -1333,9 +1341,8 @@ export default {
             this.$refs.stringSearchInput.$refs.input.focus()
             this.handleQuery()
         }
-        else if (this.selected) {
-            this.filters.id = 41
-            this.layout = 'cards'
+        else if (this.select && this.selected) {
+            this.filters.id = this.selected
             this.runQuery()
         }
     },
@@ -1546,22 +1553,24 @@ export default {
         },
 
         showQueryDialog () {
-            this.queryDialog = {
-                show: true,
-                page: false,
-                text: '' + Date.now()
+            if (!this.dialog) {
+                this.queryDialog = {
+                    show: true,
+                    page: false,
+                    text: '' + Date.now()
+                }
+                setTimeout(() => {
+                    this.$refs.storeQueryName.$refs.input.focus()
+                    this.$refs.storeQueryName.$refs.input.select()
+                }, 0)
             }
-            setTimeout(() => {
-                this.$refs.storeQueryName.$refs.input.focus()
-                this.$refs.storeQueryName.$refs.input.select()
-            }, 0)
         },
 
         saveQuery () {
-            console.log(this.queryDialog)
+            //console.log(this.queryDialog)
             const queries = { ...this.storedQueries }
             queries[this.queryDialog.text.trim()] = this.getQueryString(this.queryDialog.page)
-            console.log(queries)
+            //console.log(queries)
             this.$root.changeSettings('queries', JSON.stringify({ [this.entity]: queries }))
             this.queryDialog.show = false
         },

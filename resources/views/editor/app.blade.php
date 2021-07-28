@@ -67,7 +67,7 @@
 
                 <app-about></app-about>
                 <coin-type-details></coin-type-details>
-
+                <app-eye-protection></app-eye-protection>
             </v-app>
         </template>
 

@@ -77,97 +77,93 @@
     </div>
 
     <!-- Content -->
-    <div :class="'sheet_bg component-content' + (dialog ? ' component-content-dialog' : '')">
-
-        <div class="pa-5">
-            <!--<v-card tile class="pa-5 mb-10 grey_sec">-->
-                <!-- Editor -->
-                <template v-if="mode === 'edit'">
-                    <div
-                        class="mt-n1 d-flex justify-space-between align-center mb-5"
-                        style="cursor:pointer"
-                        @click="editorExpanded = !editorExpanded"
-                    >
-                        <div class="body-1 font-weight-bold" v-text="editorExpanded ? 'Edit Data' : 'Details'" />
-                        <v-icon class="ml-2 mr-3" v-text="editorExpanded ? 'expand_less' : 'edit'" />
-                        <v-divider />
-                    </div>
-
-                    <v-expand-transition>
-                        <div v-if="editorExpanded || !editorItem.id">
-                            <slot name="editor" v-bind:item="editorItem" />
-                        </div>
-                        <div
-                            v-else
-                            class="d-flex justify-center mt-n4"
-                            v-html="printEditorSumup()"
-                        />
-                    </v-expand-transition>
-                </template>
-
-                <!-- Cloning -->
-                <template v-else-if="mode === 'clone'">
-                    <div class="mb-2">
-                        <span v-if="language === 'de'">
-                            Bitte wählen Sie die Werte aus, die Sie kopieren möchten (Leereinträge können nicht kopiert werden).<br />
-                            Anschließend können Sie die Werte weiter bearbeiten.
-                        </span>
-                        <span v-else>
-                            Please select the values you would like to copy (empty values cannot be copied).<br />
-                            You can then edit the copied values.
-                        </span>
-                    </div>
-
-                    <v-row class="ma-0 pa-0">
-                        <template v-for="(key) in Object.keys(cloningItem)">
-                            <v-col
-                                v-if="cloningItem[key].clone !== undefined"
-                                :key="key"
-                                :cols="12"
-                                :sm="6"
-                                :md="4"
-                                :lg="3"
-                            >
-                                <div class="d-flex align-start">
-                                    <v-checkbox
-                                        v-model="cloningItem[key].clone"
-                                        :disabled="cloningItem[key].clone === null"
-                                        class="mt-0"
-                                        color="blue_prim"
-                                    />
-                                    <div class="pt-1 ml-1">
-                                        <div
-                                            class="caption font-weight-thin text-uppercase mb-1"
-                                            v-text="cloningItem[key].text"
-                                        />
-                                        <div v-html="cloningItem[key].content" />
-                                    </div>
-                                </div>
-                            </v-col>
-                        </template>
-                    </v-row>
-                </template>
-            <!--</v-card>-->
-
-            <!-- Gallery -->
-            <v-expand-transition>
-                <ItemGallery
-                    v-if="(!mode || mode === 'edit') && editorItem.id"
-                    :key="editorItem.id"
-                    :entity="entity"
-                    :search_key="gallery"
-                    :search_val="editorItem.id ? editorItem.id : 0"
-                    :linking="linking"
-                    dis-card-header
+    <div :class="'app_bg component-content' + (dialog ? ' component-content-dialog' : '')">
+        <sheet-template :dialog="dialog">
+            <!-- Editor -->
+            <template v-if="mode === 'edit'">
+                <div
+                    class="mt-n1 d-flex justify-space-between align-center mb-5"
+                    style="cursor:pointer"
+                    @click="editorExpanded = !editorExpanded"
                 >
-                    <template v-slot:link="slot">
-                        <div :key="slot.link.active">
-                            <slot name="gallery-link" v-bind:link="slot.link" />
-                        </div>
+                    <div class="body-1 font-weight-bold" v-text="editorExpanded ? 'Edit Data' : 'Details'" />
+                    <v-icon class="ml-2 mr-3" v-text="editorExpanded ? 'expand_less' : 'edit'" />
+                    <v-divider />
+                </div>
+
+                <v-expand-transition>
+                    <div v-if="editorExpanded || !editorItem.id">
+                        <slot name="editor" v-bind:item="editorItem" />
+                    </div>
+                    <div
+                        v-else
+                        class="d-flex justify-center mt-n4"
+                        v-html="printEditorSumup()"
+                    />
+                </v-expand-transition>
+
+                <!-- Gallery -->
+                <v-expand-transition :key="editorItem.id">
+                    <ItemGallery
+                        v-if="editorItem.id"
+                        :entity="entity"
+                        :search_key="gallery"
+                        :search_val="editorItem.id ? editorItem.id : 0"
+                        :linking="linking"
+                        dis-card-header
+                    >
+                        <template v-slot:link="slot">
+                            <div :key="slot.link.active">
+                                <slot name="gallery-link" v-bind:link="slot.link" />
+                            </div>
+                        </template>
+                    </ItemGallery>
+                </v-expand-transition>
+            </template>
+
+            <!-- Cloning -->
+            <template v-else-if="mode === 'clone'">
+                <div class="mb-2">
+                    <span v-if="language === 'de'">
+                        Bitte wählen Sie die Werte aus, die Sie kopieren möchten (Leereinträge können nicht kopiert werden).<br />
+                        Anschließend können Sie die Werte weiter bearbeiten.
+                    </span>
+                    <span v-else>
+                        Please select the values you would like to copy (empty values cannot be copied).<br />
+                        You can then edit the copied values.
+                    </span>
+                </div>
+
+                <v-row class="ma-0 pa-0">
+                    <template v-for="(key) in Object.keys(cloningItem)">
+                        <v-col
+                            v-if="cloningItem[key].clone !== undefined"
+                            :key="key"
+                            :cols="12"
+                            :sm="6"
+                            :md="4"
+                            :lg="3"
+                        >
+                            <div class="d-flex align-start">
+                                <v-checkbox
+                                    v-model="cloningItem[key].clone"
+                                    :disabled="cloningItem[key].clone === null"
+                                    class="mt-0"
+                                    color="blue_prim"
+                                />
+                                <div class="pt-1 ml-1">
+                                    <div
+                                        class="caption font-weight-thin text-uppercase mb-1"
+                                        v-text="cloningItem[key].text"
+                                    />
+                                    <div v-html="cloningItem[key].content" />
+                                </div>
+                            </div>
+                        </v-col>
                     </template>
-                </ItemGallery>
-            </v-expand-transition>
-        </div>
+                </v-row>
+            </template>
+        </sheet-template>
     </div>
 
 </div>

@@ -1,5 +1,5 @@
 <template>
-<div :class="background">
+<div :style="'background-color:' + Background">
     <v-img
         :src="img.src"
         :contain="contain"
@@ -57,7 +57,12 @@ export default {
 
     computed: {
         baseURL () { return this.$root.baseURL },
-        ratio () { return this.square ? 1 : 4/3 }
+        ratio () { return this.square ? 1 : 4/3 },
+        Background () {
+            if (!this.background) return 'grey'
+            if (this.$root.colors[this.background]) return this.$root.colors[this.background]
+            return this.background
+        }
     },
 
     watch: {

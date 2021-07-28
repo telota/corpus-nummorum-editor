@@ -32,6 +32,7 @@ export default {
 
                 this.$root.user     = data.user
                 this.$root.settings = data.settings
+                this.$root.settings.night = this.$root.settings.night ? parseInt(this.$root.settings.night) : 0
                 if (this.$root.settings?.color_theme === 0) this.$vuetify.theme.dark = false
                 this.$root.log      = data.log
                 this.$root.system   = data.system
