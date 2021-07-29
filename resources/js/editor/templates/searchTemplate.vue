@@ -57,12 +57,12 @@
             <div v-if="layout === 'table'" class="pa-5">
                 <v-card
                     tile
-                    class="grey_trip pt-2 pb-1"
+                    class="tile_bg pt-2 pb-1"
+                    style="overflow-x: auto"
                 >
                     <table class="sdt" style="width: 100%;">
                         <!-- Table Header -->
                         <tr class="body-1 font-weight-black">
-                            <td v-if="select" style="width: 60px;" />
                             <td
                                 v-for="(header, i) in headers"
                                 :key="i + 'h'"
@@ -84,22 +84,8 @@
                             <tr
                                 :key="i"
                                 class="caption"
-                                :class="selected == item.id ? 'marked' : ''"
+                                :class="item.id == selected ? 'tile_selected' : ''"
                             >
-                                <td v-if="select" style="width: 60px;">
-                                    <v-btn
-                                        fab
-                                        dark
-                                        x-small
-                                        depressed
-                                        color="blue_prim"
-                                        class="mr-2 ml-2"
-                                        @click="selectItem(item)"
-                                    >
-                                        <v-icon v-text="'touch_app'" />
-                                    </v-btn>
-                                </td>
-
                                 <td
                                     v-for="(header, i) in headers"
                                     :key="i + 'r'"
@@ -108,8 +94,18 @@
                                     v-html="header.content(item)"
                                 />
 
-                                <td>
-                                    <div class="d-md-flex justify-end">
+                                <td style="width: 120px">
+                                    <div class="d-flex">
+                                        <adv-btn
+                                            v-if="select"
+                                            icon="touch_app"
+                                            color-main="blue_prim"
+                                            color-hover="blue_sec"
+                                            color-text="white"
+                                            medium
+                                            :disabled="item.id == selected"
+                                            v-on:click="selectItem(item)"
+                                        />
                                         <adv-btn
                                             icon="preview"
                                             dis-tooltip="View/Edit Details"
@@ -142,25 +138,12 @@
                         :lg="cols.lg"
                         :xl="cols.xl"
                     >
-                        <v-card tile class="grey_trip">
+                        <v-card tile :class="item.id == selected ? 'tile_selected' : 'tile_bg'">
                             <!-- Details Header -->
-                            <v-card-title
-                                class="pb-n3"
-                                :class="item.id == selected ? 'marked' : 'grey_trip'"
-                            >
-                                <slot name="search-tile-header" v-bind:item="item" />
-                                <v-spacer />
-                                <v-btn
-                                    v-if="select"
-                                    fab
-                                    dark
-                                    x-small
-                                    depressed
-                                    color="blue_prim"
-                                    @click="selectItem(item)"
-                                >
-                                    <v-icon v-text="'touch_app'" />
-                                </v-btn>
+                            <v-card-title class="pb-n3 text-truncate">
+                                <slot name="search-tile-header" v-bind:item="item">
+                                    cn {{ entity.slice(-1) === 's' ? entity.slice(0, -1) : entity }} {{ item.id }}
+                                </slot>
                             </v-card-title>
 
                             <!-- Details Body -->
@@ -171,16 +154,28 @@
                             <v-divider />
 
                             <div class="d-flex">
+                                <adv-btn
+                                    v-if="select"
+                                    icon="touch_app"
+                                    color-main="blue_prim"
+                                    color-hover="blue_sec"
+                                    color-text="white"
+                                    medium
+                                    :disabled="item.id == selected"
+                                    v-on:click="selectItem(item)"
+                                />
                                 <v-spacer />
                                 <v-divider vertical />
                                 <adv-btn
                                     icon="preview"
                                     dis-tooltip="View/Edit Details"
+                                    medium
                                     @click="editItem(item)"
                                 />
                                 <adv-btn
                                     icon="library_add"
                                     dis-tooltip="Copy Record"
+                                    medium
                                     @click="cloneItem(item)"
                                 />
                             </div>

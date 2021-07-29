@@ -21,11 +21,11 @@ class monograms implements listsInterface  {
                         REPLACE(
                             LOWER(
                                 IFNULL(
-                                    monogram, 
+                                    monogram,
                                     REPLACE(image, ".svg", "")
                                 )
-                            ), 
-                        "mon_", ""), 
+                            ),
+                        "mon_", ""),
                     "_", " ") AS addition
                 '),
                 // Image
@@ -36,15 +36,15 @@ class monograms implements listsInterface  {
                     comment
                 )) AS search')*/
             ]);
-        
+
         // Where
-        if (!empty($input['id'])) {
+        /*if (!empty($input['id'])) {
             $query -> orWhereIn('id', $input['id']);
-        }
+        }*/
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
-            $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+            $query -> where(function ($subquery) use ($search, $input) {
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('monogram', 'LIKE', '%'.$search.'%')
                         -> orWhere(function ($lettersubquery) use ($search) {
@@ -54,6 +54,9 @@ class monograms implements listsInterface  {
                                 $lettersubquery -> where('lettercomb', 'LIKE', '%'.$letter.'%');
                             }
                         });
+                    if (!empty($input['id'])) {
+                        $subquery -> orWhereIn('id', $input['id']);
+                    }
                 });
             }
         }

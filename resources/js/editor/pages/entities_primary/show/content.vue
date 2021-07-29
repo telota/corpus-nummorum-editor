@@ -30,19 +30,51 @@
     <div v-else>
 
         <!-- Top Information --------------------------------------------------------------- -->
-        <div class="d-flex component-wrap justify-space-between">
+        <div class="d-flex align-start justify-space-between mb-2 caption">
             <!-- Status, Creator, Editor -->
-            <div
-                class="mb-2 body-2"
-                v-html="$handlers.show_item_data(l, entity, item, 'system')"
-            />
+            <div>
+                <table>
+                    <tr>
+                        <td class="pr-2" v-text="'Status'" />
+                        <td v-html="printStatus()" />
+                    </tr>
+                    <tr>
+                        <td class="pr-2" v-text="'ID public'" />
+                        <td v-if="status !== 1" v-text="'--'" />
+                        <td v-else>
+                            <clipboard-copy :value="$root.publicURL + '/' + entity + '/' + id" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="pr-2" v-text="'ID private'" />
+                        <td>
+                            <clipboard-copy :value="$root.baseURL + '/editor#/' + entity + '/show/' + id" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
             <!-- Source Link -->
-            <div v-html="labels['source'] + ':&emsp;' + $handlers.show_item_data(l, entity, item, 'source')"></div>
+            <div>
+                <table>
+                    <tr>
+                        <td class="pr-2" v-text="$root.label('source')" />
+                        <td v-html="$handlers.show_item_data(language, entity, item, 'source')" />
+                    </tr>
+                    <tr v-for="(key) in ['created', 'updated']" :key="key">
+                        <td class="pr-2" v-text="key" />
+                        <td v-html="printSystem(key)" />
+                    </tr>
+                </table>
+            </div>
         </div>
 
         <!-- Forgery -->
-        <div v-if="item.is_forgery" class="text-center red--text headline" v-html="'!!!&emsp;' + $root.label('forgery') + '&emsp;!!!'" />
+        <div
+            v-if="item.is_forgery"
+            class="text-center red--text headline text-uppercase font-weight-bold mt-n5 mb-3"
+            v-html="$root.label('forgery')"
+        />
 
         <!-- First Row / Obverse and Reverse ----------------------------------------------- -->
         <v-row>
@@ -72,12 +104,12 @@
                                 <td
                                     :class="td_header"
                                     :style="no_wrap"
-                                    v-text="labels[key]"
+                                    v-text="$root.label(key)"
                                 ></td>
                                 <td :class="td_value">
                                     <div
                                         class="d-flex flex-wrap"
-                                        v-html="$handlers.show_item_data(l, entity, item, key, side)"
+                                        v-html="$handlers.show_item_data(language, entity, item, key, side)"
                                     ></div>
                                 </td>
                             </tr>
@@ -103,11 +135,11 @@
                         <td
                             :class="td_header"
                             :style="no_wrap"
-                            v-text="labels[key]"
+                            v-text="$root.label(key)"
                         ></td>
                         <td
                             :class="td_value"
-                            v-html="$handlers.show_item_data(l, entity, item, key)"
+                            v-html="$handlers.show_item_data(language, entity, item, key)"
                         ></td>
                     </tr>
                 </table>
@@ -127,7 +159,7 @@
                             :key="i"
                             class="font-weight-bold"
                         >
-                            <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.text(data, l)"></div>
+                            <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.text(data, language)"></div>
                         </li>
                     </ol>
                 </div>
@@ -147,7 +179,7 @@
                             :key="i"
                             class="font-weight-bold"
                         >
-                            <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.individual(data, l)"></div>
+                            <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.individual(data, language)"></div>
                         </li>
                     </ol>
                 </div>
@@ -160,8 +192,6 @@
             :search_key="'id_' + entity.slice(0, -1)"
             :search_val="item.id"
             :key="entity + item.id"
-            color_main="grey_trip"
-            color_hover="sysbar"
         />
 
         <!-- Hoard(s) and Findspot(s), Groups, Links --------------------------------------------------------- -->
@@ -182,13 +212,13 @@
                                 :key="i"
                                 class="font-weight-bold"
                             >
-                                <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.hoard_findspot(data, l)"></div>
+                                <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.hoard_findspot(data, language)"></div>
                             </li>
                         </ol>
                     </div>
                 </div>
 
-                <div v-else class="caption font-weight-regular" v-html="$handlers.show_item_data(l, entity, item, key)"></div>
+                <div v-else class="caption font-weight-regular" v-html="$handlers.show_item_data(language, entity, item, key)"></div>
             </v-col>
 
             <!-- Groups -->
@@ -207,7 +237,7 @@
                         >
                             <div
                                 class="ml-3 mb-2 caption font-weight-regular"
-                                v-html="to_string.objectgroup(data, l)"
+                                v-html="to_string.objectgroup(data, language)"
                             ></div>
                         </li>
                     </ol>
@@ -230,7 +260,7 @@
                         >
                             <div
                                 class="ml-3 mb-2 caption font-weight-regular"
-                                v-html="to_string.weblink(data, l)"
+                                v-html="to_string.weblink(data, language)"
                             ></div>
                         </li>
                     </ol>
@@ -253,7 +283,7 @@
                             :key="i"
                             class="font-weight-bold mb-1"
                         >
-                            <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.reference(data, l)"></div>
+                            <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.reference(data, language)"></div>
                         </li>
                     </ol>
                 </div>
@@ -270,7 +300,7 @@
                                 :key="i"
                                 class="font-weight-bold mb-1"
                             >
-                                <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.reference(data, l)"></div>
+                                <div class="ml-3 mb-2 caption font-weight-regular" v-html="to_string.reference(data, language)"></div>
                             </li>
                         </ol>
                     </div>
@@ -300,7 +330,7 @@
                         ></td>
                         <td
                             :class="td_value"
-                            v-html="$handlers.show_item_data(l, entity, item, key)"
+                            v-html="$handlers.show_item_data(language, entity, item, key)"
                         ></td>
                     </tr>
                 </table>
@@ -384,13 +414,16 @@ export default {
 
     computed: {
         // Localization
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
+        language () { return this.$root.language },
 
         images () {
             if (this.entity === 'types' && this.item?.images?.[0]?.id) return this.item.images
             if (this.entity === 'coins' && this.item?.dbi?.images?.[0]?.id) return this.item.dbi.images
             return []
+        },
+
+        status () {
+            return parseInt(this.item?.dbi?.public) ?? 0
         },
 
         to_string () { return this.$handlers.format.stringify_data },
@@ -440,6 +473,21 @@ export default {
             }
             else this.no_match = null
         },
+
+        printSystem (key) {
+            const printed = []
+            printed.push(this.$handlers.format.date(this.language, this.item?.[key === 'created' ? 'created_at' : 'updated_at'], true))
+            printed.push('&ensp;|&ensp;' + (this.item?.dbi?.[key === 'created' ? 'creator_name' : 'editor_name'] ?? '???'))
+            return printed.join('')
+        },
+
+        printStatus () {
+            let printed = { status: 'unpublished', color: 'grey' }
+            if (this.status === 1) printed = { status: 'published', color: 'green' }
+            else if (this.status === 2) printed = { status: 'publishing requested', color: 'blue_sec' }
+            else if (this.status === 3) printed = { status: 'deleted', color: 'red' }
+            return '<span class="' + printed.color + '--text">' + printed.status + '</span>'
+        }
     }
 }
 

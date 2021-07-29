@@ -34,17 +34,20 @@ class legends implements listsInterface  {
             ]);
 
         // Where
-        if (!empty($input['id'])) {
+        /*if (!empty($input['id'])) {
             $query -> orWhereIn('id', $input['id']);
-        }
+        }*/
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
-            $query -> where(function ($subquery) use ($search) {
+            $query -> where(function ($subquery) use ($search, $input) {
                     $subquery
                         -> orWhere('id', $search)
                         -> orWhere('legend', 'LIKE', '%'.$search.'%')
                         -> orWhere('legend_sort_basis', 'LIKE', '%'.$search.'%')
                         -> orWhere('keywords', 'LIKE', '%'.$search.'%');
+                    if (!empty($input['id'])) {
+                        $subquery -> orWhereIn('id', $input['id']);
+                    }
                 });
             }
         }

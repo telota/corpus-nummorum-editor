@@ -72,13 +72,8 @@
         <div class="mb-5">
             <div class="mb-1" v-text="'Please provide a valid cn type ID.'" />
             <div class="mb-5" v-text="'You can also click on the sync icon of a linked type to set this type as inheriting for cn coin ' + item.id + '.'" />
-            <v-text-field dense outlined filled clearable
-                v-model="dialog.id"
-                :label="'cn type ID'"
-                prepend-icon="blur_circular"
-                :rules="[$handlers.rules.id]"
-                counter=255
-            />
+
+            <coins-types-selector entity="types" :selected="dialog.id" v-on:select="select" />
         </div>
 
         <div class="pa-2 d-flex align-center justify-center">
@@ -95,7 +90,7 @@
             <v-btn
                 fab
                 small
-                :dark="dialog.id"
+                :dark="dialog.id ? true : false"
                 color="blue_prim"
                 class="ml-3"
                 :disabled="!dialog.id"
@@ -187,16 +182,12 @@ export default {
 
         manage () {
             this.$emit('inheritanceManage')
-        }
+        },
 
-        /*linking () {
-            if (this.item?.inherited?.id_type) {
-                this.$emit('inheritance', 'unlink')
-            }
-            else {
-                alert('Click on a linked type and select it as inheriting.')
-            }
-        }*/
+        select (value) {
+            this.dialog.id = value
+            console.log('parent', value, this.dialog.id)
+        }
     }
 }
 

@@ -83,6 +83,7 @@ Vue.component('pagination-bar',     require('./modules/paginationBar.vue').defau
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
 Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
 Vue.component('drawer',             require('./modules/drawer.vue').default);
+Vue.component('clipboard-copy',     require('./modules/clipboardCopy.vue').default);
 
 
 // Primary Entities
@@ -96,6 +97,7 @@ Vue.component('detailsdialog',      require('./pages/entities_primary/modules/de
 Vue.component('ItemGallery',        require('./pages/entities_primary/modules/coinsTypesGallery.vue').default);
 Vue.component('commandbar',         require('./pages/entities_primary/modules/commandBar.vue').default);
 Vue.component('coin-images',        require('./pages/entities_primary/modules/coinImages.vue').default);
+Vue.component('coins-types-selector', require('./pages/entities_primary/modules/coinsTypesSelector.vue').default);
 
 // Entities
 Vue.component('coins',              require('./pages/entities_primary/search/searchCoins.vue').default);
@@ -171,7 +173,8 @@ const editor = new Vue({
                     header_marked:'#0099cc',
                     drawer_bg:  '#d0d0d0',
                     sheet_bg:   '#fff',
-                    tile_bg:    '#e6e6e6'
+                    tile_bg:    '#e6e6e6',
+                    tile_selected: '#bdd1e3'
                 },
                 dark: {
                     app_bg:     '#181818',
@@ -202,7 +205,8 @@ const editor = new Vue({
                     header_marked:'#0099cc',
                     drawer_bg:  '#262626',
                     sheet_bg:    '#1c1c1c',
-                    tile_bg:    '#363636'
+                    tile_bg:    '#363636',
+                    tile_selected:  '#213044'
                 },
             },
         },
@@ -265,7 +269,8 @@ const editor = new Vue({
             user: {},
             log: {},
             settings: {},
-            digilib: (path) => 'https://digilib.bbaw.de/digitallibrary/servlet/Scaler?fn=silo10/thrakien/' + path + '&dw=500&dh=500'
+            digilib: (path) => 'https://digilib.bbaw.de/digitallibrary/servlet/Scaler?fn=silo10/thrakien/' + path + '&dw=500&dh=500',
+            publicURL: 'https://www.corpus-nummorum.eu'
         }
     },
 
@@ -353,7 +358,20 @@ const editor = new Vue({
             if (newTitle) document.title = 'CN Editor | ' + newTitle.trim()
         },
 
-        onResize () {
+        copyToClipboard (value) {
+            const el = document.createElement('textarea')
+            el.value = value
+            el.setAttribute('readonly', '')
+            el.style = { position: 'absolute', left: '-9999px' }
+            document.body.appendChild(el)
+            el.select()
+            document.execCommand('copy')
+            document.body.removeChild(el)
+
+            alert('"' + el.value + '" copied to Clipboard')
+        },
+
+        /*onResize () {
             const win = window
             const totalWidth = win.innerWidth
             const totalHeight = win.innerHeight
@@ -372,7 +390,7 @@ const editor = new Vue({
                 width,
                 height: (totalHeight - top - 30)
             }
-        },
+        },*/
 
         openInNewTab (link) {
             if (link) { window.open(link) }

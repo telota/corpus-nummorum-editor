@@ -10,19 +10,21 @@
                 class=" d-flex align-center justify-center"
                 :style="[
                     'position: fixed',
+                    'pointer-events: none',
+                    'cursor: default',
                     'left: 50%',
                     'margin-left: -250px',
                     'z-index: 102',
                     'height: 40px',
                     'width: 500px',
-                    'background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(' + snackBg + ',1) 20%, rgba(' + snackBg + ',1) 80%, rgba(0,0,0,0) 100%)'
+                    'background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(' + snackBg + ',1) 20%, rgba(' + snackBg + ',0.5) 80%, rgba(0,0,0,0) 100%)'
                 ].join(';\n')"
             >
                 <div
                     :class="snackColor"
                     class="pl-2 pr-2 caption font-weight-medium text-truncate text-center"
                     v-html="snackMessage"
-                    style="width: 300px;"
+                    style="width: 300px; pointer-events: none;"
                 />
             </div>
         </v-fade-transition>

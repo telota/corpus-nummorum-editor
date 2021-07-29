@@ -189,7 +189,7 @@
                 :label="$root.label('side')"
                 prepend-icon="tonality"
                 style="width: 100%"
-            ></v-select>
+            />
             <InputForeignKey
                 entity="positions"
                 label="Position"
@@ -197,7 +197,7 @@
                 :selected="slot.link.item.position"
                 style="width: 100%"
                 v-on:select="(emit) => { slot.link.item.position = emit }"
-            ></InputForeignKey>
+            />
         </template>
 
     </generic-entity-template>

@@ -1,14 +1,13 @@
 <template>
 <div>
     <v-autocomplete
-        :value="ac_selected"
-        :search-input.sync="search"
+        :value="inputValue"
+        :search-input.sync="inputSearch"
         :items="items"
         item-value="id"
         item-text="string"
         :filter="filterItems"
         :no-filter="sync"
-        :loading="loading"
         multiple
         dense
         outlined
@@ -23,6 +22,8 @@
     >
         <!-- Sticky Dopdown Keyboard -->
         <template v-slot:prepend-item>
+            <v-progress-linear :indeterminate="(sync && pending) || loading" :height="1" />
+
             <v-card
                 v-if="!hide_keyboard"
                 tile
@@ -36,21 +37,21 @@
                     x-small
                     v-text="(keyboard ? 'Hide' : 'Show') + ' Keyboard'"
                     @click="keyboard = !keyboard"
-                ></v-btn>
+                />
 
-                <v-divider class="mb-1"></v-divider>
+                <v-divider class="mb-1" />
 
                 <v-expand-transition>
                     <div v-if="keyboard">
                         <keyboard
-                            :string="search"
+                            :string="inputSearch"
                             :layout="sk"
                             small
                             hide_options
-                            v-on:input="(emit) => { search = emit }"
-                        ></keyboard>
+                            v-on:input="(emit) => { inputSearch = emit }"
+                        />
 
-                        <v-divider class="mb-1 mt-1"></v-divider>
+                        <v-divider class="mb-1 mt-1" />
                     </div>
                 </v-expand-transition>
             </v-card>
@@ -61,15 +62,16 @@
             <v-list-item-avatar v-if="slot.item.image" class="white pa-1" tile>
                 <img :src="$handlers.format.image_link(slot.item.image, 40)">
             </v-list-item-avatar>
+
             <v-list-item-content>
                 <div
                     class="body-2"
                     v-text="slot.item.string"
-                ></div>
+                />
                 <div
                     class="caption"
                     v-html="'ID&nbsp;' + slot.item.id + (slot.item.addition ? (', ' + slot.item.addition) : '')"
-                ></div>
+                />
             </v-list-item-content>
         </template>
 
@@ -86,12 +88,12 @@
                     class="white ml-1"
                     max-height="14"
                     max-width="14"
-                ></v-img>
+                />
                 <div
                     class="caption ml-1 mr-1 text-truncate"
                     v-text="printChip(slot.item)"
-                ></div>
-                <v-icon small v-text="'clear'"></v-icon>
+                />
+                <v-icon small v-text="'clear'" />
             </v-card>
         </template>
 
@@ -107,13 +109,15 @@ export default {
     data () {
         return {
             items:          [],
-            search:         null,
-            ac_selected:    this.selected?.[this.selected_key] ? this.selected[this.selected_key] : [],
+            inputValue:     this.selected ?? [],
+            inputSearch:    null,
+            delayedSearch:  null,
 
             sk_keys:        this.$store.state.screenkeys[this.sk],
             keyboard:       ['monograms', 'legends'].includes(this.entity) ? true : false,
 
             loading:        false,
+            pending:        false,
             dialog:         false,
             list:           this.entity
         }
@@ -121,8 +125,7 @@ export default {
 
     props: {
         entity:             { type: String, required: true },
-        selected:           { type: Object, required: true },
-        selected_key:       { type: String, required: true },
+        selected:           { type: Array, default: () => [] },
         conditions:         { type: Array },
 
         label:              { type: String },
@@ -137,21 +140,21 @@ export default {
         labels () { return this.$root.labels },
 
         sync () {
-            return this.items?.[0]?.search === undefined ? true : false
+            return this.items?.[0]?.inputSearch === undefined ? true : false
         },
-        observe () {
-            return JSON.stringify(this.selected)
+
+        search () {
+            return this.sync ? this.delayedSearch : this.inputSearch
         }
     },
 
     watch: {
-        search: async function (search) {
-            if (this.sync) {
-                this.items = await this.getItems(search, this.selected?.[this.selected_key])
-            }
+        search: async function () {
+            this.pending = this.search !== this.delayedSearch
+            if (this.sync) this.items = await this.getItems(this.search, this.selected)
         },
-        observe: function () {
-            this.ac_selected = this.selected?.[this.selected_key]?.[0] ? this.selected[this.selected_key] : []
+        selected: function () {
+            this.inputValue = this.selected ?? []
         }
     },
 
@@ -175,19 +178,23 @@ export default {
             }
             this.items = this.$store.state.lists.cache[this.list]
 
-            if (this.items && this.sync && this.ac_selected[0]) {
-                if (!this.items.map((row) => { return row.id }).includes(this.ac_selected)) {
-                    this.items = await this.getItems(null, this.ac_selected)
+            if (this.items && this.sync && this.inputValue[0]) {
+                if (!this.items.map((row) => row.id).includes(this.inputValue)) {
+                    this.items = await this.getItems(null, this.inputValue)
                 }
             }
+
+            setInterval(() => {
+                this.delayedSearch = this.inputSearch
+            }, 750)
         },
 
         async getItems (search, ids) {
             // Define general parameters
             const params = {
-                language: this.l,
+                language: this.$root.language,
                 reduced: 1,
-            };
+            }
 
             // Add conditions to parameters if given
             if (this.conditions) {
@@ -198,67 +205,47 @@ export default {
             }
 
             // Add Search to parameters if given
-            if (search) {
-                params.search = search
-            }
+            if (search) params.search = search
 
             // Add selected IDs to parameters if given
-            if (ids) {
-                params.id = ids
-            }
+            if (ids) params.id = ids
 
             // DBI call
             this.loading = true
             const dbi = await this.$root.DBI_SELECT_POST('lists/' + this.entity, params)
             this.loading = false
 
-            if (dbi?.contents?.[0]) {
-                return dbi.contents
-            }
-            else {
-                console.log('ERROR: Search Foreign Key "' + this.entity + '" did not receive any data.')
-            }
+            if (dbi?.contents?.[0]) return dbi.contents
+            else console.error('ERROR: Search Foreign Key "' + this.entity + '" did not receive any data.')
         },
 
         filterItems (item, queryText, itemText) {
-            if (!queryText) {
-                return item
-            }
-            else {
-                let match = true
-                // Split Input by blank spaces
-                queryText.split(' ').forEach((queryString) => {
-                    if (!item.search.includes(queryString.toLowerCase())) {
-                       match = false
-                    }
-                })
-                if (match) { return item }
-            }
+            if (!queryText) return item
+
+            let match = true
+            // Split Input by blank spaces
+            queryText.split(' ').forEach((queryString) => {
+                if (!item.search.includes(queryString.toLowerCase())) match = false
+            })
+            if (match) return item
         },
 
         selectItem (input) {
             if (input.target) input = []
             this.$emit('select', input)
-            this.search = ''
+            this.inputSearch = ''
         },
 
         removeChip (item) {
-            const selected = this.selected[this.selected_key]
-            const index = selected.indexOf(item)
-            if (index >= 0) { selected.splice(index, 1) }
+            const selected = this.selected //[this.selected_key]
+            const index = selected?.indexOf(item)
+            if (index >= 0) selected?.splice(index, 1)
             this.$emit('select', selected)
         },
 
         printChip (item) {
-            if (item.string) {
-                return item.string
-                //return item.string.length > 60 ? (item.string.slice(0, 60) + ' ...') : item.string
-            }
-            else {searchStringIncludeFiled
-                const selected = this.selected?.[this.selected_key]
-                const index = selected.indexOf(item)
-                return 'ID ' + (selected?.[index] ? selected[index] : 'unknown')
-            }
+            if (item.string !== undefined) return item.string ? item.string : ('ID ' + item.id)
+            else return 'unknown'
         }
     }
 }

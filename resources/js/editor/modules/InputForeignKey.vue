@@ -2,13 +2,12 @@
 <div>
     <v-autocomplete
         :value="selected"
-        :search-input.sync="search"
+        :search-input.sync="inputSearch"
         :items="items"
         item-value="id"
         item-text="string"
         :filter="filterItems"
         :no-filter="sync"
-        :loading="loading"
         dense
         outlined
         filled
@@ -25,13 +24,14 @@
     >
         <!-- Sticky Dopdown Keyboard -->
         <template v-slot:prepend-item>
+            <v-progress-linear :indeterminate="(sync && pending) || loading" :height="1" />
+
             <v-card
                 v-if="!hide_keyboard"
                 tile
                 flat
                 style="position: sticky; top: 0; z-index: 10"
             >
-                <v-divider></v-divider>
                 <v-btn
                     tile
                     block
@@ -41,19 +41,19 @@
                     @click="keyboard = !keyboard"
                 ></v-btn>
 
-                <v-divider class="mb-1"></v-divider>
+                <v-divider class="mb-1" />
 
                 <v-expand-transition>
                     <div v-if="keyboard">
                         <keyboard
-                            :string="search"
+                            :string="inputSearch"
                             :layout="sk"
                             small
                             hide_options
-                            v-on:input="(emit) => { search = emit }"
+                            v-on:input="(emit) => { inputSearch = emit }"
                         ></keyboard>
 
-                        <v-divider class="mb-1 mt-1"></v-divider>
+                        <v-divider class="mb-1 mt-1" />
                     </div>
                 </v-expand-transition>
             </v-card>
@@ -68,15 +68,16 @@
             >
                 <img :src="$handlers.format.image_link(slot.item.image, 40)">
             </v-list-item-avatar>
+
             <v-list-item-content>
                 <div
                     class="body-2"
                     v-text="slot.item.string"
-                ></div>
+                />
                 <div
                     class="caption"
                     v-html="'ID&nbsp;' + slot.item.id + (slot.item.addition ? (', ' + slot.item.addition) : '')"
-                ></div>
+                />
             </v-list-item-content>
         </template>
 
@@ -89,7 +90,7 @@
                 class="appbar"
                 style="position: sticky; bottom: 0; z-index: 10"
             >
-                <v-divider></v-divider>
+                <v-divider />
                 <v-btn
                     tile
                     block
@@ -97,8 +98,8 @@
                     x-small
                     v-text="'Click to open ' + entity_label + '-Dialog.'"
                     @click="dialog = true"
-                ></v-btn>
-                <v-divider></v-divider>
+                />
+                <v-divider />
             </v-card>
         </template>
 
@@ -115,11 +116,11 @@
                     class="white ml-1"
                     max-height="14"
                     max-width="14"
-                ></v-img>
+                />
                 <div
                     class="body-2 ml-1 mr-1"
                     v-text="printChip(slot.item)"
-                ></div><!-- text-truncate -->
+                />
             </v-card>
         </template>
 
@@ -128,16 +129,14 @@
             <!-- Botton -->
             <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-hover>
-                        <template v-slot:default="{ hover }" >
-                            <v-icon
-                                v-bind="attrs"
-                                v-on="on"
-                                :color="hover ? 'blue_sec' : 'blue_prim'"
-                                v-text="icon"
-                                @click="dialog = true"
-                            ></v-icon>
-                        </template>
+                    <v-hover v-slot="{ hover }">
+                        <v-icon
+                            v-bind="attrs"
+                            v-on="on"
+                            :class="hover ? 'blue_sec--text' : 'blue_prim--text'"
+                            v-text="icon === 'help_outline' ? 'launch' : icon"
+                            @click="dialog = true"
+                        />
                     </v-hover>
                 </template>
                 <span v-text="'Click to open ' + entity_label + '-Dialog.'"></span>
@@ -152,34 +151,9 @@
                 v-on:select="forwardSelection"
                 v-on:close="dialog = false"
             />
-            <!-- Dialog
-            <simpleSelectDialog
-                :active="dialog"
-                :text="$root.label(entity)"
-                v-on:close="dialog = false"
-            >
-                <template v-slot:content>
-                    <component
-                        :is="entity"
-                        select
-                        :selected="selected"
-                        v-on:select="(emit) => { forwardSelection(emit) }"
-                        v-on:close="dialog = false"
-                    ></component>
-                </template>
-            </simpleSelectDialog> -->
         </template>
 
     </v-autocomplete>
-
-    <!--<ChildDialog
-        v-if="dialog_available && dialog"
-        :prop_active="dialog"
-        :prop_component="entity"
-        :prop_item="{ key: 'id', id: selected }"
-        v-on:assignment="selectDialogItem"
-        v-on:close="dialog = false"
-    ></ChildDialog>-->
 
 </div>
 </template>
@@ -197,13 +171,17 @@ export default {
     data () {
         return {
             items:          [],
-            search:         null,
-            ac_selected:    this.selected,
+            //inputSearch:         null,
+            //ac_selected:    this.selected,
+            //inputValue:     this.selected,
+            inputSearch:    null,
+            delayedSearch:  null,
 
             sk_keys:        this.$store.state.screenkeys[this.sk],
             keyboard:       ['monograms', 'legends'].includes(this.entity) ? true : false,
 
             loading:        false,
+            pending:        false,
             dialog:         false,
             list:           this.entity
         }
@@ -214,7 +192,7 @@ export default {
         selected:           { type: [String, Number], default: null },
         inherited:          { type: Boolean, default: false },
         disabled:           { type: [String, Boolean], default: null },
-        conditions:         { type: Array },
+        conditions:         { type: Array, default: () => [] },
 
         label:              { type: String },
         icon:               { type: String, default: 'help_outline' },
@@ -227,24 +205,29 @@ export default {
     computed: {
         l () { return this.$root.language },
         labels () { return this.$root.labels },
+
         entity_label () {
             return this.labels[this.entity] ? this.labels[this.entity] : (this.entity.slice(0, 1).toUpperCase() + this.entity.slice(1))
         },
 
         sync () {
-            return this.items?.[0]?.search === undefined ? true : false
+            return this.items?.[0]?.inputSearch === undefined ? true : false
         },
+
+        search () {
+            return this.sync ? this.delayedSearch : this.inputSearch
+        },
+
         dialog_available () {
             return this.inherited ? false : (Vue.options.components[this.entity] ? true : false)
         }
     },
 
     watch: {
-        search: async function (search) {
-            if (this.sync) {
-                this.items = await this.getItems(search, this.selected)
-            }
-        }
+        search: async function () {
+            this.pending = this.search !== this.delayedSearch
+            if (this.sync) this.items = await this.getItems(this.search, this.selected)
+        },
     },
 
     created () {
@@ -272,12 +255,16 @@ export default {
                     this.items = await this.getItems(null, this.selected)
                 }
             }
+
+            setInterval(() => {
+                this.delayedSearch = this.inputSearch
+            }, 750)
         },
 
         async getItems (search, ids) {
             // Define general parameters
             const params = {
-                language: this.l,
+                language: this.$root.language,
                 reduced: 1,
             };
 
@@ -290,54 +277,41 @@ export default {
             }
 
             // Add Search to parameters if given
-            if (search) {
-                params.search = search
-            }
+            if (search) params.search = search
 
             // Add selected IDs to parameters if given
-            if (ids) {
-                params.id = ids
-            }
+            if (ids) params.id = ids
 
             // DBI call
             this.loading = true
             const dbi = await this.$root.DBI_SELECT_POST('lists/' + this.entity, params)
             this.loading = false
 
-            if (dbi?.contents?.[0]) {
-                return dbi.contents
-            }
-            else {
-                console.log('ERROR: Search Foreign Key "' + this.entity + '" did not receive any data.')
-            }
+            if (dbi?.contents?.[0]) return dbi.contents
+            else console.error('ERROR: Search Foreign Key "' + this.entity + '" did not receive any data.')
         },
 
         filterItems (item, queryText, itemText) {
-            if (!queryText) {
-                return item
-            }
-            else {
-                let match = true
-                // Split Input by blank spaces
-                queryText.split(' ').forEach((queryString) => {
-                    if (!item.search.includes(queryString.toLowerCase())) {
-                       match = false
-                    }
-                })
-                if (match) { return item }
-            }
+            if (!queryText) return item
+
+            let match = true
+            // Split Input by blank spaces
+            queryText.split(' ').forEach((queryString) => {
+                if (!item.search.includes(queryString.toLowerCase())) match = false
+            })
+            if (match) return item
         },
 
         selectItem (input) {
             if (!['number', 'string'].includes(typeof input)) input = null
             this.$emit('select', input)
-            this.search = ''
+            this.inputSearch = ''
         },
 
         async forwardSelection (input) {
             if (input?.id) {
                 const id = input.id
-                if (!this.items.map((row) => { return row.id }).includes(id)) {
+                if (!this.items.map((row) => row.id).includes(id)) {
                     if (this.sync) {
                         this.items = await this.getItems(null, id)
                     }
@@ -349,27 +323,7 @@ export default {
                 }
                 this.selectItem(id)
             }
-            else {
-                alert('No ID received')
-            }
-        },
-
-        async selectDialogItem (emit) {
-            // Check if emited is in list
-            if (!this.items.map((row) => { return row.id }).includes(emit.id)) {
-                if (this.sync) {
-                    this.items = await this.getItems(null, emit.id)
-                }
-                else {
-                    this.items = await this.getItems()
-                    this.$store.commit('SET_LIST', { entity: this.entity, data: this.items })
-                }
-            }
-
-            this.$emit('select', emit.id)
-            this.$root.snackbar(this.label + ' ' + emit.id + ' selected.')
-            this.search = ''
-            this.dialog = false
+            else alert('No ID received')
         },
 
         removeChip () {
@@ -377,15 +331,8 @@ export default {
         },
 
         printChip (item) {
-            if (item.string) {
-                return item.string
-                //return item.string.length > 60 ? (item.string.slice(0, 60) + ' ...') : item.string
-            }
-            else {
-                const selected = this.selected?.[this.selected_key]
-                const index = selected.indexOf(item)
-                return 'ID ' + (selected?.[index] ? selected[index] : 'unknown')
-            }
+            if (item.string !== undefined) return item.string ? item.string : ('ID ' + item.id)
+            else return 'unknown'
         }
     }
 }

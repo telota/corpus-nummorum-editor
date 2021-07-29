@@ -25,15 +25,12 @@ class dies implements listsInterface  {
                     LOWER(REPLACE(TRIM(keywords), ", ", "|"))
                 ) AS search')*/
             ]);
-        
+
         // Where
-        if (!empty($input['id'])) {
-            $query -> orWhereIn('di.id', $input['id']);
-        }
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
-            $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+            $query -> where(function ($subquery) use ($search, $input) {
+                    $subquery
                         -> orWhere('di.id', $search)
                         -> orWhere('di.name_die', 'LIKE', '%'.$search.'%')
                         -> orWhere('di.comment', 'LIKE', '%'.$search.'%')
@@ -43,6 +40,9 @@ class dies implements listsInterface  {
                         -> orWhere('l.legend', 'LIKE', '%'.$search.'%')
                         -> orWhere('l.legend_sort_basis', 'LIKE', '%'.$search.'%')
                         -> orWhere('l.keywords', 'LIKE', '%'.$search.'%');
+                    if (!empty($input['id'])) {
+                        $subquery -> orWhereIn('di.id', $input['id']);
+                    }
                 });
             }
         }

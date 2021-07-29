@@ -20,7 +20,7 @@ class designs implements listsInterface  {
                     CASE
                         WHEN role = 2 THEN IF("'.$language.'" = "de", "MÜNZE/TYP", "COIN/TYPE")
                         WHEN role = 1 THEN IF("'.$language.'" = "de", "TYP", "TYPE")
-                        ELSE IF("'.$language.'" = "de", "MÜNZE", "COIN") 
+                        ELSE IF("'.$language.'" = "de", "MÜNZE", "COIN")
                     END,
                     IF(border_of_dots = 1, "'.($language === 'de' ? 'Perlkreis' : 'border of dots').'", null)
                 ) AS addition')
@@ -30,19 +30,22 @@ class designs implements listsInterface  {
                     LOWER(REPLACE(TRIM(keywords), ", ", "|"))
                 ) AS search')*/
             ]);
-        
+
         // Where
-        if (!empty($input['id'])) {
+        /*if (!empty($input['id'])) {
             $query -> orWhereIn('id', $input['id']);
-        } 
+        }*/
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
-            $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+            $query -> where(function ($subquery) use ($search, $input) {
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('design_de', 'LIKE', '%'.$search.'%')
                         -> orWhere('design_en', 'LIKE', '%'.$search.'%')
                         -> orWhere('comment', 'LIKE', '%'.$search.'%');
+                    if (!empty($input['id'])) {
+                        $subquery -> orWhereIn('id', $input['id']);
+                    }
                 });
             }
         }

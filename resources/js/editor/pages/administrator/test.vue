@@ -11,12 +11,37 @@
 
 
         <InputForeignKey
-            v-if="entity === 'materials'"
-            :entity="entity"
-            :label="entity"
-            :icon="entity"
-            :selected="selected"
-            v-on:select="(emit) => { selected = emit }"
+            entity="materials"
+            label="materials"
+            class="mt-5"
+            :selected="mat"
+            v-on:select="(emit) => { mat = emit }"
+        />
+
+        <InputForeignKey
+            entity="legends"
+            label="legends"
+            class="mt-5"
+            :selected="leg"
+            v-on:select="(emit) => { leg = emit }"
+        />
+
+        <SearchForeignKey
+            entity="materials"
+            label="materials"
+            class="mt-5"
+            :selected="m_selected"
+            selected_key="id"
+            v-on:select="select"
+        />
+
+        <SearchForeignKey
+            entity="legends"
+            label="legends"
+            class="mt-5"
+            :selected="l_selected"
+            selected_key="id"
+            v-on:select="select"
         />
 
     </div>
@@ -37,9 +62,19 @@
 export default {
     data () {
         return {
+            mat: 2,
+            leg: 40,
             selected: 41,
+            l_selected: [40],
+            m_selected: [2],
             entity: 'coins',
             dialog: false
+        }
+    },
+    methods: {
+        select (emit) {
+            console.log('receive', emit)
+            this.l_selected = emit
         }
     }
 }

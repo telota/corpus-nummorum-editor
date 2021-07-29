@@ -453,8 +453,7 @@
                                         entity="users"
                                         label="Creator"
                                         icon="person"
-                                        :selected="filters"
-                                        selected_key="id_creator"
+                                        :selected="filters.id_creator"
                                         v-on:select="(emit) => { filters.id_creator = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -465,8 +464,7 @@
                                         entity="users"
                                         label="Editor"
                                         icon="person_outline"
-                                        :selected="filters"
-                                        selected_key="id_editor"
+                                        :selected="filters.id_editor"
                                         v-on:select="(emit) => { filters.id_editor = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -509,8 +507,7 @@
                                 entity="objectgroups"
                                 label="Object Group"
                                 icon="control_camera"
-                                :selected="filters"
-                                selected_key="id_group"
+                                :selected="filters.id_group"
                                 v-on:select="(emit) => { filters.id_group = emit }"
                                 v-on:keyup_enter="runQuery()"
                             />
@@ -596,8 +593,7 @@
                                 entity="references"
                                 label="Bibliography"
                                 icon="menu_book"
-                                :selected="filters"
-                                selected_key="id_reference"
+                                :selected="filters.id_reference"
                                 v-on:select="(emit) => { filters.id_reference = emit }"
                                 v-on:keyup_enter="runQuery()"
                             />
@@ -607,8 +603,7 @@
                                 entity="owners"
                                 label="Owner"
                                 icon="account_circle"
-                                :selected="filters"
-                                selected_key="id_owner"
+                                :selected="filters.id_owner"
                                 v-on:select="(emit) => { filters.id_owner = emit }"
                                 v-on:keyup_enter="runQuery()"
                             />
@@ -645,8 +640,7 @@
                                 entity="hoards"
                                 label="Hoard"
                                 icon="grain"
-                                :selected="filters"
-                                selected_key="id_hoard"
+                                :selected="filters.id_hoard"
                                 v-on:select="(emit) => { filters.id_hoard = emit }"
                                 v-on:keyup_enter="runQuery()"
                             />
@@ -656,8 +650,7 @@
                                 entity="findspots"
                                 label="Findspot"
                                 icon="pin_drop"
-                                :selected="filters"
-                                selected_key="id_findspot"
+                                :selected="filters.id_findspot"
                                 v-on:select="(emit) => { filters.id_findspot = emit }"
                                 v-on:keyup_enter="runQuery()"
                             />
@@ -685,8 +678,7 @@
                                         entity="regions"
                                         label="Region"
                                         icon="terrain"
-                                        :selected="filters"
-                                        selected_key="id_region"
+                                        :selected="filters.id_region"
                                         v-on:select="(emit) => { filters.id_region = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -696,8 +688,7 @@
                                         entity="mints"
                                         label="Mint"
                                         icon="museum"
-                                        :selected="filters"
-                                        selected_key="id_mint"
+                                        :selected="filters.id_mint"
                                         v-on:select="(emit) => { filters.id_mint = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -710,8 +701,7 @@
                                         entity="authorities"
                                         label="Type of Coinage"
                                         icon="toll"
-                                        :selected="filters"
-                                        selected_key="id_authority"
+                                        :selected="filters.id_authority"
                                         v-on:select="(emit) => { filters.id_authority = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -726,8 +716,7 @@
                                         :conditions="[{ authority: 1 }]"
                                         label="Ruler"
                                         icon="how_to_reg"
-                                        :selected="filters"
-                                        selected_key="id_authority_person"
+                                        :selected="filters.id_authority_person"
                                         v-on:select="(emit) => { filters.id_authority_person = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -737,8 +726,7 @@
                                         entity="tribes"
                                         label="Tribe"
                                         icon="sports_kabaddi"
-                                        :selected="filters"
-                                        selected_key="id_authority_group"
+                                        :selected="filters.id_authority_group"
                                         v-on:select="(emit) => { filters.id_authority_group = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -750,8 +738,7 @@
                                 entity="persons"
                                 label="Person"
                                 icon="emoji_people"
-                                :selected="filters"
-                                selected_key="id_person"
+                                :selected="filters.id_person"
                                 v-on:select="(emit) => { filters.id_person = emit }"
                                 v-on:keyup_enter="runQuery()"
                             />
@@ -763,8 +750,7 @@
                                         entity="periods"
                                         label="Epoch"
                                         icon="watch_later"
-                                        :selected="filters"
-                                        selected_key="id_period"
+                                        :selected="filters.id_period"
                                         v-on:select="(emit) => { filters.id_period = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -816,8 +802,7 @@
                                         entity="materials"
                                         label="Material"
                                         icon="palette"
-                                        :selected="filters"
-                                        selected_key="id_material"
+                                        :selected="filters.id_material"
                                         v-on:select="(emit) => { filters.id_material = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -831,8 +816,7 @@
                                         entity="denominations"
                                         label="Denomination"
                                         icon="bubble_chart"
-                                        :selected="filters"
-                                        selected_key="id_denomination"
+                                        :selected="filters.id_denomination"
                                         v-on:select="(emit) => { filters.id_denomination = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -842,8 +826,7 @@
                                         entity="standards"
                                         label="Standard"
                                         icon="group_work"
-                                        :selected="filters"
-                                        selected_key="id_standard"
+                                        :selected="filters.id_standard"
                                         v-on:select="(emit) => { filters.id_standard = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
@@ -926,8 +909,7 @@
                                     :conditions="[{ side: key.v }]"
                                     :label="key.text + ' Design'"
                                     icon="notes"
-                                    :selected="filters"
-                                    :selected_key="key.v + '_id_design'"
+                                    :selected="filters[key.v + '_id_design']"
                                     v-on:select="(emit) => { filters[key.v + '_id_design'] = emit }"
                                     v-on:keyup_enter="runQuery()"
                                 />
@@ -939,8 +921,7 @@
                                     :label="key.text + ' Legend'"
                                     icon="translate"
                                     sk="el_uc_adv"
-                                    :selected="filters"
-                                    :selected_key="key.v + '_id_legend'"
+                                    :selected="filters[key.v + '_id_legend']"
                                     v-on:select="(emit) => { filters[key.v + '_id_legend'] = emit }"
                                     v-on:keyup_enter="runQuery()"
                                 />
@@ -950,8 +931,7 @@
                                     entity="monograms"
                                     :label="key.text + ' Monogram'"
                                     icon="functions"
-                                    :selected="filters"
-                                    :selected_key="key.v + '_id_monogram'"
+                                    :selected="filters[key.v + '_id_monogram']"
                                     v-on:select="(emit) => { filters[key.v + '_id_monogram'] = emit }"
                                     v-on:keyup_enter="runQuery()"
                                 />
@@ -961,8 +941,7 @@
                                     entity="symbols"
                                     :label="key.text + ' Symbol'"
                                     icon="flare"
-                                    :selected="filters"
-                                    :selected_key="key.v + '_id_symbol'"
+                                    :selected="filters[key.v + '_id_symbol']"
                                     v-on:select="(emit) => { filters[key.v + '_id_symbol'] = emit }"
                                     v-on:keyup_enter="runQuery()"
                                 />
@@ -1003,7 +982,7 @@
                         >
                             <component
                                 :is="layouts[layout].component"
-                                :key="layout + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0) + selected"
+                                :key="layout + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
                                 :entity="entity"
                                 :item="item"
                                 :publisher="publisher"
@@ -1012,6 +991,7 @@
                                 :selected="selected"
                                 v-on:publish="Publish([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0))"
                                 v-on:checked="checked[i].state = !checked[i].state"
+                                v-on:select="$emit('select', item.id)"
                             />
                         </v-col>
                     </v-row>
@@ -1586,7 +1566,7 @@ export default {
             //console.log(query)
             window.location.href = '/editor#/' + this.entity + '/' + (this.publisher ? 'publish' : 'search') + '?' + query
             this.queryIncrement()
-        },
+        }
     }
 }
 

@@ -310,22 +310,22 @@ export default {
                         const header = []
 
                         if (d?.diameter?.value_max) {
-                            let diameter = '&bigodot;&nbsp;' + format_decimal(language, d.diameter.value_max) + '&nbsp;mm'
+                            let diameter = /*'&bigodot;&nbsp;' +*/ format_decimal(language, d.diameter.value_max) + '&nbsp;mm'
                             diameter += (d.diameter?.count ? (' (' + d.diameter.count + ')') : '')
                             header.push(diameter)
                         }
                         if (d?.weight?.value) {
-                            let weight = '&#9878;&nbsp;' + format_decimal(language, d.weight.value) + '&nbsp;g'
+                            let weight = /*'&#9878;&nbsp;' +*/ format_decimal(language, d.weight.value) + '&nbsp;g'
                             weight += (d.weight?.count ? (' (' + d.weight.count + ')') : '')
                             header.push(weight)
                         }
 
-                        return header.join('&ensp;')
+                        return header[0] ? header.join('&ensp;') : '--'
                     }
                     else if (key === 'card_footer') {
                         let footer = []
 
-                        if (d?.is_forgery) { footer.push('<span class="red--text">' + (language === 'de' ? 'Fälschung' : 'Forgery') + '</span>') }
+                        //if (d?.is_forgery) { footer.push('<span class="red--text">' + (language === 'de' ? 'Fälschung' : 'Forgery') + '</span>') }
                         if (d?.date?.text?.[language] || d?.date?.text?.de) { footer.push(d?.date?.text?.[language] ? d.date.text[language] : d.date.text.de) }
                         if (d?.material?.text?.[language]) { footer.push(d.material.text[language]) }
                         if (d?.denomination?.text?.[language]) { footer.push(d.denomination.text[language].split('(')[0].trim()) }
@@ -333,6 +333,10 @@ export default {
 
                         footer = footer.join('; ')
                         return footer.length > 1 ? footer : '--'
+                    }
+                    // Forgers
+                    else if (key === 'forgery') {
+                        return d?.is_forgery  ? ('<span class="red--text">' + (language === 'de' ? 'Fälschung' : 'Forgery') + '!</span>') : ''
                     }
                 }
                 else {

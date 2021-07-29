@@ -50,7 +50,7 @@ export default {
             const obj = {}
             if (this.images?.[this.index]?.id) {
                 const img = this.images[this.index]
-                console.log(img)
+                //console.log(img)
 
                 obj.id = img.id
                 obj.kind = img.kind

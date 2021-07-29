@@ -3,18 +3,16 @@
         v-if="entity === 'types' || !select"
         v-html="$root.label('linked_' + (entity === 'coins' ? 'types' : 'coins')) + ':&nbsp;' + length"
     />
-    <v-hover v-else>
-        <template v-slot:default="{ hover }" >
-            <div
-                class="d-flex"
-                :class="hover ? 'blue_sec--text' : ''"
-                style="cursor: pointer"
-                @click="$store.commit('setDetailsDialog', { entity: 'types', id: select.id })"
-            >
-                <div class="text-truncate" v-text="(select.inherited ? 'Inherited from' : 'Linked to') + ' cn'" />
-                <div v-html="'&nbsp;' + entity.slice(0, -1) + '&nbsp;' + select.id" />
-            </div>
-        </template>
+    <v-hover v-else v-slot="{ hover }">
+        <div
+            class="d-flex"
+            :class="hover ? 'blue_sec--text' : ''"
+            style="cursor: pointer"
+            @click="$store.commit('setDetailsDialog', { entity: 'types', id: select.id })"
+        >
+            <div class="text-truncate" v-text="(select.inherited ? 'Inherited from' : 'Linked to') + ' cn'" />
+            <div v-html="'&nbsp;' + entity.slice(0, -1) + '&nbsp;' + select.id" />
+        </div>
     </v-hover>
 </template>
 

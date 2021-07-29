@@ -9,6 +9,7 @@
             color-hover="red darken-1"
             color-text="white"
             :small="small"
+            :medium="!small"
             @click="$emit('unlink')"
         />
         <adv-btn
@@ -19,6 +20,7 @@
             color-hover="blue_sec"
             color-text="white"
             :small="small"
+            :medium="!small"
             @click="entity === 'types' ? $emit('inherit') : $emit('represent')"
         />
         <div :class="divider" />
@@ -33,6 +35,7 @@
         :tooltip="(status === 1 ? 'Unpublish' : 'Publish') + ' cn ' + entity.slice(0, -1) + ' ' + id"
         :disabled="!is_publisher || status === 3"
         :small="small"
+        :medium="!small"
         v-on:click="$emit('publish')"
     />
 
@@ -44,8 +47,9 @@
         color-hover="blue_sec"
         color-text="white"
         :small="small"
-        :disabled="slected == id"
-        v-on:click="$emit('select')"
+        :medium="!small"
+        :disabled="selected == id"
+        v-on:click="$emit('select', id)"
     />
 
     <v-spacer />
@@ -55,14 +59,16 @@
             icon="preview"
             :tooltip="'Show Details of ' + name"
             :small="small"
+            :medium="!small"
             :color-hover="colorHover"
-            @click="$store.commit('setDetailsDialog', { entity: entity, id: id })"
+            @click="noDetailsDialog ? $emit('details') : $store.commit('setDetailsDialog', { entity: entity, id: id })"
         />
         <a :href="'/editor#/' + entity + '/edit/' + id">
             <adv-btn
                 icon="edit"
                 :tooltip="'edit ' + name"
                 :small="small"
+                :medium="!small"
                 :color-hover="colorHover"
             />
         </a>
@@ -76,6 +82,7 @@
                 icon="add_circle_outline"
                 :tooltip="'Copy ' + name + ' as new ' + $root.label('type')"
                 :small="small"
+                :medium="!small"
                 :color-hover="colorHover"
             />
         </a>
@@ -84,6 +91,7 @@
                 icon="add_circle"
                 :tooltip="'Copy ' + name + ' as new ' + $root.label('coin')"
                 :small="small"
+                :medium="!small"
                 :color-hover="colorHover"
             />
         </a>
@@ -111,7 +119,8 @@ export default {
         small:          { type: Boolean, default: false },
         select:         { type: Boolean, default: false },
         selected:       { type: [String, Number], default: null },
-        colorHover:     { type: String, default: 'header_hover' }
+        colorHover:     { type: String, default: 'header_hover' },
+        noDetailsDialog:{ type: Boolean, default: false }
     },
 
     computed: {

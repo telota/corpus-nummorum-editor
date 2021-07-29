@@ -12,18 +12,15 @@
             <v-spacer />
 
             <template v-if="select">
-                <v-btn
-                    fab
-                    dark
-                    x-small
-                    depressed
-                    color="blue_prim"
-                    class="mr-3"
-                    :disabled="!editorItem.id"
-                    @click="selectItem()"
-                >
-                    <v-icon v-text="'touch_app'" />
-                </v-btn>
+                <adv-btn
+                    v-if="select"
+                    icon="touch_app"
+                    color-main="blue_prim"
+                    color-hover="blue_sec"
+                    color-text="white"
+                    :disabled="!editorItem.id || editorItem.id == selected"
+                    v-on:click="selectItem(item)"
+                />
 
                 <div :class="divider" />
             </template>
@@ -111,6 +108,7 @@
                         :search_val="editorItem.id ? editorItem.id : 0"
                         :linking="linking"
                         dis-card-header
+                        class="mt-10"
                     >
                         <template v-slot:link="slot">
                             <div :key="slot.link.active">

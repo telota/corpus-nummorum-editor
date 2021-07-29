@@ -27,16 +27,19 @@ class persons implements listsInterface  {
                     LOWER(REPLACE(TRIM(keywords), ", ", "|"))
                 ) AS search')*/
             ]);
-        
+
         // Where
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
-            $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+            $query -> where(function ($subquery) use ($search, $input) {
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('person', 'LIKE', '%'.$search.'%')
                         -> orWhere('alias', 'LIKE', '%'.$search.'%')
                         -> orWhere('nomisma_id_person', 'LIKE', '%'.$search.'%');
+                    if (!empty($input['id'])) {
+                        $subquery -> orWhereIn('id', $input['id']);
+                    }
                 });
             }
         }
@@ -51,7 +54,7 @@ class persons implements listsInterface  {
             (empty($input['id']) ? '' : 'FIELD(id, '.implode(',', array_reverse($input['id'])).') DESC, ').
             'person IS NULL, '.
             'person ASC'
-        ) 
+        )
         -> limit(50);
 
         return json_decode($query->get(), TRUE);

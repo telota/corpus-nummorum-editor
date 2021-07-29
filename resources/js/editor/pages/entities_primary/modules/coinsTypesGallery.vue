@@ -40,11 +40,15 @@
                             </div>
                         </template>
                     </v-hover>
-                    <v-progress-linear
-                        :indeterminate="data[e].loading"
-                        :height="1"
-                        class="ml-4"
-                    />
+
+                    <!-- Loading -->
+                    <div class="pl-3" :class="linking ? 'pr-3' : ''" style="width: 100%;">
+                        <v-progress-linear
+                            :indeterminate="data[e].loading"
+                            :height="1"
+                        />
+                    </div>
+
                     <!-- Add Button -->
                     <v-btn
                         v-if="linking"
@@ -53,7 +57,6 @@
                         x-small
                         depressed
                         color="blue_prim"
-                        class="ml-4"
                         style="z-index: 1"
                         @click="linkDialog(true, e)"
                     >
@@ -112,86 +115,48 @@
         </div>
     </template>
 
-    <!-- Link Dialog
-    <v-dialog v-model="dialog_link.active" persistent max-width="400">
-        <v-card tile>
-
-            <dialogbartop
-                icon="link"
-                :text="'new link'"
-                v-on:close="dialog_link = { active: false, entity: null, id: null }"
-            ></dialogbartop>
-
-            <v-card-text class="d-flex component-wrap pt-8">
-                <v-text-field
-                    v-if="dialog_link.entity"
-                    dense
-                    outlined
-                    filled
-                    v-model="dialog_link.id"
-                    prepend-icon="link"
-                    :label="'cn ' + dialog_link.entity.slice(0, -1) + ' ID'"
-                    :rules="[$handlers.rules.id]"
-                ></v-text-field>
-                <v-btn
-                    text
-                    v-text="'OK'"
-                    class="ml-3"
-                    @click="$emit('link', dialog_link.id); dialog_link = { active: false, entity: null, id: null }"
-                ></v-btn>
-            </v-card-text>
-
-        </v-card>
-    </v-dialog> -->
-
     <!-- Link Dialog -->
-    <simpleSelectDialog
-        :active="dialog_link.active"
-        :width="500"
+    <small-dialog
+        :show="dialog.show"
         :text="linkHeader"
         icon="link"
         v-on:close="linkDialog(false)"
     >
-        <template v-slot:content>
-            <div class="mt-2">
-                <v-text-field dense outlined filled clearable
-                    v-model="dialog_link.item.id"
-                    :label="dialog_link.entity ? ($root.label(dialog_link.entity.slice(0, -1)) + ' ID') : 'none'"
-                    :prepend-icon="dialog_link.entity === 'coins' ? 'copyright' : 'blur_circular'"
-                    :rules="[$handlers.rules.id]"
-                    class="mb-2"
-                    counter=255
-                />
-                <slot name="link" v-bind:link="dialog_link" />
-            </div>
-        </template>
+        <div class="mb-5 mt-2" v-text="'Please provide a valid cn ID.'" />
 
-        <template v-slot:actions>
-            <div class="pb-2 d-flex align-center">
-                <v-spacer></v-spacer>
-                <v-btn
-                    fab
-                    x-small
-                    color="grey_sec"
-                    class="mr-3"
-                    @click="linkDialog(false)"
-                >
-                    <v-icon v-text="'clear'"></v-icon>
-                </v-btn>
-                <v-btn
-                    fab
-                    small
-                    color="blue_prim"
-                    class="ml-3"
-                    @click="linkItem('link', dialog_link.entity, dialog_link.item)"
-                >
-                    <v-icon v-text="'done'"></v-icon>
-                </v-btn>
-                <v-spacer></v-spacer>
-            </div>
-        </template>
+        <coins-types-selector
+            :entity="dialog.entity"
+            :selected="dialog.item.id"
+            v-on:select="(emit) => { this.dialog.item.id = emit }"
+        />
 
-    </simpleSelectDialog>
+        <slot name="link" v-bind:link="dialog" />
+
+        <div class="pa-2 d-flex align-center justify-center">
+            <v-btn
+                fab
+                x-small
+                dark
+                class="mr-3 grey darken-2"
+                @click="linkDialog(false)"
+            >
+                <v-icon v-text="'clear'" />
+            </v-btn>
+
+            <v-btn
+            :key="dialog.item.id"
+                fab
+                small
+                :dark="dialog.item.id ? true : false"
+                color="blue_prim"
+                class="ml-3"
+                :disabled="!dialog.item.id"
+                @click="linkItem('link', dialog.entity, dialog.item)"
+            >
+                <v-icon v-text="'done'" />
+            </v-btn>
+        </div>
+    </small-dialog>
 
 </div>
 </template>
@@ -234,20 +199,10 @@ export default {
                 }
             },
 
-            /*dialog_options: {
-                active: false,
+            dialog: {
+                show: false,
                 entity: null,
-                id: null
-            },*/
-            dialog_details: {
-                entity: null,
-                id: null,
-                public: 0
-            },
-            dialog_link: {
-                active: false,
-                entity: null,
-                item: {}
+                item: { id: null }
             }
         }
     },
@@ -261,7 +216,7 @@ export default {
         color_bg:       { type: String, default: 'sheet_bg' },
         color_hover:    { type: String, default: 'grey_prim' },
         limit:          { type: [String, Number], default: 12 },
-        tiles:          { type: [String, Number], default: 6 },
+        bigTiles:       { type: Boolean, default: false },
         //options:        { type: Boolean, default: false },
         //image_select:   { type: Boolean, default: false },
         //inherit_select: { type: Boolean, default: false },
@@ -283,7 +238,12 @@ export default {
         },
 
         cols () {
-            return this.tiles === 4 ? { sm: 6, md: 3, xl: 3 } : { sm: 4, md: 2, xl: 2 }
+            return {
+                sm: this.big ? 12 : 6,
+                md: this.big ? 4 : 3,
+                lg: this.big ? 3 : 2,
+                xl: this.big ? 3 : 2
+            }
         },
 
         counter () {
@@ -327,7 +287,7 @@ export default {
         },
 
         linkHeader () {
-            return 'New Linking between ' + this.$handlers.format.cn_entity(this.entity, this.search_val) + ' and '  + this.$root.label(this.dialog_link.entity?.slice(0, -1))
+            return 'New Linking between ' + this.$handlers.format.cn_entity(this.entity, this.search_val) + ' and '  + this.$root.label(this.dialog.entity?.slice(0, -1))
         },
 
         header () {
@@ -387,19 +347,20 @@ export default {
         },
 
         // Linking -----------------------------------------------------------------------------
-        linkDialog (active, entity, data) {
+        linkDialog (show, entity, data) {
             const item = {}
-            Object.keys(this.dialog_link.item).forEach((key) => {
+            Object.keys(this.dialog.item).forEach((key) => {
                 item[key] = data?.[key] === undefined ? null : data[key]
             })
-            this.dialog_link = {
-                active: active,
-                entity: entity ? entity : null,
-                item: item
+            this.dialog = {
+                show,
+                entity: entity ?? null,
+                item
             }
         },
 
         async linkItem (mode, e, item) {
+            //console.log(this.dialog)
             if (mode) {
                 const input = {
                     mode: mode,
@@ -415,7 +376,7 @@ export default {
                     confirmed = confirm('Are you sure you want to unlink ' + this.$handlers.format.cn_entity(this.entity, this.search_val) + ' and ' + this.$handlers.format.cn_entity(input.entity, input.id) + '?')
                 }
                 if (confirmed) {
-                    console.log(input)
+                    //console.log(input)
                     const response = await this.$root.DBI_INPUT_POST('link', 'input', input)
                     if (response.success) {
                         this.GetItems(input.entity)

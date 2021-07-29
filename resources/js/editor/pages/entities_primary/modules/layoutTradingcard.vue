@@ -1,14 +1,10 @@
 <template>
-<div>
-
-    <v-card
-        tile
-        :class="select && selected == item.id ? 'marked' : 'tile_bg'"
-    >
+    <v-card tile :class="select && selected == item.id ? 'tile_selected' : 'tile_bg'">
         <!-- Publisher -->
         <v-btn tile block depressed
             v-if="publisher"
-            :color="checked ? 'blue_prim' : 'sysbar'"
+            :color="checked ? 'blue_prim' : 'transparent'"
+            :dark="checked"
             :disabled="item.public === 3 || item.public === 1"
             @click="$emit('checked')"
         >
@@ -18,20 +14,24 @@
         <!-- Image -->
         <coin-images :images="item.id ? item.images : []" />
 
-        <!-- Name -->
-        <div :class="truncate ? 'pa-3' : 'pa-4'">
-            <div
-                class="d-flex body-1 font-weight-black"
-                :class="item.public === 3 ? ' text-decoration-line-through' : ''"
-            >
+
+        <div class="mt-n1 mb-n1" :class="truncate ? 'pa-3' : 'pa-4'">
+            <div class="d-flex justify-space-between align-end">
+                <!-- Name -->
                 <div
-                    class="text-truncate"
-                    v-text="'cn ' + entity.slice(0, -1)"
-                />
-                <div class="d-flex">
-                    <div v-html="'&nbsp;' + item.id" />
-                    <div v-html="$handlers.format.cn_public_link(item)" />
+                    class="d-flex body-1 font-weight-black"
+                    :class="item.public === 3 ? ' text-decoration-line-through' : ''"
+                >
+                    <div
+                        class="text-truncate"
+                        v-text="'cn ' + entity.slice(0, -1)"
+                    />
+                    <div class="d-flex">
+                        <div v-html="'&nbsp;' + item.id" />
+                        <div v-html="$handlers.format.cn_public_link(item)" />
+                    </div>
                 </div>
+                <div class="caption font-weight-bold text-truncate" v-html="$handlers.show_item_data(language, entity, item, 'forgery')" />
             </div>
         </div>
 
@@ -81,9 +81,9 @@
                 <v-divider :class="truncate ? 'mt-2 mb-2' : 'mt-3 mb-3'" />
 
                 <div
-                    v-for="(side) in ['obverse', 'reverse']"
+                    v-for="(side, s) in ['obverse', 'reverse']"
                     :key="side"
-                    :class="truncate ? 'caption' : 'body-2 mb-3'"
+                    :class="(truncate ? 'caption' : 'body-2') + (s === 0 ? ' mb-3' : '')"
                     style="position: relative"
                 >
                     <div
@@ -95,11 +95,13 @@
                         <div
                             class="pl-4 font-weight-thin pb-1"
                             :class="truncate ? 'text-truncate' : ''"
+                            :title="truncate ? printLegend(side) : null"
                             v-text="printLegend(side)"
                         />
                         <div
                             class="pl-4"
                             :class="truncate ? 'text-truncate' : ''"
+                            :title="truncate ? printDesign(side) : null"
                             v-text="printDesign(side)"
                         />
                     </div>
@@ -123,10 +125,9 @@
             v-on:unlink="$emit('unlink')"
             v-on:inherit="$emit('inherit')"
             v-on:represent="$emit('represent')"
+            v-on:select="$emit('select', item.id)"
         />
     </v-card>
-
-</div>
 </template>
 
 

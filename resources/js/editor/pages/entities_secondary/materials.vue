@@ -34,7 +34,7 @@
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
             <template v-slot:search-tile-header="slot">
-                {{ 'ID&nbsp;' + slot.item.id }}
+                {{ 'ID&nbsp;' + slot.item.id }}, {{ attributes['name_' + language].content(slot.item) }}
             </template>
 
             <template v-slot:search-tile-body="slot">

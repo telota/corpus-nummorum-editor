@@ -12,29 +12,19 @@
             :style="'cursor:' + (active === i ? 'default' : 'pointer')"
             @click="selected = i"
         >
-            <div class="whitespace-nowrap caption" v-html="img.label" />
+            <div class="whitespace-nowrap caption" v-html="img.kind + '&nbsp;(ID&nbsp;' + img.id + ')'" />
             <v-icon v-text="active === i ? 'expand_less' : 'expand_more'" />
         </div>
 
         <!-- Content -->
         <v-expand-transition>
-            <div v-if="active === i">
-                <a
-                    v-for="(file) in img.files"
-                    :key="'img' + img.id + '_' + file.src"
-                    :href="file.href"
-                    target="_blank"
-                >
-                    <div style="position: relative;">
-                        <adv-img contain square :src="file.src" :background="file.bg" />
-                        <div
-                            v-text="file.text"
-                            class="caption pl-1 black--text"
-                            style="position: absolute; bottom: 0; left: 0;"
-                        />
-                    </div>
-                </a>
-            </div>
+            <coin-images
+                v-if="active === i"
+                :images="images"
+                :index="i"
+                vertical
+                link
+            />
         </v-expand-transition>
 
         <v-divider />
@@ -55,7 +45,8 @@ export default {
     },
 
     props: {
-        item:       { type: Object, default: () => { return { images: [] }} }
+        entity: { type: String, required: true },
+        item:   { type: Object, default: () => {} }
     },
 
     computed: {
@@ -64,32 +55,8 @@ export default {
         },
 
         images () {
-            const data = this.item.images?.[0] ? this.item.images : []
-            const computed = []
-
-            data.forEach((img) => {
-                if (img.id) {
-                    const set = {
-                        id: img.id,
-                        label: img.kind + '&nbsp;(ID&nbsp;' + img.id + ')',
-                        files: []
-                    }
-
-                    ;['obverse', 'reverse'].forEach((side) => {
-                        const file = img[side] ?? {}
-                        set.files.push({
-                            src: file.link ?? null,
-                            bg: file.bg_color ?? (file.kind === 'plastercast' ? 'imgbg' : null),
-                            href: file.digilib ?? file.link,
-                            text: side
-                        })
-                    })
-
-                    computed.push(set)
-                }
-            })
-
-            return computed
+            if (this.entity === 'types') return this.item?.images?.[0]?.id ? this.item.images : []
+            return this.item?.dbi?.images?.[0]?.id ? this.item.dbi.images : []
         },
 
         styling () {

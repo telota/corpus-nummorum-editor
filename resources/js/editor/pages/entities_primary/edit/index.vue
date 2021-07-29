@@ -11,7 +11,7 @@
     />
 
     <!-- Images -->
-    <edit-images :item="item" />
+    <edit-images :entity="entity" :item="item_data" />
 
     <!-- Drawer -->
     <edit-tabs
@@ -63,7 +63,7 @@
                         v-for="(set, i) in item.images"
                         :key="'set' + i + '-' + set.id"
                     >
-                        <v-card tile class="pa-3">
+                        <v-card tile class="pa-3 tile_bg">
                             <div class="d-flex align-end mb-5">
                                 <div class="headline" v-text="set.id ? ('ID ' + set.id) : 'New Set'" style="width: 160px" />
 
@@ -93,18 +93,18 @@
                             </div>
 
                             <div
-                                v-for="(img, side) in { obverse: set.obverse, reverse: set.reverse }"
+                                v-for="(side) in ['obverse', 'reverse']"
                                 :key="'set' + i + '-' + set.id + side"
                                 class="d-flex"
                                 :class="side === 'obverse' ? 'mb-5' : ''"
                             >
                                 <!-- Img -->
-                                <div style="width: 160px" :key="'set' + i + '-' + set.id + side + '_' + img.path">
-                                    <adv-img
-                                        contain
-                                        square
-                                        :src="img.link"
-                                        :background="img.bg_color ? img.bg_color : (img.kind === 'plastercast' ? 'imgbg' : 'grey')"
+                                <div style="width: 160px" :key="'set' + i + '-' + set.id + side">
+                                    <coin-images
+                                        :images="item.images"
+                                        :index="i"
+                                        :side="side"
+                                        link
                                     />
                                 </div>
 
@@ -132,7 +132,7 @@
                                                     :style="'border-bottom: 1px solid ' + $root.colors[hover ? 'input_hover' : 'input_main']"
                                                 >
                                                     <v-icon class="mr-1" v-text="'insert_drive_file'" />
-                                                    <div class="text-truncate" :class="img.path ? '' : 'grey--text'" v-text="img.path ? img.path : 'no file'" />
+                                                    <div class="text-truncate" :class="set[side].path ? '' : 'grey--text'" v-text="set[side].path ? set[side].path : 'no file'" />
                                                     <v-spacer />
                                                     <v-icon class="ml-2" v-text="'expand_more'" />
                                                 </div>
@@ -143,8 +143,8 @@
                                             <v-list-item-group>
                                                 <v-list-item
                                                     v-text="'Open File Manager'"
-                                                    :disabled="img.path ? (img.path.substring(0, 4) === 'http' || !img.path.includes('/') ? true : false) : false"
-                                                    @click="files_dialog = { active: true, key: i + '_' + side, id: img.path }"
+                                                    :disabled="set[side].path ? (set[side].path.substring(0, 4) === 'http' || !set[side].path.includes('/') ? true : false) : false"
+                                                    @click="files_dialog = { active: true, key: i + '_' + side, id: set[side].path }"
                                                 />
                                                 <v-list-item
                                                     v-text="'Upload new image'"
@@ -156,7 +156,7 @@
                                                 />
                                                 <v-list-item
                                                     v-text="'Delete Relation'"
-                                                    :disabled="!img.link"
+                                                    :disabled="!set[side].link"
                                                     @click="item.images[i][side].link = null; item.images[i][side].path = null"
                                                 />
                                             </v-list-item-group>
@@ -175,7 +175,7 @@
                                             <template v-slot:append>
                                                 <v-icon
                                                     v-text="side === 'obverse' ? 'arrow_downward' : 'arrow_upward'"
-                                                    @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].photographer = img.photographer"
+                                                    @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].photographer = set[side].photographer"
                                                 ></v-icon>
                                             </template>
                                         </v-text-field>
@@ -192,7 +192,7 @@
                                             <template v-slot:append>
                                                 <v-icon
                                                     v-text="side === 'obverse' ? 'arrow_downward' : 'arrow_upward'"
-                                                    @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].copyright = img.copyright"
+                                                    @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].copyright = set[side].copyright"
                                                 ></v-icon>
                                             </template>
                                         </v-select>
