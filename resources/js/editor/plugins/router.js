@@ -26,6 +26,30 @@ const router = new Router({
         // ----------------------------------------------------------------------------------------------
         // Primary Entities
 
+        // Show
+        {
+            path: '/(coins|types)/show/:id',
+            name: 'coins-types-show',
+            component: require('./../pages/entities_primary/show/index').default,
+            props: (route) => ({
+                entity: route.params.pathMatch,
+                id: parseInt(route.params.id)
+            })
+        },
+
+        // Search
+        {
+            path: '/(coins|types)/(search|publish)',
+            name: 'coins-types-search',
+            component: require('./../pages/entities_primary/search/index').default,
+            props: (route) => ({
+                dialog: false,
+                entity: route.params.pathMatch,
+                publisher: route.params["1"] === 'publish',
+                routedQuery: route.query ?? {}
+            })
+        },
+
         // New
         {
             path: '/(coins|types)/edit',
@@ -50,58 +74,31 @@ const router = new Router({
             })
         },
 
-        // Show
-        /*{
-            path: '/types/show/:id',
-            name: 'types-details',
-            component: require('./../pages/entities_primary/ItemDetails').default,
-            props: (route) => ({ entity: 'types', id: parseInt(route.params.id) })
-        },
+        // Copy
         {
-            path: '/coins/show/:id',
-            name: 'coins-details',
-            component: require('./../pages/entities_primary/ItemDetails').default,
-            props: (route) => ({ entity: 'coins', id: parseInt(route.params.id) })
-        },*/
-        {
-            path: '/(coins|types)/show/:id',
-            name: 'coins-types-show',
-            component: require('./../pages/entities_primary/show/index').default,
-            props: (route) => ({
-                entity: route.params.pathMatch,
-                id: parseInt(route.params.id)
-            })
-        },
-
-        // Search
-        {
-            path: '/(coins|types)/(search|publish)',
-            name: 'coins-types-search',
-            component: require('./../pages/entities_primary/search/index').default,
+            path: '/(coins|types)/copy/:source/:id',
+            name: 'coins-types-copy',
+            component: require('./../pages/entities_primary/copy/index').default,
             props: (route) => ({
                 dialog: false,
                 entity: route.params.pathMatch,
-                publisher: route.params["1"] === 'publish',
-                routedQuery: route.query ?? {}
+                sourceEntity: route.params.source,
+                sourceId: parseInt(route.params.id),
             })
-        },
-
-        // Copy
-        {
-            path: '/types/copy/:source/:id',
-            name: 'types-copy',
-            component: require('./../pages/entities_primary/ItemCopy').default,
-            props: { entity: 'types'}
-        },
-        {
-            path: '/coins/copy/:source/:id',
-            name: 'coins-copy',
-            component: require('./../pages/entities_primary/ItemCopy').default,
-            props: { entity: 'coins'}
         },
 
         // import
         {
+            path: '/(coins|types)/import*',
+            name: 'coins-types-import',
+            component: require('./../pages/entities_primary/import/index').default,
+            props: (route) => ({
+                dialog: false,
+                entity: route.params.pathMatch,
+                source: route.params["1"] ? decodeURI(route.params["1"].slice(1)) : null
+            })
+        },
+        /*{
             path: '/types/import',
             name: 'types-import',
             component: require('./../pages/entities_primary/ItemImport').default,
@@ -112,7 +109,7 @@ const router = new Router({
             name: 'coins-import',
             component: require('./../pages/entities_primary/ItemImport').default,
             props: { entity: 'coins'}
-        },
+        },*/
 
 
         // ----------------------------------------------------------------------------------------------

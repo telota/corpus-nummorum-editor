@@ -19,6 +19,10 @@ a {
     width: 1px;
 }
 
+.input-nostyle {
+    outline: none;
+}
+
 #app-snack {
     position: fixed;
     left: 50%;

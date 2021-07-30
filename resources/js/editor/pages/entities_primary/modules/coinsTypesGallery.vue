@@ -144,7 +144,6 @@
             </v-btn>
 
             <v-btn
-            :key="dialog.item.id"
                 fab
                 small
                 :dark="dialog.item.id ? true : false"

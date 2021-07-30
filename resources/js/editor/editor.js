@@ -60,6 +60,7 @@ Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').defau
 Vue.component('generic-entity-template',      require('./templates/genericEntityTemplate.vue').default);
 Vue.component('sheet-template',      require('./templates/sheetTemplate.vue').default);
 Vue.component('small-dialog',       require('./templates/dialogSmall.vue').default);
+Vue.component('input-template',       require('./templates/inputTemplate.vue').default);
 
 Vue.component('Imager',             require('./modules/Imager.vue').default);
 //Vue.component('coin-images',        require('./modules/coinImages.vue').default);
@@ -81,7 +82,7 @@ Vue.component('adv-btn',            require('./modules/btnAdv.vue').default);
 Vue.component('pagination',         require('./modules/pagination.vue').default);
 Vue.component('pagination-bar',     require('./modules/paginationBar.vue').default);
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
-Vue.component('vertdivider',        require('./modules/vertDivider.vue').default);
+Vue.component('vertical-divider',   require('./modules/verticalDivider.vue').default);
 Vue.component('drawer',             require('./modules/drawer.vue').default);
 Vue.component('clipboard-copy',     require('./modules/clipboardCopy.vue').default);
 
@@ -203,8 +204,8 @@ const editor = new Vue({
                     header_bg:  '#363636',
                     header_hover:'#666666',
                     header_marked:'#0099cc',
-                    drawer_bg:  '#262626',
-                    sheet_bg:    '#1c1c1c',
+                    drawer_bg:  '#292929',
+                    sheet_bg:    '#1e1e1e',
                     tile_bg:    '#363636',
                     tile_selected:  '#213044'
                 },
@@ -259,6 +260,8 @@ const editor = new Vue({
                 width: 0,
                 height: 0
             },
+
+            vDivider: 'header_hover fill-height width-1px',
 
             // Settings
             appName: 'CN Editor',
