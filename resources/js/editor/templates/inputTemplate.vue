@@ -13,7 +13,9 @@
             <input
                 v-model="Value"
                 :style="inputStyles"
+                :placeholder="placeholder"
                 class="text-truncate flex-grow-1"
+                v-on:keyup.enter="$emit('keyup_enter', true)"
             />
         </slot>
 
@@ -41,7 +43,8 @@ export default {
         width:      { type: [String, Number], default: '100%' },
         icon:       { type: String, default: null },
         clearable:  { type: Boolean, default: false },
-        noGrow:     { type: Boolean, default: false }
+        noGrow:     { type: Boolean, default: false },
+        placeholder:{ type: String, default: null }
     },
 
     computed: {

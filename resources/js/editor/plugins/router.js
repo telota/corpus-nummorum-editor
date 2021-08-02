@@ -227,6 +227,10 @@ const router = new Router({
             path: '/storage*',
             name: 'storage',
             component: require ('./../pages/storage/index').default,
+            props: (route) => ({
+                dialog: false,
+                path: route.params.pathMatch
+            })
         },
         {
             path: '/sparql',

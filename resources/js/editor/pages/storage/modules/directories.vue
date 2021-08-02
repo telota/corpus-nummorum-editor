@@ -1,90 +1,88 @@
 <template>
-    <v-navigation-drawer
-        id="directories-menu"
-        expand-on-hover
-        :mini-variant-width="200"
-        :width="400"
-        class="grey_sec"
-        :style="[
-            'position: fixed',
-            'top:' + position.top + 'px',
-            'left:' + position.left + 'px',
-            'height:' + (position.height - 15)+ 'px'
-        ].join(';\n')"
+    <drawer
+        :dialog="dialog"
+        :costum-header="showSearch ? 80 : 40"
+        :mini-width="200"
+        :collapse="collapse"
+        :expanding="expanded"
+        no-auto-expansion
+        v-on:expand="(emit) => { isExpanded = emit }"
     >
+        <template v-slot:header>
+            <!-- Header -->
+            <div :style="'height:' + (showSearch ? 80 : 40) + 'px;'">
+                <div class="d-flex align-center">
 
-        <!-- Header -->
-        <div :style="'height:' + (showSearch ? 90 : 50) + 'px;'">
-            <div class="d-flex align-center">
-                <!-- Collapse
-                <adv-btn
-                    icon="arrow_back_ios"
-                    tooltip="hide_menu"
-                    v-on:click="toggleMenu()"
-                />
-                <v-spacer /> -->
-
-                <!-- Filter -->
-                <adv-btn
-                    :icon="showSearch ? 'search_off' : 'search'"
-                    :tooltip="(showSearch ? 'Hide' : 'Show') + ' Search'"
-                    v-on:click="toggleSearch"
-                />
-
-                <!-- Refresh -->
-                <adv-btn
-                    icon="sync"
-                    tooltip="Refresh List"
-                    :loading="loading"
-                    :disabled="loading"
-                    v-on:click="$store.dispatch('fetchDirectories')"
-                />
-
-                <!-- Expand all -->
-                <adv-btn
-                    :icon="expandAll ? 'unfold_less' : 'unfold_more'"
-                    :tooltip="expandAll ? 'expand_less' : 'expand_more'"
-                    v-on:click="$store.commit('setDirectoryExpandedAll', !expandAll)"
-                />
-            </div>
-
-            <v-expand-transition>
-                <div v-if="showSearch" class="d-flex align-center" style="height: 40px;">
-                    <v-icon
-                        small
-                        class="ml-3 mr-2"
-                        v-text="'search'"
+                    <!-- Filter -->
+                    <adv-btn
+                        :icon="showSearch ? 'search_off' : 'search'"
+                        :tooltip="(showSearch ? 'Hide' : 'Show') + ' Search'"
+                        medium
+                        v-on:click="toggleSearch"
                     />
-                    <input
-                        id="directories-search"
-                        v-model="search"
-                        style="border: 0; outline: none; height: 40px; width: 100%; color: grey;"
-                        placeholder="Verzeichnisse filtern"
+
+                    <!-- Refresh -->
+                    <adv-btn
+                        icon="sync"
+                        tooltip="Refresh List"
+                        :loading="loading"
+                        :disabled="loading"
+                        medium
+                        v-on:click="$store.dispatch('fetchDirectories')"
                     />
-                    <v-fade-transition>
-                        <v-icon
-                            v-if="search"
-                            small
-                            class="ml-2 mr-4"
-                            v-text="'clear'"
-                            @click="search = null"
-                        />
-                    </v-fade-transition>
+
+                    <!-- Expand all -->
+                    <adv-btn
+                        :icon="expandAll ? 'unfold_less' : 'unfold_more'"
+                        :tooltip="expandAll ? 'expand_less' : 'expand_more'"
+                        medium
+                        v-on:click="expandAll = !expandAll"
+                    />
+
+                    <v-spacer />
+
+                    <!-- Expander -->
+                    <adv-btn
+                        :icon="isExpanded ? 'chevron_left' : 'chevron_right'"
+                        :tooltip="(isExpanded ? 'Collapse' : 'Expand') + ' Drawer'"
+                        medium
+                        v-on:click="isExpanded ? ++collapse : ++expanded"
+                    />
                 </div>
-            </v-expand-transition>
 
-            <v-progress-linear :indeterminate="loading" height="1px" />
-        </div>
+                <v-expand-transition>
+                    <div v-if="showSearch" class="d-flex align-center" style="height: 40px;">
+                        <v-icon
+                            small
+                            class="ml-3 mr-2"
+                            v-text="'search'"
+                        />
+                        <input
+                            id="directories-search"
+                            v-model="search"
+                            style="border: 0; outline: none; height: 40px; width: 100%; color: grey;"
+                            placeholder="Verzeichnisse filtern"
+                        />
+                        <v-fade-transition>
+                            <v-icon
+                                v-if="search"
+                                small
+                                class="ml-2 mr-4"
+                                v-text="'clear'"
+                                @click="search = null"
+                            />
+                        </v-fade-transition>
+                    </div>
+                </v-expand-transition>
+
+                <v-progress-linear :indeterminate="loading" height="1px" />
+            </div>
+        </template>
 
         <!-- Directory Items -->
-        <div
-            style="width: 100%; overflow: auto; padding-bottom: 10px;"
-            :style="'height:' + (position.height - (showSearch ? 105 : 65))+ 'px'"
-        >
-
-            <!-- Nodes -->
+        <template v-slot:content>
             <v-expand-transition>
-                <div v-if="Object.keys(items)[0]" class="mt-2">
+                <div v-if="Object.keys(items)[0]" class="pt-5">
 
                     <!-- List (showSearch) -->
                     <div v-if="search" class="caption pl-3 pr-4 pt-1">
@@ -117,61 +115,61 @@
                     <div v-else>
                         <v-expand-transition>
                             <div>
-                        <template v-for="(item, path) in items">
-                            <v-hover
-                                v-if="item.depth === 0 || item.show || expandAll"
-                                v-slot="{ hover }"
-                                :key="path"
-                            ><!-- || ($root.contextMenu.show && $root.contextMenu.item.path === path)-->
-                                <div
-                                    :ref="'node:' + path"
-                                    class="d-flex align-center pa-1"
-                                    :class="hover  ? 'grey_prim' : ''"
-                                    style="cursor: pointer"
-                                >
-                                    <!-- Indentation -->
-                                    <div :style="'padding-left:' + (item.depth * indentation) + 'em'" />
-
-                                    <!-- Icon -->
-                                    <v-btn
-                                        icon
-                                        x-small
-                                        :disabled="!item.expandable || expandAll"
-                                        :style="!item.expandable && !item.current ? 'opacity: 0' : ''"
-                                        @click="toggleExpansion(item.path)"
+                                <template v-for="(item, path) in items">
+                                    <v-hover
+                                        v-if="item.depth === 0 || item.show || expandAll"
+                                        v-slot="{ hover }"
+                                        :key="path"
                                     >
-                                        <v-icon small v-text="expandIcon(item)" />
-                                    </v-btn>
+                                        <div
+                                            :ref="'node:' + path"
+                                            class="d-flex align-center pa-1"
+                                            :class="hover  ? 'grey_prim' : ''"
+                                            style="cursor: pointer"
+                                        >
+                                            <!-- Indentation -->
+                                            <div :style="'padding-left:' + (item.depth * indentation) + 'em'" />
 
-                                    <!-- Label -->
-                                    <div
-                                        v-text="item.label.replaceAll('_', ' ')"
-                                        class="pl-1 caption pr-2 text-truncate"
-                                        :class="item.current ? 'font-weight-bold' : ''"
-                                        style="width: 100%"
-                                        @click="setPath(path)"
-                                    />
+                                            <!-- Icon -->
+                                            <v-btn
+                                                icon
+                                                x-small
+                                                :disabled="!item.expandable || expandAll"
+                                                :style="!item.expandable && !item.current ? 'opacity: 0' : ''"
+                                                @click="toggleExpansion(item.path)"
+                                            >
+                                                <v-icon small v-text="expandIcon(item)" />
+                                            </v-btn>
 
-                                    <!-- Options
-                                    <v-spacer />
-                                    <v-btn
-                                        icon
-                                        small
-                                        @click="(element) => showContextMenu(element, item)"
-                                    >
-                                        <v-icon small v-text="'more_vert'" />
-                                    </v-btn>-->
-                                </div>
-                            </v-hover>
-                        </template>
+                                            <!-- Label -->
+                                            <div
+                                                v-text="item.label.replaceAll('_', ' ')"
+                                                class="pl-1 caption pr-2 text-truncate"
+                                                :class="item.current ? 'font-weight-bold' : ''"
+                                                style="width: 100%"
+                                                @click="setPath(path)"
+                                            />
+
+                                            <!-- Options
+                                            <v-spacer />
+                                            <v-btn
+                                                icon
+                                                small
+                                                @click="(element) => showContextMenu(element, item)"
+                                            >
+                                                <v-icon small v-text="'more_vert'" />
+                                            </v-btn>-->
+                                        </div>
+                                    </v-hover>
+                                </template>
                         </div>
                         </v-expand-transition>
                     </div>
                 </div>
             </v-expand-transition>
-        </div>
+        </template>
 
-    </v-navigation-drawer>
+    </drawer>
 </template>
 
 <script>
@@ -180,24 +178,31 @@ export default {
     data () {
         return {
             search: null,
-            showSearch: false
+            showSearch: false,
+            expanded: 0,
+            collapse: 0,
+            isExpanded: false,
+            expand: [],
+            expandAll: false
         }
     },
 
     props: {
+        dialog:         { type: Boolean, default: false },
         currentDir:     { type: [Boolean, String], default: null },
         indentation:    { type: Number, default: 1 }
     },
 
     computed: {
-        position () { return this.$root.position },
-
-        loading () { return Object.keys(this.items).length < 1 || this.$store.state.storage.directory.loading },
-        directories () { return this.$store.state.storage.directory.items },
-        currentNodes () { return this.getNodes(this.currentDir) },
-
-        expand () { return this.$store.state.storage.directory.expanded },
-        expandAll () { return this.$store.state.storage.directory.expandedAll },
+        loading () {
+            return Object.keys(this.items).length < 1 || this.$store.state.storage.directory.loading
+        },
+        directories () {
+            return this.$store.state.storage.directory.items
+        },
+        currentNodes () {
+            return this.getNodes(this.currentDir)
+        },
 
         items () {
             const items = {}
@@ -265,13 +270,6 @@ export default {
     },
 
     methods: {
-        toggleMenu () {
-            this.$store.dispatch('toggleSidebar', { key: 'directory' })
-        },
-
-        resize (e) {
-            this.$store.commit('setWidth', { key: 'directory', value: e.width - 20 })
-        },
 
         setPath (dir) {
             this.$emit('setPath', dir)
@@ -307,15 +305,18 @@ export default {
             return check
         },
 
-        toggleExpansion (path) {
-            this.$store.dispatch('toggleDirectoryExpansion', { path })
-        },
-
         expandIcon (item) {
             if (item.current) return 'chevron_right'
             if (!item.expandable) return 'remove'
             if (item.expand || this.expandAll) return 'expand_less'
             return 'expand_more'
+        },
+
+        toggleExpansion (path) {
+            const index = this.expand.indexOf(path)
+            if (index < 0) this.expand.push(path)
+            else if (this.expand.length > 1) this.expand.splice(index, 1)
+            else this.expand = []
         },
 
         toggleSearch () {
@@ -326,9 +327,7 @@ export default {
                     el.focus()
                 })
             }
-            else {
-                this.search = null
-            }
+            else this.search = null
         }
     }
 }

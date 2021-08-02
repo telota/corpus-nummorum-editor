@@ -1,38 +1,69 @@
 <template>
-<div class="d-flex">
-
-    <!-- Tree -->
-    <div style="width: 220px; z-index: 101" class="mr-5">
-        <directories
-            :currentDir="currentDir"
-            v-on:setPath="setCurrentPath"
-        />
-    </div>
-
-    <div style="width: 100%">
-
+<div>
+    <dialog-template
+        :dialog="dialog"
+        text="$root.label(entity)"
+        dis-closing="closing"
+        dis-select="select"
+        dis-selected="selected"
+        v-on:close="$emit('close')"
+    >
         <!-- Toolbar -->
-        <v-card tile raised class="pl-2 d-flex align-center grey_sec" :height="50" style="z-index:100">
-
-            <!-- Breadcrumbs-->
-            <breadcrumbs
-                :directory="currentDir"
-                :height="50"
-                v-on:setPath="setCurrentPath"
-            />
-            <v-spacer />
+        <component-toolbar :dialog="dialog">
 
             <!-- Upload -->
             <upload :directory="currentDir" v-on:update="setFileIndex">
                 <template v-slot:activator="slot">
+                    <div class="pr-2">
                     <adv-btn
                         icon="cloud_upload"
                         :tooltip="'upload Files to current Directory (/' + currentDir + ')'"
                         :disabled="!currentDir || directoryLoading"
                         v-on:click="slot.controls.active = true"
                     />
+                    </div>
                 </template>
             </upload>
+
+            <!-- Breadcrumbs -->
+            <breadcrumbs
+                :directory="currentDir"
+                :height="50"
+                v-on:setPath="setCurrentPath"
+            />
+
+            <!-- Search
+            <div class="pl-2 pr-3" :style="'width:' + searchInputWidth + 'px'">
+                <v-text-field
+                    dense clearable
+                    v-model="searchFile"
+                    placeholder="Dateien filtern"
+                    class="mb-n3"
+                />
+            </div> -->
+
+            <div :style="'width:' + searchInputWidth + 'px'">
+                <input-template
+                    v-model="searchFile"
+                    icon="search"
+                    class="ml-3 mr-2"
+                    placeholder="File Filter"
+                    clearable
+                />
+            </div>
+
+            <!-- Global Search
+            <globalsearch v-on:setPath="setCurrentPath">
+                <template v-slot:activator="slot">
+                    <advbtn
+                        icon="travel_explore"
+                        :disabled="directoryLoading"
+                        tooltip="Globale Suche"
+                        large
+                        v-on:click="slot.controls.active = true"
+                    />
+                </template>
+            </globalsearch> -->
 
             <!-- Refresh -->
             <adv-btn
@@ -43,15 +74,6 @@
                 v-on:click="setFileIndex()"
             />
 
-            <!-- Search -->
-            <div class="pl-2 pr-3" :style="'width:' + searchInputWidth + 'px'">
-                <v-text-field
-                    dense clearable
-                    v-model="searchFile"
-                    placeholder="Dateien filtern"
-                    class="mb-n3"
-                />
-            </div>
             <!--<v-icon v-text="'search'" />
             <div
                 class="d-flex align-center pa-2 ml-2"
@@ -74,33 +96,27 @@
                     />
                 </v-fade-transition>
             </div>-->
+        </component-toolbar>
 
-            <!-- Global Search
-            <globalsearch v-on:setPath="setCurrentPath">
-                <template v-slot:activator="slot">
-                    <advbtn
-                        icon="travel_explore"
-                        :disabled="directoryLoading"
-                        tooltip="Globale Suche"
-                        large
-                        v-on:click="slot.controls.active = true"
-                    />
-                </template>
-            </globalsearch> -->
+        <!-- Directory Drawer -->
+        <directories
+            :dialog="dialog"
+            :currentDir="currentDir"
+            v-on:setPath="setCurrentPath"
+        />
 
-        </v-card>
+        <!-- Content -->
+        <galery
+            :dialog="dialog"
+            :currentDir="currentDir"
+            :currentFile="currentFile"
+            :search="searchFile"
+            :selected="selectedFiles"
+            v-on:setPath="setCurrentPath"
+            v-on:selectFile="selectFile"
+        />
 
-        <div style="width: 100%">
-            <galery
-                :currentDir="currentDir"
-                :currentFile="currentFile"
-                :search="searchFile"
-                :selected="selectedFiles"
-                v-on:setPath="setCurrentPath"
-                v-on:selectFile="selectFile"
-            />
-        </div>
-    </div>
+    </dialog-template>
 
 </div>
 </template>
@@ -130,15 +146,17 @@ export default {
     },
 
     props: {
+        dialog: { type: Boolean, default: false },
+        path:   { type: String, default: null }
     },
 
     computed:{
         directoryLoading () { return this.$store.state.storage.directory?.loading },
         directories ()      { return this.$store.state.storage.directory?.items },
         searchInputWidth () {
-            if (this.$vuetify.breakpoint.lgAndUp) return 250
-            if (this.$vuetify.breakpoint.mdAndUp) return 200
-            return 100
+            if (this.$vuetify.breakpoint.lgAndUp) return 400
+            if (this.$vuetify.breakpoint.mdAndUp) return 300
+            return 150
         },
         selectedFiles () {
             const selected = this.selected
@@ -150,11 +168,11 @@ export default {
     },
 
     watch: {
-        $route (to, from) {
-            this.getRoute()
+        path () {
+            this.handlePath()
         },
         directories () {
-            if (this.directories?.[0]) this.getRoute()
+            if (this.directories?.[0]) this.handlePath()
         }
     },
 
@@ -174,8 +192,8 @@ export default {
             }
             else if (this.$route.path !== '/storage') this.$router.push('/storage')
         },
-        getRoute () {
-            let path = this.$route.params.pathMatch
+        handlePath () {
+            let path = this.path
 
             if (path) {
                 this.searchFile = null

@@ -54,6 +54,7 @@
                     offset-y
                     :open-on-hover="hovering"
                     tile
+                    @input="(emit) => { setDropdownState(r, emit) }"
                 >
                     <template v-slot:activator="{ on, attrs }">
                         <v-hover v-slot="{ hover }">
@@ -61,7 +62,7 @@
                                 v-bind="attrs"
                                 v-on="on"
                                 class="pr-2 pl-2 d-flex align-center"
-                                :class="hover ? 'header_hover' : ''"
+                                :class="hover || current[r] ? 'header_hover' : ''"
                                 style="height: 40px;"
                                 @click="hovering = true"
                             >
@@ -234,7 +235,8 @@ export default {
             additionalFavs: [
                 { text: 'CN Website', icon: 'language', link: 'https://www.corpus-nummorum.eu'},
                 { text: 'IKMK', icon: 'language', link: 'https://ikmk.smb.museum/home?lang=de' }
-            ]
+            ],
+            current: {}
         }
     },
     computed: {
@@ -422,6 +424,10 @@ export default {
             await this.$root.changeSettings('dashboardFavorites', this.selectedFavs.map((fav) => { return fav.link }).join(' '))
             this.favorites = this.selectedFavs
             this.manageFavorites (false)
+        },
+
+        setDropdownState (r, state) {
+            this.current = { [r]: state }
         }
     }
 }

@@ -14,25 +14,23 @@
         <input-template
             v-model="sourceLink"
             icon="public"
-            class="ml-2 mr-5"
+            class="ml-2"
+            placeholder="Source URL"
             clearable
+            v-on:keyup_enter="pushSource()"
         />
 
-        <!-- Actions -->
-        <a :href="'/editor#/' + entity + '/search'">
-            <adv-btn
-                icon="search"
-                tooltip="Go to search"
-                color-hover="header_hover"
-            />
-        </a>
-        <a :href="'/editor#/' + entity + '/edit'">
-            <adv-btn
-                icon="add"
-                tooltip="Create new Object"
-                color-hover="header_hover"
-            />
-        </a>
+        <v-hover v-slot="{ hover }">
+            <div
+                class="d-flex align-center justify-center headline font-weight-bold text-uppercase light-blue--text text--darken-2"
+                :class="hover ? 'header_hover' : 'header_bg'"
+                style="width: 200px; height: 50px; cursor: pointer"
+                @click="pushSource()"
+            >
+                <v-icon v-text="'play_arrow'" class="mr-2 light-blue--text text--darken-2" />
+                <div v-text="'Get Data'" />
+            </div>
+        </v-hover>
 
         <div :class="$root.vDivider" />
 
@@ -42,10 +40,10 @@
                 :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
                 style="width: 200px; height: 50px;"
                 :style="saveDisabled ? 'cursor: default:' : 'cursor: pointer'"
-                @click="saveDisabled ? '' : (readyToSave ? save() : pushSource())"
+                @click="saveDisabled ? '' : save()"
             >
-                <v-icon v-text="readyToSave ? 'save' : 'play_arrow'" class="mr-2" :class="saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2'" />
-                <div v-text="readyToSave ? 'save' : 'proceed'" />
+                <v-icon v-text="'save'" class="mr-2" :class="saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2'" />
+                <div v-text="'save'" />
             </div>
         </v-hover>
     </component-toolbar>
@@ -58,23 +56,25 @@
                 <v-divider />
             </div>
 
-            <!-- Error
-            <div v-if="error || duplicates[0]">
-                test
-                <div class="font-weight-bold red--text" v-text="error" />
+            <!-- Loading -->
+            <div v-if="loading" class="text-center headline mt-5" v-text="'Loading ... '" />
+
+            <!-- Error -->
+            <div v-else-if="error || duplicates[0]">
+                <div class="font-weight-bold red--text mb-2" v-text="error" />
                 <template v-if="duplicates[0]">
                     <div
                         v-for="(d) in duplicates"
                         :key="d"
-                        class="ml-5 mb-1"
+                        class="mb-1"
                     >
                         <a :href="'/editor#/' + entity + '/show/' + d" v-text="'cn ' + entity.slice(0, -1) + ' ' + d" />
                     </div>
                 </template>
-            </div>-->
+            </div>
 
             <!-- Select Template -->
-            <v-row>
+            <v-row v-else>
                 <v-col
                     cols="12"
                     sm="6"
@@ -100,7 +100,7 @@
             </v-row>
 
             <!-- Infos -->
-            <v-row class="mt-10">
+            <v-row style="margin-top: 150px;">
                 <v-col cols="12" sm="6">
                     <v-card class="tile_bg caption mr-5" tile>
                         <v-card-text>
@@ -142,7 +142,6 @@ export default {
         return {
             sourceLink:     this.source,
             sourceData:     {},
-            readyToSave:    false,
             error:          null,
             duplicates:     [],
             selection:      {},
@@ -161,15 +160,15 @@ export default {
         },
         saveDisabled () {
             if (this.loading) return true
-            if (this.error && this.readyToSave) return true
+            if (!this.sourceData?.url) return true
+            if (this.error) return true
             return false
         }
     },
 
     watch: {
-        title () { this.getSourceData() },
-        sourceLink () { this.readyToSave = false },
-        source () { this.sourceLink = this.source }
+        entity () { this.watchInput() },
+        source () { this.watchInput() }
     },
 
     created () {
@@ -186,6 +185,16 @@ export default {
             else this.getSourceData()
         },
 
+        watchInput () {
+            this.sourceLink = this.source
+            this.error = null
+            this.duplicates = []
+            this.sourceData = {}
+            this.selection = {}
+
+            if (this.sourceLink) this.getSourceData()
+        },
+
         checkSource () {
             let error = null
             if (!this.source) error = 'No Source given'
@@ -199,16 +208,16 @@ export default {
                 this.$root.loading = this.loading = true
                 this.$root.setTitle(this.title)
 
-                this.readyToSave = false
                 this.error = null
                 this.duplicates = []
-                this.selection = this.sourceData = {}
+                this.sourceData = {}
+                this.selection = {}
 
                 const dbi = await this.$root.DBI_SELECT_POST('import/' + this.entity, { source: this.sourceLink })
 
                 if (!dbi?.url) this.error = typeof dbi === 'object' ? ('Source Dataobject does not seem to be a ' + this.entity.slice(0, -1)) : dbi
                 else if (dbi?.duplicates?.[0]) {
-                    this.error = 'Duplicates detected'
+                    this.error = 'This object has already been imported. Duplicate(s) detected:'
                     this.duplicates = dbi.duplicates
                 }
                 else {
@@ -216,7 +225,6 @@ export default {
                     Object.keys(this.sourceData.data).forEach((key) => {
                         this.selection[key] = true
                     })
-                    this.readyToSave = true
                 }
 
                 this.$root.loading = this.loading = false

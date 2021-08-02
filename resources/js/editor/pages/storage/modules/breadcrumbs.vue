@@ -1,85 +1,90 @@
 <template>
-<div
+<!--<div
     class="d-flex align-center flex-grow-1"
     :class="boxed ? (boxClass + ' breadcrumbs-box') : ''"
     style="cursor: default; overflow-x: auto;"
     :style="height ? ('height:' + height + 'px;') : ''"
->
+>-->
+<input-template>
+    <template v-slot:input>
+        <div class="d-flex align-center" style="margin-left: -10px; overflow-x: hidden">
 
-    <template v-for="(item, i) in items">
-        <!-- Crumb -->
-        <div
-            :key="'crumb' + i"
-            :style="!disabled && item.value !== false ? 'cursor: pointer' : ''"
-            @click="setPath(item.value)"
-        >
-            <div
-                v-if="item.text"
-                v-text="item.text"
-                class="text-truncate font-weight-medium"
-                :style="'max-width:' + getNodeWidth(i) + 'px'"
-            />
-            <v-icon
-                v-else
-                class="ml-2"
-                v-text="item.icon"
-            />
-        </div>
-
-        <!-- Divider -->
-        <v-menu
-            :key="'divider' + i"
-            v-if="i < items.length - 1 || (!disabled && Object.keys(item.nodes)[0])"
-            tile
-            offset-y
-            nudge-bottom="4"
-            nudge-right="12"
-        >
-            <!-- Activator -->
-            <template v-slot:activator="{ on, attrs }">
-                <v-hover v-slot="{ hover }" :disabled="disabled || !Object.keys(item.nodes)[0]">
-                    <div
-                        v-bind="hover ? attrs : null"
-                        v-on="hover ? on : null"
-                    >
-                        <v-icon
-                            v-text="dividerBtn"
-                            :color="hover ? 'blue_sec' : ''"
-                            class="ml-2 mr-2"
-                        />
-                    </div>
-                </v-hover>
-                <!--<v-btn
-                    small
-                    icon
-                    class="ml-1 mr-1"
-                    v-bind="attrs"
-                    v-on="on"
-
-                >
-                    <v-icon v-text="dividerBtn" />
-                </v-btn>-->
-            </template>
-
-            <v-card tile>
-                <v-hover
-                    v-for="(node, nodepath) in item.nodes"
-                    :key="nodepath"
-                    v-slot="{ hover }"
+            <template v-for="(item, i) in items">
+                <!-- Crumb -->
+                <div
+                    :key="'crumb' + i"
+                    :style="!disabled && item.value !== false ? 'cursor: pointer' : ''"
+                    @click="setPath(item.value)"
                 >
                     <div
-                        class="pa-2 caption"
-                        :class="hover ? 'grey_prim' : (item.disabled ? 'grey--text' : '')"
-                        :style="'cursor:' + (hover ? 'pointer' : 'default')"
-                        v-text="node"
-                        @click="setPath(nodepath)"
+                        v-if="item.text"
+                        v-text="item.text"
+                        class="text-truncate caption mt-1"
+                        :style="'max-width:' + getNodeWidth(i) + 'px'"
                     />
-                </v-hover>
-            </v-card>
-        </v-menu>
+                    <v-icon
+                        v-else
+                        class="ml-2"
+                        v-text="item.icon"
+                    />
+                </div>
 
+                <!-- Divider -->
+                <v-menu
+                    :key="'divider' + i"
+                    v-if="i < items.length - 1 || (!disabled && Object.keys(item.nodes)[0])"
+                    tile
+                    offset-y
+                    nudge-bottom="4"
+                    nudge-right="12"
+                >
+                    <!-- Activator -->
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-hover v-slot="{ hover }" :disabled="disabled || !Object.keys(item.nodes)[0]">
+                            <div
+                                v-bind="hover ? attrs : null"
+                                v-on="hover ? on : null"
+                            >
+                                <v-icon
+                                    v-text="dividerBtn"
+                                    :color="hover ? 'blue_sec' : ''"
+                                    class="ml-2 mr-2"
+                                />
+                            </div>
+                        </v-hover>
+                        <!--<v-btn
+                            small
+                            icon
+                            class="ml-1 mr-1"
+                            v-bind="attrs"
+                            v-on="on"
+
+                        >
+                            <v-icon v-text="dividerBtn" />
+                        </v-btn>-->
+                    </template>
+
+                    <v-card tile>
+                        <v-hover
+                            v-for="(node, nodepath) in item.nodes"
+                            :key="nodepath"
+                            v-slot="{ hover }"
+                        >
+                            <div
+                                class="pa-2 caption"
+                                :class="hover ? 'grey_prim' : (item.disabled ? 'grey--text' : '')"
+                                :style="'cursor:' + (hover ? 'pointer' : 'default')"
+                                v-text="node"
+                                @click="setPath(nodepath)"
+                            />
+                        </v-hover>
+                    </v-card>
+                </v-menu>
+
+            </template>
+        </div>
     </template>
-</div>
+</input-template>
 </template>
 
 <script>
@@ -98,7 +103,7 @@ export default {
         boxed:      { type: Boolean, default: false },
         height:     { type: Number, default: 0 },
         hideHome:   { type: Boolean, default: false },
-        homeBtn:    { type: String, default: 'home' },
+        homeBtn:    { type: String, default: 'filter_drama' },
         dividerBtn: { type: String, default: 'navigate_next' }
     },
 

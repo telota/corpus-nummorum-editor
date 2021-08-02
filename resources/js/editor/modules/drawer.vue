@@ -46,11 +46,11 @@
             </v-hover>
         </div>
 
-        <div v-else-if="costumHeader" :style="'height:' + header + 'px'">
+        <div v-else-if="costumHeader" :style="'height:' + costumHeader + 'px'">
             <slot name="header" />
         </div>
 
-        <div :style="stylingContent" @click="onDrawerExpand(true)">
+        <div :style="stylingContent" @click="noAutoExpansion ? '' : onDrawerExpand(true)">
             <slot name="content" />
         </div>
     </div>
@@ -78,6 +78,8 @@ export default {
         delay: { type: Number, default: 350 },
         color: { type: String, default: 'drawer_bg' },
         collapse:  { type: [Number, String], default: null },
+        expanding: { type: [Number, String], default: null },
+        noAutoExpansion: { type: Boolean, default: false }
     },
 
     computed: {
@@ -145,7 +147,14 @@ export default {
     watch: {
         collapse () {
             if (this.collapse) this.onDrawerExpand(false)
+        },
+        expanding () {
+            if (this.expanding) this.onDrawerExpand(true)
         }
+    },
+
+    created () {
+        this.drawerWidth = this.mini_width
     },
 
     methods: {
