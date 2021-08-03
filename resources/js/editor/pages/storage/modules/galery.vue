@@ -1,17 +1,20 @@
 <template>
 <div
-    :class="'component-content' + (dialog ? ' component-content-dialog' : '')"
+    :class="'transition-width-350 component-content' + (dialog ? ' component-content-dialog' : '')"
     style="overflow-y: hidden; margin-left: 200px;"
     :style="'width:' + this.width + 'px'"
 >
     <v-fade-transition>
         <!-- Loading -->
         <div
-            v-if="loading"
-            class="d-flex align-center justify-center"
-            style="position: absolute; left: 0; top: 0; right: 0; bottom: 0"
+            v-if="loading || !items[0]"
+            class="d-flex align-center justify-center headline"
+            style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow-y: scroll; cursor: default;"
         >
-            <v-progress-circular :size="200" indeterminate />
+            <v-progress-circular v-if="loading" :size="200" indeterminate />
+            <div v-else-if="!currentDir" v-text="'Please select a directory'" />
+            <div v-else-if="search" v-text="'No matches for \'' + search + '\''" />
+            <div v-else v-text="'No Files in current directory'" />
         </div>
 
         <!-- Tiles -->
@@ -44,19 +47,32 @@
                                 :style="[
                                     'height:' + (grid.size - 20) + 'px',
                                     (hover ? 'outline: 3px solid lightsteelblue' : ''),
-                                    (selected.includes(path) ? ('outline: 3px solid ' + (hover ? 'cornflowerblue' : 'steelblue')) : '')
+                                    (marked.includes(path) ? ('outline: 3px solid ' + (hover ? 'cornflowerblue' : 'steelblue')) : '')
                                 ].join(';\n')"
-                                @click.exact="select(path)"
-                                @click.ctrl="select(path, true)"
+                                @click.exact="mark(path)"
+                                @click.ctrl="mark(path, true)"
                                 @contextmenu="(element) => showContextMenu(element, path)"
                             >
+                                <v-btn
+                                    v-if="select"
+                                    fab
+                                    absolute
+                                    x-small
+                                    dark
+                                    class="blue_prim ml-n2 mt-n2"
+                                    :disabled="selected === path"
+                                    v-on:click="$emit('select', path)"
+                                >
+                                    <v-icon v-text="'touch_app'" />
+                                </v-btn>
+
                                 <!-- Img -->
                                 <adv-img
                                     contain
                                     :height="grid.size - 80"
                                     :src="path"
                                     :background="$vuetify.theme.dark ? 'imgbg' : 'white'"
-                                    style="outline: 1px solid lightgrey"
+                                    style="outline: 1px solid grey"
                                 />
 
                                 <!-- Tooltip / Name -->
@@ -83,62 +99,6 @@
         </v-virtual-scroll>
     </v-fade-transition>
 
-    <!-- Loading
-    <div
-        v-if="loading"
-        class="d-flex align-center justify-center"
-        style="position: absolute; top: 0; bottom: 0; width: 100%"
-    >
-        <v-progress-circular :size="200" indeterminate />
-    </div>-->
-
-    <!-- Tiles
-    <v-fade-transition>
-        <v-row v-if="!loading && filtered[0]" class="ma-2">
-            <v-col
-                v-for="(item, i) in filtered"
-                :key="item || i"
-                :cols="cols"
-            >
-                <div
-                    @click.exact="select(item)"
-                    @click.ctrl="select(item, true)"
-                    @contextmenu="(element) => showContextMenu(element, item)"
-                >
-                    <adv-img contain :src="item" />
-                </div>
-            </v-col>
-        </v-row>
-    </v-fade-transition> -->
-
-    <!-- Zoom
-    <v-expand-transition>
-        <div
-            id="file-galery-zoom"
-            :style="'margin-left:' + zoomPosition + 'px'"
-            class="d-flex"
-        >
-            <v-hover
-                v-for="(side, s) in ['left', 'right']"
-                :key="side + s"
-                v-slot="{ hover }"
-            >
-                <div
-                    class="d-flex align-center justify-center"
-                    style="width: 75px;height: 75px;border-top-right-radius: 75px 75px;"
-                    :style="(s === 0 ? 'transform: scaleX(-1);' : '') + (hover && (s === 0 ? (zoom > 0) : (zoom < 2)) ? 'background-color:#ddd;cursor:pointer;' : '')"
-                    @click="$store.commit('setGaleryZoom', s === 0 ? -1 : 1)"
-                >
-                    <v-icon
-                        x-large
-                        class="mt-4 mr-3"
-                        :disabled="s === 0 ? (zoom < 1) : (zoom > 1)"
-                        v-text="s === 0 ? 'zoom_out' : 'zoom_in'"
-                    />
-                </div>
-            </v-hover>
-        </div>
-    </v-expand-transition>-->
 </div>
 </template>
 
@@ -156,7 +116,9 @@ export default {
         currentDir:     { type: [String, Boolean], default: null },
         currentFile:    { type: [String, Boolean], default: null },
         search:         { type: String, default: null },
-        selected:       { type: Array }
+        marked:         { type: Array, default: () => [] },
+        select:         { type: Boolean, default: false },
+        selected:       { type: String, default: null },
     },
 
     computed: {
@@ -166,6 +128,7 @@ export default {
 
         items () {
             const stored = this.$store.state.storage.files.items
+            //console.log(stored)
 
             if (this.search) {
                 const items = stored.filter((item) => item.toLowerCase().includes(this.search.toLowerCase()))
@@ -196,7 +159,7 @@ export default {
         },
 
         width () {
-            return this.$vuetify.breakpoint.width - (200 + this.right)
+            return this.$vuetify.breakpoint.width - (200 + this.right + (this.dialog ? 50 : 0))
         },
 
         height () {
@@ -212,7 +175,6 @@ export default {
 
         grid () {
             const width = this.width - 40
-            console.log(width)
 
             let cols = 6
 
@@ -245,26 +207,14 @@ export default {
         },
 
         async fetchIndex () {
-            if (this.currentDir) this.$store.dispatch('fetchFiles', { directory: this.currentDir })
+            if (this.currentDir) {
+                await this.$store.dispatch('fetchFiles', { directory: this.currentDir })
+                if (this.currentFile && !this.items.includes(this.currentFile)) alert(this.currentFile + ' was not found')
+            }
         },
 
-        select (item, push = false) {
-            this.$emit('selectFile', item, push)
-            /*if (push) {
-                if (this.selected.includes(item)) {
-                    if (this.selected.length < 2) this.selected = []
-                    else {
-                        const index = this.selected.indexOf(item)
-                        this.selected.splice(index, 1)
-                    }
-                    if (item = this.currentDir + '/' + this.currentFile) this.$emit('setPath', this.currentDir)
-                }
-                else this.selected.push(item)
-            }
-            else {
-                if (this.selected.includes(item)) this.$emit('setPath', this.currentDir)
-                else this.$emit('setPath', item)
-            }*/
+        mark (item, push = false) {
+            this.$emit('markFile', item, push)
         },
 
         showContextMenu (element, item) {
@@ -275,9 +225,9 @@ export default {
             let color = null
 
             if (path = this.currentFile) color = 'yellow'
-            else if (this.selected.includes(path)) color = 'blue'
+            else if (this.marked.includes(path)) color = 'blue'
 
-            console.log(path, this.currentFile)
+            //console.log(path, this.currentFile)
 
             return color ? ('outline: 3px solid ' + color) : ''
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\storage;
 
 use Storage;
+use DB;
 use Auth;
 use DateTime;
 //use App\Models\searchFiles;
@@ -41,6 +42,62 @@ class StorageActions {
         return $path;
     }
 
+    public function getFileDetails ($root, $path) {
+        $file = explode('/', $path);
+        $file = array_pop($file);
+        $dbi = [];
+
+        if ($root === 'Monograms') {
+            $dbi = DB::table(config('dbi.tablenames.monograms'))
+                ->select([
+                    DB::Raw('"materials" AS entity'),
+                    'id AS id',
+                    DB::Raw('CONCAT("cn monogram ", id) AS name'),
+                    DB::Raw('null AS author'),
+                    DB::Raw('null AS copyright')
+                ])
+                ->where('image', $file)
+                ->get();
+            $dbi = json_decode($dbi, true);
+        }
+        else if ($root === 'Symbols') {
+            $dbi = DB::table(config('dbi.tablenames.symbols'))
+                ->select([
+                    DB::Raw('"symbols" AS entity'),
+                    'id AS id',
+                    DB::Raw('CONCAT("cn symbol ", id) AS name'),
+                    DB::Raw('null AS author'),
+                    DB::Raw('null AS copyright')
+                ])
+                ->where('image', $file)
+                ->get();
+            $dbi = json_decode($dbi, true);
+        }
+        else {
+            $dbi = DB::table(config('dbi.tablenames.images'))
+                ->select([
+                    DB::Raw('"coins" AS entity'),
+                    'CoinID AS id',
+                    DB::Raw('CONCAT("cn coin ", CoinID) AS name'),
+                    'ObjectType AS kind',
+                    DB::Raw('IF(ObverseImageFilename = "'.$path.'", ObversePhotographer, ReversePhotographer) AS author'),
+                    DB::Raw('null AS copyright'),
+                    DB::Raw('created_at AS created'),
+                ])
+                ->where(function ($subquery) use ($path) { $subquery->orWhere('ObverseImageFilename', $path)->orWhere('ReverseImageFilename', $path); })
+                ->get();
+            $dbi = json_decode($dbi, true);
+        }
+
+        return [
+            'path' => $path,
+            'file' => $file,
+            'type' => Storage::mimeType($path),
+            'size' => Storage::size($path),
+            'relations' => $dbi
+        ];
+    }
+
     // --------------------------------------------------------------------
 
     public function sanitizeName ($name) {
@@ -68,158 +125,3 @@ class StorageActions {
         ];
     }
 }
-
-
-/*
-
-    public function createDirectoryIndex ($directory = null) {
-
-        if (empty($directory)) {
-            $directories = Storage::directories('storage');
-        }
-        else {
-            $directory = trim($directory, '/');
-            $directory = explode('/', $directory);
-            $directories = [$directory = 'storage/'.$directory[0]];
-        }
-
-        foreach ($directories as $dir) {
-            $dir = substr($dir, 8);
-
-            $content = array_map(function ($path) {
-                return substr($path, 8);
-            }, Storage::allDirectories('storage/'.$dir));
-
-            array_unshift($content, $dir);
-
-            Storage::put('indices/directories/'.$dir.'.json', json_encode($content, JSON_UNESCAPED_UNICODE));
-        }
-    }
-
-    // create MetaFile for User Upload
-    public function createMetaForUpload ($path, $file, $meta = null) {
-        $data = [
-            'title'             => empty($meta['title']) ? null : $meta['title'],
-            'originalFileName'  => empty($meta['originalFileName']) ? $file->getClientOriginalName() : $meta['originalFileName'],
-            'size'              => empty($meta['size']) ? $file->getSize() : $meta['size'],
-            'type'              => empty($meta['type']) ? $file->getMimeType() : $meta['type'],
-            'modified'          => empty($meta['modified']) ? null : $meta['modified'],
-            'public'            => empty($meta['public']) ? false : $meta['public'],
-            'uploadEmail'       => empty($meta['email']) ? null : $meta['email'],
-            'uploadDate'        => date('Y-m-d H:i:s')
-        ];
-
-        if (empty($data['uploadEmail'])) {
-            $auth = Auth::user();
-            if (!empty($auth)) $data['uploadEmail'] = $auth->email;
-        }
-
-        $data['creatorEmail'] = $data['uploadEmail'];
-        $data['creatorDate'] = $data['uploadDate'];
-
-        return $this->createMeta($path, $data);
-    }
-
-    // create MetaFile (use input data if given)
-    public function createMeta ($path, $meta = null) {
-
-        $metaPath = $path.'.META';
-
-        if (empty($meta['modified'])) {
-            $lastmodified = Storage::LastModified('storage/'.$path);
-            $lastmodified = DateTime::createFromFormat("U", $lastmodified);
-            $meta['modified'] = $lastmodified->format('Y-m-d H:i:s');
-        }
-
-        $data = [
-            'id'                => $metaPath,
-            'relatedFile'       => [
-                'id'                => $path,
-                'originalFileName'  => empty($meta['originalFileName']) ? null : $meta['originalFileName'],
-                'size'              => empty($meta['size']) ? Storage::size('storage/'.$path) : $meta['size'],
-                'type'              => empty($meta['type']) ? Storage::mimeType('storage/'.$path) : $meta['type'],
-                'lastModified'      => empty($meta['modified']) ? null : $meta['modified'],
-                'uploadedBy'        => empty($meta['uploadEmail']) ? null : $meta['uploadEmail'],
-                'uploadedAt'        => empty($meta['uploadDate']) ? null : $meta['uploadDate']
-            ],
-            'createdBy'         => empty($meta['creatorEmail']) ? env('MAIL_FROM_ADDRESS') : $meta['creatorEmail'],
-            'createdAt'         => empty($meta['creatorDate']) ? date('Y-m-d H:i:s') : $meta['creatorDate'],
-            'public'            => empty($meta['public']) ? false : true,
-            'data' => []
-        ];
-
-        $success = Storage::put('storage/'.$metaPath, json_encode($data, JSON_UNESCAPED_UNICODE));
-        if (!empty($success)) $success = $this->indexMeta($path, $data);
-
-        return empty($success) ? false : $metaPath;
-    }
-
-    // append to existing MetaFile
-    public function appendMeta ($path, $meta) {
-
-        $metaPath = $path.'.META';
-        $storageMetaPath = 'storage/'.$metaPath;
-
-        if (Storage::missing('storage/'.$path)) return false;
-        if (Storage::missing($storageMetaPath)) $data = $this->createMeta($path);
-
-        $data = Storage::get($storageMetaPath);
-        $data = json_decode($data, true);
-
-        $auth = Auth::user();
-        $meta['modifiedBy'] = empty($auth) ? null : $auth->email;
-        $meta['modifiedAt'] = date('Y-m-d H:i:s');
-
-        array_unshift($data['data'], $meta);
-
-        $success = Storage::put($storageMetaPath, json_encode($data, JSON_UNESCAPED_UNICODE));
-        if (!empty($success)) $success = $this->indexMeta($path, $data);
-
-        return empty($success) ? false : $metaPath;
-    }
-
-    // Write to FileSearch
-    public function indexMeta ($path, $meta) {
-        if (!empty($meta['relatedFile']['originalFileName'])) $data[] = 'originalFileName::'.$meta['relatedFile']['originalFileName'];
-        if (!empty($meta['relatedFile']['uploadedBy'])) $data[] = 'uploadedBy::'.$meta['relatedFile']['uploadedBy'];
-
-        if(!empty($meta['data'][0])) {
-            foreach ($meta['data'][0] as $key => $val) {
-                if (
-                    !empty($val) &&
-                    $key !== 'modifiedBy' &&
-                    $key !== 'modifiedAt'
-                ) $data[] = trim($key).'::'.str_replace('::', '', str_replace('&&', '', trim($val)));
-            }
-        }
-
-        $data = implode('&&', $data);
-
-        searchFiles::updateOrCreate([
-            'filepath' => $path,
-        ],[
-            'filepath' => $path,
-            'metadata' => $data,
-            'is_public' => empty($meta['public']) ? 0 : 1
-        ]);
-
-        return true;
-    }
-
-    public function publishFile ($path, $value = null) {
-
-        $metaPath = $path.'.META';
-
-        if (Storage::missing('storage/'.$metaPath)) $metaPath = $this->createMeta($path);
-
-        $meta = json_decode(Storage::get('storage/'.$metaPath), true);
-        $public = isset($value) ? (empty($value) ? false : true) : (empty($meta['public']) ? true : false);
-        $meta['public'] = $public;
-        //die('state: '.$public);
-
-        $success = Storage::put('storage/'.$metaPath, json_encode($meta, JSON_UNESCAPED_UNICODE));
-        if (!empty($success)) searchFiles::where('filepath', $path)->update(['is_public' => empty($public) ? 0 : 1]);
-
-        return empty($success) ? false : $metaPath;
-    }
-    */

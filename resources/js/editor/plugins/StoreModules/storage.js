@@ -14,10 +14,8 @@ export default ({
             expanded: [],
             expandedAll: false
         },
-        editor: {
+        details: {
             loading: false,
-            width: 400,
-            widthCached: 500,
             item: {}
         },
         galery: {
@@ -33,12 +31,9 @@ export default ({
         setDirectoryExpandedAll (state, input) { state.directory.expandedAll = input },
 
         setFilesItems (state, input)            { state.files.items = input?.[0] ? input : [] },
-        setEditorItem (state, input)            { state.editor.item = input?.id ? input : {} },
+        setDetailsItem (state, input)            { state.details.item = input?.path ? input : {} },
 
         setLoading (state, input)               { state[input.key].loading = input.value },
-
-        setWidth (state, input)                 { state[input.key].width = input.value },
-        setWidthCached (state, input)           { state[input.key].widthCached = input.value },
 
         setGaleryZoom (state, input) {
             const newZoom = state.galery.zoom + input
@@ -79,81 +74,20 @@ export default ({
             commit('setLoading', { key: 'files', value: false })
         },
 
-        async fetchMeta ({ commit }, payload) {
-            console.log('Fetching Meta for ' + payload.path)
-            commit('setLoading', { key: 'editor', value: true })
-            commit('setEditorItem', {})
+        async fetchDetails ({ commit }, payload) {
+            console.log('Fetching Details for ' + payload.path)
+            commit('setLoading', { key: 'details', value: true })
+            commit('setDetailsItem', {})
 
-            const path = this.state.baseURL + '/storage-api/meta/' + payload.path + '.META'
+            const path = this.state.baseURL + '/storage-api/details/' + payload.path
             const response = await axios.get(path).catch((error) => console.error('FILE FETCH', error))
 
             const data = response?.data
 
-            if (data?.id) commit('setEditorItem', data)
+            if (data?.path) commit('setDetailsItem', data)
 
-            commit('setLoading', { key: 'editor', value: false })
+            commit('setLoading', { key: 'details', value: false })
         },
-
-        async appendMeta ({ commit }, payload) {
-            console.log('Sending Metadata for ' + payload.path)
-            commit('setLoading', { key: 'editor', value: true })
-
-            const path = this.state.baseURL + '/storage-api/action/append-meta'
-
-            await axios.post(path, Object.assign ({}, payload))
-                .then(async (response) => {
-                    const data = response?.data
-                    if (data.success && data.meta) {
-                        commit('setEditorItem', {})
-                        commit('setEditorItem', data.meta)
-                    }
-                    else console.error(response)
-                })
-                .catch((error) => {
-                    console.error(error)
-                })
-
-            commit('setLoading', { key: 'editor', value: false })
-        },
-
-        toggleDirectoryExpansion ({ commit }, payload) {
-            const path = payload.path
-            let expand = this.state.storage.directory.expanded
-            const index = expand.indexOf(path)
-
-            if (index < 0) expand.push(path)
-            else if (expand.length > 1) expand.splice(index, 1)
-            else expand = []
-
-            commit('setDirectoryExpanded', expand)
-        },
-
-        toggleSidebar ({ commit }, payload) {
-            const key = payload.key
-            const self = this
-
-            if (this.state.browser[key].width !== 0) {
-                commit('setWidthCached', { key, value: this.state.browser[key].width })
-                commit('setWidth', { key, value: 0 })
-            }
-            else commit('setWidth', { key, value: this.state.browser[key].widthCached })
-
-            /*if (self.state.browser[key].width === 0) {
-                for (let i = 1; i < 11; i++) {
-                    setTimeout(() => {
-                        commit('setWidth', { key, value: Math.ceil(self.state.browser[key].widthCached / 10 * (i)) })
-                    }, 1)
-                }
-            }
-            else {
-                commit('setWidthCached', { key, value: self.state.browser[key].width })
-                for (let i = 1; i < 11; i++) {
-                    setTimeout(() => {
-                        commit('setWidth', { key, value: Math.ceil(self.state.browser[key].widthCached / 10 * (10 - i)) })
-                    }, 1)
-                }
-            }*/
-        }
     }
 
 });

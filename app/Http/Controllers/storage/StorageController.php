@@ -56,22 +56,18 @@ class StorageController extends Controller {
     }
 
     // Get information about specific file
-    public function fileMeta ($root, $path) {
+    public function details ($root, $path) {
 
         // Check Auth
-        $this->authCheck(11);
+        $this->authCheck(10);
 
         $path = $root.'/'.$path;
         $this->directoryCheck($path);
 
-        $metaPath = $path.'.META';
         $handler = new StorageActions();
-        if (Storage::missing('storage/'.$metaPath)) $metaPath = $handler->createMeta($path);
-        if (empty($metaPath)) die (abort(404));
+        $data = $handler->getFileDetails($root, $path);
 
-        $meta = json_decode(Storage::get('storage/'.$metaPath), true);
-
-        return Response::json($meta);
+        return Response::json($data);
     }
 
     // Upload file to storage

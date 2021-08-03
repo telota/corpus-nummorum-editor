@@ -67,7 +67,8 @@ export default {
                 'width: 200px',
                 'height: calc(100vh - 90px)',
                 'overflow-y: auto',
-                'z-index: 98'
+                'z-index: 98',
+                'box-shadow: 0px 0px 10px rgba(0,0,0,0.34)'
             ].join(';\n')
         }
     }

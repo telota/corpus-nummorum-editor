@@ -13,6 +13,14 @@
             <div :style="'height:' + (showSearch ? 80 : 40) + 'px;'">
                 <div class="d-flex align-center">
 
+                    <!-- Expand all -->
+                    <adv-btn
+                        :icon="expandAll ? 'unfold_less' : 'unfold_more'"
+                        :tooltip="expandAll ? 'expand_less' : 'expand_more'"
+                        medium
+                        v-on:click="expandAll = !expandAll"
+                    />
+
                     <!-- Filter -->
                     <adv-btn
                         :icon="showSearch ? 'search_off' : 'search'"
@@ -29,14 +37,6 @@
                         :disabled="loading"
                         medium
                         v-on:click="$store.dispatch('fetchDirectories')"
-                    />
-
-                    <!-- Expand all -->
-                    <adv-btn
-                        :icon="expandAll ? 'unfold_less' : 'unfold_more'"
-                        :tooltip="expandAll ? 'expand_less' : 'expand_more'"
-                        medium
-                        v-on:click="expandAll = !expandAll"
                     />
 
                     <v-spacer />
@@ -82,7 +82,7 @@
         <!-- Directory Items -->
         <template v-slot:content>
             <v-expand-transition>
-                <div v-if="Object.keys(items)[0]" class="pt-5">
+                <div v-if="Object.keys(items)[0]" class="pt-1">
 
                     <!-- List (showSearch) -->
                     <div v-if="search" class="caption pl-3 pr-4 pt-1">

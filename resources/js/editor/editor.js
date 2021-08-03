@@ -124,6 +124,7 @@ Vue.component('tribes',             require('./pages/entities_secondary/tribes.v
 
 Vue.component('references',         require('./pages/tools/bibliography.vue').default);
 Vue.component('objectgroups',       require('./pages/tools/objectgroups.vue').default);
+Vue.component('file-manager',       require('./pages/storage/index.vue').default);
 
 // Templates
 Vue.component('dialog-template',    require('./templates/dialogTemplate.vue').default);

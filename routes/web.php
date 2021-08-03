@@ -123,8 +123,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post ('/action/upload',              'StorageController@upload');
         Route::post ('/action/{action}',            'StorageController@action');
 
-        Route::get  ('/meta/{root}/{path}.json',    'StorageController@fileMeta')->where('path', '.+');
-        Route::get  ('/meta/{root}/{path}.META',    'StorageController@fileMeta')->where('path', '.+');
+        Route::get  ('/details/{root}/{path}',      'StorageController@details')->where('path', '.+');
     });
 });
 

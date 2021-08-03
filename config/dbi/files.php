@@ -24,15 +24,16 @@ return [
     ],
 
     'root_directories' => [
-        'coin-images' => 'Coin Images (CN)',
-        'coin-images-ext' => 'Coin Images (external Users)',
-        'CoinOfMonth' => 'Coin of the Month',
-        'db1995' => 'DB (1995)',
+        'coins'             => 'Coins (old)',
+        'coin-images'       => 'Coin Images (CN)',
+        'coin-images-ext'   => 'Coin Images (external Users)',
+        'CoinOfMonth'       => 'Coin of the Month',
+        'db1995'            => 'DB (1995)',
         'legend-directions' => 'Legend Directions',
-        'Monograms' => 'Monograms',
-        'news' => 'News',
-        'Symbols' => 'Symbols',
-        'team' => 'Team',
-        'uploads' => 'Uploads'
+        'Monograms'         => 'Monograms',
+        'news'              => 'News',
+        'Symbols'           => 'Symbols',
+        'team'              => 'Team',
+        'uploads'           => 'Uploads'
     ]
 ];

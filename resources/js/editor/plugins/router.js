@@ -229,7 +229,7 @@ const router = new Router({
             component: require ('./../pages/storage/index').default,
             props: (route) => ({
                 dialog: false,
-                path: route.params.pathMatch
+                routedPath: route.params.pathMatch
             })
         },
         {

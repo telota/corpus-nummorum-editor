@@ -33,7 +33,7 @@
                     style="position: absolute; width: 100%; height: 30px;"
                     :style="'z-index:' + ((zIndex + 1) + (small ? 10 : 0))"
                 >
-                    <div class="d-flex align-center" style="width: 150px;">
+                    <div class="d-flex align-center" style="width: 250px;">
                         <v-icon :dark="!$vuetify.theme.dark" :light="$vuetify.theme.dark" small class="ml-2 mr-2" v-text="icon" />
                         <v-card :dark="!$vuetify.theme.dark" :light="$vuetify.theme.dark" flat class="caption transparent text-truncate" v-html="text" />
                     </div>
@@ -44,7 +44,7 @@
                         v-html="selected ? ('Currently selected ID ' + selected) : 'No Selection, yet'"
                     />
 
-                    <div style="width: 150px; text-align: end">
+                    <div style="width: 250px; text-align: end">
                         <v-btn
                             small
                             tile
