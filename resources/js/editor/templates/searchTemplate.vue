@@ -94,8 +94,8 @@
                                     v-html="header.content(item)"
                                 />
 
-                                <td style="width: 120px">
-                                    <div class="d-flex">
+                                <td style="width: 140px">
+                                    <div class="d-flex justify-end">
                                         <adv-btn
                                             v-if="select"
                                             icon="touch_app"
@@ -199,7 +199,7 @@ export default {
             loading:        false,
 
             showFilters:    false,
-            layout:         this.defaultDisplay,
+            layout:         this.defaultLayout,
 
             fullFetch:      !this.sync,
             queryCounter:   0,
@@ -221,7 +221,7 @@ export default {
 
         attributes:     { type: Object, required: true },
         defaultSortBy:  { type: String, default: 'id.DESC' },
-        defaultDisplay: { type: String, default: 'table' },
+        defaultLayout:  { type: String, default: 'table' },
         table:          { type: Boolean, default: true },
         tiles:          { type: Boolean, default: true },
         smallTiles:     { type: Boolean, default: false },
@@ -387,10 +387,8 @@ export default {
 
         async getItems () {
             this.loading = this.$root.loading = true
-            let dbi = {}
 
-            if (this.fullFetch) dbi = await this.$root.DBI_SELECT_GET(this.entity, null)
-            else dbi = await this.$root.DBI_SELECT_POST(this.entity, this.query)
+            const dbi = await this.$root.DBI_SELECT_POST(this.entity, this.query)
 
             if (dbi?.pagination?.limit !== undefined) {
                 this.pagination.limit = dbi.pagination.limit
@@ -408,7 +406,7 @@ export default {
         },
 
         async setItems (forcedReload) {
-            if (forcedReload) await this.getItems()
+            if (!this.fullFetch || forcedReload) await this.getItems()
 
             if (this.fullFetch) {
                 this.loading = this.$root.loading = true
@@ -436,7 +434,7 @@ export default {
 
                 }, 150)
             }
-            else if (!forcedReload) this.items = this.getItems()
+            else this.items = this.itemsRaw
         },
 
         // Filtering

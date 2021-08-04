@@ -1,187 +1,192 @@
 <template>
 <div>
-    <v-row>
+    <component-toolbar />
+    <component-content>
+        <v-row class="pt-0 ma-0">
 
-        <!-- Legends Index -->
-        <v-col cols=3>
-            <v-card tile>
-                <div class="pa-3">
-                    <v-text-field outlined filled clearable dense
-                        ref="searchString"
-                        v-model="search.string"
-                        :label="$root.label('legend')"
-                        append-icon="keyboard"
-                        class="mb-n4"
-                        v-on:click:append="showKB = !showKB"
-                    />
-                    <v-expand-transition>
-                        <div v-if="showKB" class="d-flex justify-center">
-                            <keyboard
-                                :string="search.string"
-                                layout="el_uc"
-                                small
-                                hide_options
-                                v-on:input="keyboardInput"
-                            ></keyboard>
-                        </div>
-                    </v-expand-transition>
-                </div>
-
-                <div class="pl-3 pr-3 mt-n3 d-flex justify-center">
-                    <div class="d-flex align-center">
-                        <v-checkbox
-                            v-model="search.transform"
-                            label="use Pseudo-Greek"
-                            class="mr-1"
+            <!-- Legends Index -->
+            <v-col cols=3>
+                <v-card tile>
+                    <div class="pa-3">
+                        <v-text-field outlined filled clearable dense
+                            ref="searchString"
+                            v-model="search.string"
+                            :label="$root.label('legend')"
+                            append-icon="keyboard"
+                            class="mb-n4"
+                            v-on:click:append="showKB = !showKB"
                         />
-                        <sup class="body-1" style="cursor: pointer;" @click="showLG = true"> *</sup>
-                    </div>
-                    <div class="d-flex align-center ml-5">
-                        <v-checkbox
-                            v-model="search.regex"
-                            label="use REGEX"
-                            class="mr-1"
-                        />
-                        <sup class="body-1"><a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank"> *</a></sup>
-                    </div>
-                </div>
-
-                <div class="pl-3 pr-3 pt-2">
-                    <v-text-field outlined filled clearable dense
-                        v-model="search.keywords"
-                        :label="$root.label('Keywords')"
-                        class="mb-n3"
-                    />
-                </div>
-
-                <div
-                    class="text-center mb-2"
-                    v-text="loading ? 'Please wait ...' : (list.length + ' records' + (searchDisplay ? (' for \'' + searchDisplay + '\'') : ''))"
-                />
-
-                <v-progress-linear :indeterminate="loading" height="1" />
-
-                <v-virtual-scroll :items="list" item-height="60" height="700">
-                    <template v-slot:default="{ item, index }">
-                        <div
-                            class="pl-3 pr-3 d-flex align-center"
-                            :class="item.string === listSelect ? 'grey_prim' : ''"
-                            style="height: 60px; cursor: pointer;"
-                            @click="selectListItem(item)"
-                        >
-                            <div>
-                                <span v-html="item.string ? item.string : '<i>EMPTY</i>'" />
+                        <v-expand-transition>
+                            <div v-if="showKB" class="d-flex justify-center">
+                                <keyboard
+                                    :string="search.string"
+                                    layout="el_uc"
+                                    small
+                                    hide_options
+                                    v-on:input="keyboardInput"
+                                ></keyboard>
                             </div>
+                        </v-expand-transition>
+                    </div>
+
+                    <div class="pl-3 pr-3 mt-n3 d-flex justify-center">
+                        <div class="d-flex align-center">
+                            <v-checkbox
+                                v-model="search.transform"
+                                label="use Pseudo-Greek"
+                                class="mr-1"
+                            />
+                            <sup class="body-1" style="cursor: pointer;" @click="showLG = true"> *</sup>
                         </div>
-                    </template>
-                </v-virtual-scroll>
-            </v-card>
-        </v-col>
-
-        <!-- Legend Variants -->
-        <v-col cols=3>
-            <v-card tile>
-                <div class="pa-3">
-                    <v-row>
-                        <v-col cols="6">
-                            <v-select
-                                v-model="search.role"
-                                :items="[
-                                    { value: null, text:'All' },
-                                    { value: 0, text:'Coins' },
-                                    { value: 1, text:'Types' },
-                                    { value: 2, text:'Coins/Types' }
-                                ]"
-                                label="Entity"
-                                outlined dense filled
+                        <div class="d-flex align-center ml-5">
+                            <v-checkbox
+                                v-model="search.regex"
+                                label="use REGEX"
+                                class="mr-1"
                             />
-                        </v-col>
+                            <sup class="body-1"><a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank"> *</a></sup>
+                        </div>
+                    </div>
 
-                        <v-col cols="6">
-                            <v-select
-                                v-model="search.side"
-                                :items="[
-                                    { value: null, text:'All' },
-                                    { value: 0, text:'Obverse' },
-                                    { value: 1, text:'Reverse' },
-                                    { value: 2, text:'Obverse/Reverse' }
-                                ]"
-                                label="Side"
-                                outlined dense filled
-                            />
-                        </v-col>
-                    </v-row>
-                </div>
+                    <div class="pl-3 pr-3 pt-2">
+                        <v-text-field outlined filled clearable dense
+                            v-model="search.keywords"
+                            :label="$root.label('Keywords')"
+                            class="mb-n3"
+                        />
+                    </div>
 
-                <div
-                    class="text-center mb-2"
-                    v-text="listSelect === 0 ? '...' : (records.length + ' variants' + (records.length < recordsRaw.length ? (' (' + recordsRaw.length + ' in total)') : ''))"
-                />
+                    <div
+                        class="text-center mb-2"
+                        v-text="loading ? 'Please wait ...' : (list.length + ' records' + (searchDisplay ? (' for \'' + searchDisplay + '\'') : ''))"
+                    />
 
-                <v-divider />
+                    <v-progress-linear :indeterminate="loading" height="1" />
 
-                <div v-if="listSelect === 0">
-                    <div class="body-1 pt-10 text-center" v-text="'Legend Variants'" />
-                    <div class="caption pt-1 pb-10 text-center" v-text="'Click on a list item to show variants'" />
-                </div>
-                <v-virtual-scroll
-                    v-else-if="records[0]"
-                    :items="records"
-                    item-height="100"
-                    height="701"
-                >
-                    <template v-slot:default="{ item, index }">
-                        <div
-                            class="pa-3 d-flex justify-space-between"
-                            :class="item.id === recordSelect ? 'grey_prim' : ''"
-                            style="height: 100px; cursor: pointer;"
-                            @click="selectRecord(item)"
-                        >
-                            <div>
-                                <div class="body-1 font-weight-thin" v-html="item.legend" />
-                                <div class="caption pt-1">
-                                    <a :href="'/editor#/legends/' + item.id" class="caption" v-html="'ID&nbsp;' + item.id" />,
-                                    <span v-text="item.language === 'el' ? 'Greek' : (item.language === 'la' ? 'Latin' : item.language)" />,
-                                    <span v-text="item.role === 0 ? 'Coins' : (item.role === 1 ? 'Types' : 'Coins/Types')" />,
-                                    <span v-text="item.side === 0 ? 'Obverse' : (item.side === 1 ? 'Reverse' : 'Obverse/Reverse')" />
+                    <v-virtual-scroll :items="list" item-height="60" height="700">
+                        <template v-slot:default="{ item, index }">
+                            <div
+                                class="pl-3 pr-3 d-flex align-center"
+                                :class="item.string === listSelect ? 'grey_prim' : ''"
+                                style="height: 60px; cursor: pointer;"
+                                @click="selectListItem(item)"
+                            >
+                                <div>
+                                    <span v-html="item.string ? item.string : '<i>EMPTY</i>'" />
                                 </div>
-                                <div class="caption" v-html="item.keywords ? item.keywords : '-'" />
                             </div>
+                        </template>
+                    </v-virtual-scroll>
+                </v-card>
+            </v-col>
 
-                            <div class="ml-3" v-html="getDirectionImage(item)" />
-                        </div>
-                        <v-divider />
-                    </template>
-                </v-virtual-scroll>
-            </v-card>
-        </v-col>
+            <!-- Legend Variants -->
+            <v-col cols=3>
+                <v-card tile>
+                    <div class="pa-3">
+                        <v-row>
+                            <v-col cols="6">
+                                <v-select
+                                    v-model="search.role"
+                                    :items="[
+                                        { value: null, text:'All' },
+                                        { value: 0, text:'Coins' },
+                                        { value: 1, text:'Types' },
+                                        { value: 2, text:'Coins/Types' }
+                                    ]"
+                                    label="Entity"
+                                    outlined dense filled
+                                />
+                            </v-col>
 
-        <!-- Preview -->
-        <v-col cols=6>
-            <v-card tile>
-                <div class="pa-3">
-                    <ItemGallery
-                        v-if="recordSelect"
-                        :key="recordSelect"
-                        :entity="'legends'"
-                        :search_key="'id_legend'"
-                        :search_val="recordSelect ? recordSelect : 0"
-                        :tiles="4"
-                        :limit="8"
-                        color_main="grey_trip"
-                        color_hover="marked"
-                    />
-                    <div v-else>
-                        <div class="body-1 pt-7 text-center" v-text="'Related Types and Coins'" />
-                        <div class="caption pt-1 pb-7 text-center" v-text="'Click on a Variant to show Galery'" />
+                            <v-col cols="6">
+                                <v-select
+                                    v-model="search.side"
+                                    :items="[
+                                        { value: null, text:'All' },
+                                        { value: 0, text:'Obverse' },
+                                        { value: 1, text:'Reverse' },
+                                        { value: 2, text:'Obverse/Reverse' }
+                                    ]"
+                                    label="Side"
+                                    outlined dense filled
+                                />
+                            </v-col>
+                        </v-row>
                     </div>
-                </div>
-            </v-card>
-        </v-col>
-    </v-row>
 
-    <v-dialog v-model="showLG" tile width="175">
-        <v-card tile class="pa-2">
+                    <div
+                        class="text-center mb-2"
+                        v-text="listSelect === 0 ? '...' : (records.length + ' variants' + (records.length < recordsRaw.length ? (' (' + recordsRaw.length + ' in total)') : ''))"
+                    />
+
+                    <v-divider />
+
+                    <div v-if="listSelect === 0">
+                        <div class="body-1 pt-10 text-center" v-text="'Legend Variants'" />
+                        <div class="caption pt-1 pb-10 text-center" v-text="'Click on a list item to show variants'" />
+                    </div>
+                    <v-virtual-scroll
+                        v-else-if="records[0]"
+                        :items="records"
+                        item-height="100"
+                        height="701"
+                    >
+                        <template v-slot:default="{ item, index }">
+                            <div
+                                class="pa-3 d-flex justify-space-between"
+                                :class="item.id === recordSelect ? 'grey_prim' : ''"
+                                style="height: 100px; cursor: pointer;"
+                                @click="selectRecord(item)"
+                            >
+                                <div>
+                                    <div class="body-1 font-weight-thin" v-html="item.legend" />
+                                    <div class="caption pt-1">
+                                        <a :href="'/editor#/legends/' + item.id" class="caption" v-html="'ID&nbsp;' + item.id" />,
+                                        <span v-text="item.language === 'el' ? 'Greek' : (item.language === 'la' ? 'Latin' : item.language)" />,
+                                        <span v-text="item.role === 0 ? 'Coins' : (item.role === 1 ? 'Types' : 'Coins/Types')" />,
+                                        <span v-text="item.side === 0 ? 'Obverse' : (item.side === 1 ? 'Reverse' : 'Obverse/Reverse')" />
+                                    </div>
+                                    <div class="caption" v-html="item.keywords ? item.keywords : '-'" />
+                                </div>
+
+                                <div class="ml-3" v-html="getDirectionImage(item)" />
+                            </div>
+                            <v-divider />
+                        </template>
+                    </v-virtual-scroll>
+                </v-card>
+            </v-col>
+
+            <!-- Preview -->
+            <v-col cols=6>
+                <v-card tile>
+                    <div class="pa-3">
+                        <ItemGallery
+                            v-if="recordSelect"
+                            :key="recordSelect"
+                            :entity="'legends'"
+                            :search_key="'id_legend'"
+                            :search_val="recordSelect ? recordSelect : 0"
+                            :tiles="4"
+                            :limit="8"
+                            color_main="grey_trip"
+                            color_hover="marked"
+                        />
+                        <div v-else>
+                            <div class="body-1 pt-7 text-center" v-text="'Related Types and Coins'" />
+                            <div class="caption pt-1 pb-7 text-center" v-text="'Click on a Variant to show Galery'" />
+                        </div>
+                    </div>
+                </v-card>
+            </v-col>
+        </v-row>
+
+        <small-dialog
+            :show="showLG"
+            :width="175"
+            v-on:close="showLG = false"
+        >
             <div class="d-flex justify-center">
                 <table>
                     <tr>
@@ -194,8 +199,9 @@
                     </tr>
                 </table>
             </div>
-        </v-card>
-    </v-dialog>
+        </small-dialog>
+
+    </component-content>
 </div>
 </template>
 

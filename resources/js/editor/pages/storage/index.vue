@@ -12,7 +12,11 @@
         <component-toolbar :dialog="dialog">
 
             <!-- Upload -->
-            <upload :directory="currentDir" v-on:update="setFileIndex">
+            <upload
+                :directory="currentDir"
+                v-on:update="setFileIndex"
+                v-on:setPath="setCurrentPath"
+            >
                 <template v-slot:activator="slot">
                     <div class="pr-2">
                     <adv-btn

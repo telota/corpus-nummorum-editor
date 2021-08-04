@@ -1,48 +1,51 @@
 <template>
 <div>
-    <!-- Dialog -->
-    <v-dialog
-        v-model="controls.active"
-        persistent
-        :fullscreen="fullscreen || $vuetify.breakpoint.smAndDown"
-        scrollable
-        tile
-        width="800px"
-    >
-        <v-card tile height="75vH">
-            <!-- Sysbar -->
-            <dialogbartop
-                icon="cloud_upload"
-                text="Upload"
-                :fullscreen="fullscreen"
-                v-on:fullscreen="(emit) => fullscreen = emit"
-                v-on:close="controls.active = false"
-            ></dialogbartop>
 
-            <!-- Toolbar -->
-            <v-card tile class="grey_sec d-flex align-center">
+    <!-- Activator -->
+    <slot name="activator" v-bind:controls="controls">
+        <advbtn
+            icon="cloud_upload"
+            tooltip="upload Files to current Directory"
+            :disabled="controls.disabled"
+            v-on:click="controls.active = true"
+        />
+    </slot>
+
+    <!-- Dialog -->
+    <small-dialog
+        :show="controls.active"
+        icon="cloud_upload"
+        :text="'Upload to \'/' + dir + '\''"
+        width="90%"
+        :max-width="800"
+        no-padding
+        v-on:close="controls.active = false"
+    >
+        <div style="position: relative; height: calc(100vh - 150px); width: 100%;">
+            <v-card tile class="header_bg d-flex" style="height: 40px;">
+
+                <div
+                    class="caption d-flex align-center justify-center"
+                    style="position: absolute; width: 100%; height: 40px;"
+                    v-html="'<div>Maximale Größe pro Datei: <b>' + maxSize.value + '&nbsp;MB</b></div>'"
+                />
 
                 <!-- File Browser -->
-                <v-btn
-                    tile
-                    color="transparent"
-                    depressed
+                <adv-btn
+                    icon="folder_open"
+                    tooltip="open FIle Browser"
+                    medium
                     @click="openFileManager()"
-                >
-                    <v-icon v-text="'folder_open'" />
-                </v-btn>
+                />
 
                 <!-- Clear -->
-                <v-btn
-                    :tile="files[0] ? true : false"
-                    :text="!files[0]"
-                    color="transparent"
-                    depressed
+                <adv-btn
+                    icon="clear"
+                    tooltip="Clear Upload Queue"
+                    medium
                     :disabled="!files[0]"
-                    @click="files = []"
-                >
-                    <v-icon v-text="'clear'" />
-                </v-btn>
+                    @v-on:click="files = []"
+                />
 
                 <!-- File Input -->
                 <input
@@ -77,6 +80,7 @@
                             color="transparent"
                             v-bind="attrs"
                             v-on="on"
+                            style="height: 40px;"
                         >
                             <div
                                 class="mr-5"
@@ -95,7 +99,7 @@
                     </template>
 
                     <!-- Upload History Dropdown -->
-                    <v-card tile :width="fullscreen ? 500 : 250">
+                    <v-card tile :width="500">
                         <!-- current Upload -->
                         <template v-if="uploading.active">
                             <div class="d-flex align-center pa-1">
@@ -147,9 +151,9 @@
             </v-card>
 
             <!-- Body -->
-            <v-card-text
-                class="ma-0 pa-0"
-                style="position: relative"
+            <div
+                class="app_bg"
+                style="height: calc(100vh - 310px); position: relative;"
                 @drop.prevent="dropFile"
                 @dragover.prevent
             >
@@ -192,7 +196,7 @@
                     v-if="files[0]"
                     :items="files"
                     :item-height="120"
-                    style="width: 100%"
+                    style="width: 100%; overflow-y: scroll;"
                     :dis-bench="3"
                 >
                     <template v-slot:default="{ item, index }">
@@ -234,17 +238,12 @@
                     </template>
                 </v-virtual-scroll>
 
-            </v-card-text>
+            </div>
 
             <!-- Footer -->
-            <div>
+            <div style="height: 120px;">
                 <!-- Upload Options -->
-                <div class="pa-2 grey_prim">
-                    <!-- Remarks -->
-                    <div class="caption">
-                        Maximale Größe pro Datei: <b>{{ maxSize.value }}&nbsp;MB</b>.
-                        <span v-if="maxSize.hint">(Die tatsächliche Größe variiert je nach Umfang der Metadaten)</span>
-                    </div>
+                <div class="pa-2 grey_prim" style="height: 80px;">
 
                     <!-- Options
                     <div class="d-flex flex-wrap">
@@ -264,26 +263,18 @@
                     tile
                     block
                     large
-                    dark
+                    :dark="files[0] ? true : false"
                     class="title"
                     :class="uploading.active ? 'red' : 'blue_prim'"
                     v-text="'upload'"
                     :disabled="!files[0]"
+                    style="height: 40px;"
                     @click="() => { if (uploading.active) { abortUpload() } else uploadData() }"
                 />
             </div>
 
-        </v-card>
-    </v-dialog>
-
-    <!-- Activator -->
-    <slot name="activator" v-bind:controls="controls">
-        <advbtn
-            icon="cloud_upload"
-            tooltip="upload Files to current Directory"
-            v-on:click="controls.active = true"
-        />
-    </slot>
+        </div>
+    </small-dialog>
 
 </div>
 </template>
@@ -300,13 +291,13 @@ export default {
     data () {
         return {
             controls: {
-                active: false
+                active: false,
+                disabled: false
             },
             fullscreen: false,
             loading: false,
             files: [],
             meta: [],
-            dir: this.directory ? this.directory.trim('/') : 'uploads',
             dirIsPublic: false,
 
             uploading: {
@@ -331,6 +322,11 @@ export default {
     },
 
     computed: {
+        dir: {
+            get: function () { return this.directory ? this.directory.trim('/') : 'uploads' },
+            set: function (value) { this.$emit('setPath', value) }
+        },
+
         maxSize () {
             const system = this.$root.system
             const value = Math.min(system.maxPost, system.maxUpload, system.memoryLimit)
@@ -367,12 +363,6 @@ export default {
                 percentage,
                 string
             }
-        }
-    },
-
-    watch: {
-        directory () {
-            this.dir = this.directory ? this.directory.trim('/') : 'uploads'
         }
     },
 

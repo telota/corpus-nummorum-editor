@@ -13,9 +13,10 @@ export default {
         styling () {
             return [
                 'position: fixed',
+                'top: 40px',
                 'z-index: 500',
                 'width: 100vw',
-                'height: 100vh',
+                'height: calc(100vh - 40px)',
                 'pointer-events: none',
                 'background-color: rgb(255,190,10)',
                 'opacity: ' + 0.15

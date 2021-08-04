@@ -44,7 +44,8 @@ export default {
         icon:       { type: String, default: null },
         clearable:  { type: Boolean, default: false },
         noGrow:     { type: Boolean, default: false },
-        placeholder:{ type: String, default: null }
+        placeholder:{ type: String, default: null },
+        disabled:   { type: Boolean, default: false }
     },
 
     computed: {
@@ -72,6 +73,7 @@ export default {
         classes () {
             return [
                 'input-template',
+                this.disabled ? 'input-template-disabled' : null,
                 'd-flex',
                 'align-center',
                 (this.dark ? 'white--' : 'black--') + 'text'
@@ -109,6 +111,10 @@ export default {
 }
 
 .input-template:focus-within {
+    background-color: rgba(0,0,0,0.1);
+}
+
+.input-template-disabled {
     background-color: rgba(0,0,0,0.1);
 }
 </style>

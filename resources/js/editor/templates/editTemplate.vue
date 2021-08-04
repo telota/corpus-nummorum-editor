@@ -89,11 +89,14 @@
                 </div>
 
                 <v-expand-transition>
-                    <div v-if="editorExpanded || !editorItem.id">
+                    <div v-if="showEditor">
                         <slot name="editor" v-bind:item="editorItem" />
                     </div>
+                </v-expand-transition>
+
+                <v-expand-transition>
                     <div
-                        v-else
+                        v-if="!showEditor"
                         class="d-flex justify-center mt-n4"
                         v-html="printEditorSumup()"
                     />
@@ -177,6 +180,7 @@ export default {
             mode:               null,
 
             editorItem:         {},
+            cloningItem:        {},
             editorItemLabel:    this.itemLabel ?? ('cn ' + (this.entity.slice(-1) === 's' ? this.entity.slice(0, -1) : this.entity)),
             saveDisabled:       false,
             editorExpanded:     this.select ? false : true,
@@ -217,6 +221,10 @@ export default {
             else if (this.id === 'new' || this.id.slice(0, 6) === 'clone-') return 'Add new Item'
             else return 'Edit ' + this.editorItemLabel + ' ' + this.id
         },
+
+        showEditor () {
+            return this.editorExpanded || !this.editorItem.id
+        }
     },
 
     watch: {
@@ -289,6 +297,7 @@ export default {
                 const item = await this.getSingleItem(id)
                 Object.keys(this.cloningItem).forEach((key) => {
                     if (key !== 'id' && item[key] !== undefined) {
+                        if (item[key] === null) this.cloningItem[key].clone = null
                         this.cloningItem[key].value = item[key]
                         this.cloningItem[key].content = this.attributes[key].content(item)
                     }

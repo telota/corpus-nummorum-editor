@@ -1,46 +1,43 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            :defaultSortBy="'name_' + language"
-            cards
-            smallCards
+            :defaultSortBy="'name_' + language + '.ASC'"
+            smallTiles
             gallery="id_denomination"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row>
-                    <template v-for="(item, i) in attributes">
-                        <v-col
-                            v-if="item.filter !== undefined"
-                            :key="i"
-                            cols=12 
-                            sm=4 
-                            md=3
-                        >
-                            <v-text-field dense outlined filled clearable
-                                v-model="attributes[i].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, i) in attributes">
+                    <div
+                        v-if="item.filter !== undefined"
+                        :key="'filter' + i"
+                    >
+                        <v-text-field dense outlined filled clearable
+                            v-model="attributes[i].filter"
+                            :label="item.text"
+                            :prepend-icon="item.icon"
+                        />
+                    </div>
+                </template>
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
-                {{ 'ID&nbsp;' + slot.item.id }}
+            <template v-slot:search-tile-header="slot">
+                {{ 'ID&nbsp;' + slot.item.id }}, {{ attributes['name_' + language].content(slot.item) }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:search-tile-body="slot">
                 <div class="body-2 mb-3">
                     <div class="font-weight-bold" v-html="attributes['name_' + language].content(slot.item)"></div>
                     <div class="caption" v-html="attributes.nomisma.content(slot.item)"></div>
@@ -50,12 +47,8 @@
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
-                <v-row>                    
+            <template v-slot:editor="slot">
+                <v-row>
                     <v-col cols=12 md=6>
                         <!-- Name DE -->
                         <v-text-field dense outlined filled clearable
@@ -66,7 +59,7 @@
                             class="mb-3"
                             counter=255
                         ></v-text-field>
-                    
+
                         <!-- Name EN -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.name_en"
@@ -76,7 +69,7 @@
                             class="mb-3"
                             counter=255
                         ></v-text-field>
-                    
+
                         <!-- Nomisma -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.nomisma"
@@ -89,7 +82,7 @@
 
                     <!-- Comment -->
                     <v-col cols=12 md=6>
-                        <v-textarea dense outlined filled clearable 
+                        <v-textarea dense outlined filled clearable
                             no-resize
                             rows=3
                             v-model="slot.item.comment"
@@ -101,7 +94,7 @@
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -109,9 +102,9 @@
 
 <script>
 
-export default { 
+export default {
     data () {
-        return { 
+        return {
             component:          'denomination',
             entity:             'denominations',
             attributes:         {},
@@ -120,15 +113,15 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null },
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         }
@@ -139,18 +132,14 @@ export default {
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -186,7 +175,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) } 
+                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
                 },
                 comment: {
                     default: null,

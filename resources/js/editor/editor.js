@@ -498,16 +498,16 @@ const editor = new Vue({
             this.error = {
                 active:     true,
                 validation: null,
-                resource:   error.config   ? (error.config.url ? error.config.url : 'unknown') : 'unknown',
-                exception:  error.response ? error.response.data.exception : (error.request ? error.request.data.exception : 'unknown'),
-                message:    error.response ? error.response.data.message   : (error.request ? error.request.data.message   : (error.message ? error.message : '--') ),
-                params:     error.config   ? (error.config.data ? error.config.data : 'none given') : 'none given'
+                resource:   error?.config?.url ?? 'unknown',
+                exception:  error?.response?.data?.exception ?? (error?.request?.data?.exception ?? 'unknown'),
+                message:    error?.response?.data?.message   ?? (error?.request?.data?.message   ?? (error?.message ?? '--') ),
+                params:     error?.config?.data ?? 'none given'
             }
         },
 
         InputPermissionCheck (item) {
-            const id_user = this.user?.id ? this.user.id : 0
-            const rank_user = this.user?.level ? this.user.level : 10
+            const id_user = this.user?.id ?? 0
+            const rank_user = this.user?.level ?? 10
             let rank_required = 12
             let message = '\nYou are not permitted to create or edit any object.\nPlease contact the team administration for more information.'
 

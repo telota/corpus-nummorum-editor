@@ -1,55 +1,51 @@
 <template>
     <div>
-        <simpleDataTemplate
-            DISABLED-:key="language"
+        <generic-entity-template
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            defaultSortBy="name"
-            cards
-            smallCards
+            :default-sort-by="'name.ASC'"
+            small-tiles
             gallery="id_findspot"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row>
-                    <template v-for="(item, key) in attributes">
-                        <v-col
-                            v-if="item.filter !== undefined"
-                            :key="key"
-                            cols=12 
-                            sm=4 
-                            md=3
-                        >
-                            <InputForeignKey
-                                v-if="key === 'country'"
-                                entity="countries" 
-                                :label="attributes[key].text"
-                                :icon="attributes[key].icon"
-                                :selected="attributes[key].filter"
-                                v-on:select="(emit) => { attributes[key].filter = emit }"
-                            ></InputForeignKey>
-                            <v-text-field dense outlined filled clearable
-                                v-else
-                                v-model="attributes[key].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, key) in attributes">
+                    <div
+                        v-if="item.filter !== undefined"
+                        :key="key"
+                    >
+                        <InputForeignKey
+                            v-if="key === 'country'"
+                            entity="countries"
+                            :label="attributes[key].text"
+                            :icon="attributes[key].icon"
+                            :selected="attributes[key].filter"
+                            v-on:select="(emit) => { attributes[key].filter = emit }"
+                        />
+                        <v-text-field dense outlined filled clearable
+                            v-else
+                            v-model="attributes[key].filter"
+                            :label="item.text"
+                            :prepend-icon="item.icon"
+                        />
+                    </div>
+                </template>
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
+            <template v-slot:search-tile-header="slot">
                 {{ 'ID&nbsp;' + slot.item.id }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:search-tile-body="slot">
                 <div class="body-2 mb-3">
                     <div class="font-weight-bold" v-html="attributes.name.content(slot.item)"></div>
                     <div v-if="slot.item.link" class="caption" v-html="attributes.geonames.content(slot.item)"></div>
@@ -64,12 +60,8 @@
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
-                <v-row>                    
+            <template v-slot:editor="slot">
+                <v-row>
                     <v-col cols=12 md=6>
                         <!-- Name -->
                         <v-text-field dense outlined filled clearable
@@ -79,7 +71,7 @@
                             hint="required"
                             class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
                         <!-- geonames -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.geonames"
@@ -89,17 +81,17 @@
                             counter=255
                             class="mb-3"
                             @click:prepend="$root.openInNewTab($handlers.constant.url.geonames + slot.item.geonames)"
-                        ></v-text-field>
+                        />
                         <!-- Country -->
                         <InputForeignKey
-                            entity="countries" 
+                            entity="countries"
                             :label="attributes.country.text"
                             :icon="attributes.country.icon"
                             :selected="slot.item.country ? slot.item.country.toLowerCase() : null"
                             v-on:select="(emit) => { slot.item.country = emit }"
-                        ></InputForeignKey>
+                        />
                     </v-col>
-                    
+
                     <v-col cols=12 md=6>
                         <!-- Alias -->
                         <v-text-field dense outlined filled clearable
@@ -108,21 +100,21 @@
                             :prepend-icon="attributes.alias.icon"
                             class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
                         <!-- Comment -->
-                        <v-textarea dense outlined filled clearable 
+                        <v-textarea dense outlined filled clearable
                             no-resize
                             rows=2
                             v-model="slot.item.comment"
                             :label="attributes.comment.text"
                             :prepend-icon="attributes.comment.icon"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -130,9 +122,9 @@
 
 <script>
 
-export default { 
+export default {
     data () {
-        return { 
+        return {
             component:          'findspot',
             entity:             'findspots',
             attributes:         {},
@@ -141,37 +133,29 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null }
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         }
     },
 
-    watch: {
-        language: function () { this.attributes = this.setAttributes() }
-    },
-
     created () {
-        this.$store.commit('setBreadcrumbs', [ // Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -215,7 +199,7 @@ export default {
                     icon: 'link',
                     header: true,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.geonames_link(item.geonames) } 
+                    content: (item) => { return this.$handlers.format.geonames_link(item.geonames) }
                 },
                 comment: {
                     default: null,

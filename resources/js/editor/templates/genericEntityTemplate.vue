@@ -17,6 +17,7 @@
             :attributes="attributes"
             :defaultSortBy="defaultSortBy"
             :small-tiles="smallTiles"
+            :default-layout="defaultLayout"
             :select="select"
             :selected="selected"
             v-on:select="selectItem"
@@ -96,7 +97,7 @@ export default {
         attributes:     { type: Object, required: true },
         defaultSortBy:  { type: String, default: 'id.DESC' },
         headline:       { type: String },
-        defaultDisplay: { type: String, default: 'table' },
+        defaultLayout:  { type: String, default: 'table' },
         table:          { type: Boolean, default: true },
         tiles:          { type: Boolean, default: true },
         smallTiles:     { type: Boolean, default: false },

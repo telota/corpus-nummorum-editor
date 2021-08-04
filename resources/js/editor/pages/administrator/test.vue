@@ -23,7 +23,7 @@ export default {
         return {
             mat: 2,
             leg: 40,
-            selected: 'Monograms/23003_02.jpg',
+            selected: 'Monograms',
             l_selected: [40],
             m_selected: [2],
             entity: 'coins',

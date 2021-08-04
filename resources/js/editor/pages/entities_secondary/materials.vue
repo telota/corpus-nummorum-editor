@@ -58,7 +58,7 @@
                             hint="required"
                             class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
 
                         <!-- JK: Name EN -->
                         <v-text-field dense outlined filled clearable
@@ -68,7 +68,7 @@
                             hint="required"
                             class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
 
                         <!-- JK: Nomsima -->
                         <v-text-field dense outlined filled clearable
@@ -77,7 +77,7 @@
                             :prepend-icon="attributes.nomisma.icon"
                             counter=255
                             @click:prepend="$root.openInNewTab((slot.item.nomisma.slice(0, 4) != 'http' ? $handlers.constant.url.nomisma : '') + slot.item.nomisma)"
-                        ></v-text-field>
+                        />
                     </v-col>
 
                     <!-- JK: Comment -->
@@ -89,7 +89,7 @@
                             :label="attributes.comment.text"
                             :prepend-icon="attributes.comment.icon"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
                 </v-row>
             </template>
@@ -119,10 +119,9 @@ export default {
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         }

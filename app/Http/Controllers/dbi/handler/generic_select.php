@@ -96,7 +96,7 @@ class generic_select {
         $query->select($table['as'].'id');
 
         if (!empty($whereIn)) {
-            foreach($whereIn as $inKey => $inVals) $dbi = $query->whereIntegerInRaw($table['as'].$inKey, $inVals);
+            foreach($whereIn as $inKey => $inVals) $dbi = $query->whereIntegerInRaw($table['as'].$inKey, is_array($inVals) ? $inVals : [$inVals]);
         }
         if (!empty($where)) $dbi = $query->where($where);
 

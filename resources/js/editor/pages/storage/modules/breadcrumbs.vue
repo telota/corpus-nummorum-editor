@@ -1,11 +1,5 @@
 <template>
-<!--<div
-    class="d-flex align-center flex-grow-1"
-    :class="boxed ? (boxClass + ' breadcrumbs-box') : ''"
-    style="cursor: default; overflow-x: auto;"
-    :style="height ? ('height:' + height + 'px;') : ''"
->-->
-<input-template>
+<input-template :disabled="disabled">
     <template v-slot:input>
         <div class="d-flex align-center" style="margin-left: -10px; overflow-x: hidden">
 
@@ -20,6 +14,7 @@
                         v-if="item.text"
                         v-text="item.text"
                         class="text-truncate caption mt-1"
+                        style="cursor: default;"
                         :style="'max-width:' + getNodeWidth(i) + 'px'"
                     />
                     <v-icon
@@ -90,12 +85,6 @@
 <script>
 
 export default {
-    data () {
-        return {
-            boxClass: 'pa-2 innerShadow'
-        }
-    },
-
     props: {
         directory:  { type: [String, Boolean], default: null },
         disabled:   { type: Boolean, default: false },
@@ -108,7 +97,9 @@ export default {
     },
 
     computed: {
-        directories () { return this.$store.state.storage.directory.items },
+        directories () {
+            return this.$store.state.storage.directory.items
+        },
         items () {
             const items = []
 
@@ -144,14 +135,7 @@ export default {
         setPath (dir) {
             if (dir !== false) {
                 if (this.disabled) console.error('Breadcrumbs: setPath disabled!')
-                else {
-                    /*if (this.routing) {
-                        if (dir) dir = dir.replaceAll('/', ':')
-                        const params = dir ? { directory: dir } : {}
-                        if (this.$route.params?.directory != dir) this.$router.push({ name: 'storage', params: params })
-                    }
-                    else*/ this.$emit('setPath', dir)
-                }
+                else this.$emit('setPath', dir)
             }
         },
 
@@ -185,9 +169,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-    .breadcrumbs-box {
-        border: 1px solid black;
-    }
-</style>

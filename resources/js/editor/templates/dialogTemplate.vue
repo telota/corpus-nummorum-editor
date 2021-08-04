@@ -41,7 +41,7 @@
                     <div
                         v-if="select"
                         class="blue_prim--text font-weight-bold caption text-truncate"
-                        v-html="selected ? ('Currently selected ID ' + selected) : 'No Selection, yet'"
+                        v-html="selected ? ('Currently selected \'' + selected + '\'') : 'No Selection'"
                     />
 
                     <div style="width: 250px; text-align: end">

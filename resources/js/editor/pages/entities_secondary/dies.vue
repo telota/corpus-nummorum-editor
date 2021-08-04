@@ -1,137 +1,124 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
-            :sync="true"
+            sync
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            defaultSortBy="name"
-            defaultDisplay="cards"
-            cards
-            smallCards
+            :default-sort-by="'name.ASC'"
+            small-tiles
+            default-layout="tiles"
             gallery="id_die"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row class="mb-4">
-                    <template v-for="(item, i) in attributes">
-                        <v-col
-                            v-if="item.filter !== undefined && !['side', 'design_' + (language === 'de' ? 'en' : 'de')].includes(i)"
-                            :key="i"
-                            cols=12 
-                            sm=4 
-                            md=3
-                            class="mb-n4"
-                        >
-                            <div v-if="i === 'legend'">
-                                <v-text-field dense outlined filled clearable
-                                    v-model="attributes.legend.filter"
-                                    :label="attributes.legend.text"
-                                    :prepend-icon="attributes.legend.icon"
-                                    append-icon="keyboard"
-                                    @click:append="keyboard = !keyboard"
-                                ></v-text-field>
-                                <v-expand-transition>
-                                    <div v-if="keyboard" class="pl-10 mt-n5" style="position: relative;">
-                                        <v-card
-                                            tile
-                                            class="pt-1 pl-1 grey_trip"
-                                            style="display: block; position: absolute; z-index: 200"
-                                        >
-                                            <keyboard                                            
-                                                :string="attributes.legend.filter"
-                                                layout="el_uc_adv"
-                                                v-on:input="(emit) => { attributes.legend.filter = emit }"
-                                            ></keyboard>
-                                        </v-card>
-                                    </div>
-                                </v-expand-transition>
-                            </div>
-                            <v-text-field v-else dense outlined filled clearable
-                                v-model="attributes[i].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                    <v-col
-                        cols=12 
-                        sm=4 
-                        md=3
-                        class="mb-n4"
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, i) in attributes">
+                    <div
+                        v-if="item.filter !== undefined && !['side', 'design_' + (language === 'de' ? 'en' : 'de')].includes(i)"
+                        :key="i"
                     >
-                        <v-select dense outlined filled clearable
-                            v-model="attributes.side.filter"
-                            :items="sides"
-                            :label="attributes.side.text"
-                            :prepend-icon="attributes.side.icon"
-                        ></v-select>
-                    </v-col>
-                </v-row>
+                        <div v-if="i === 'legend'">
+                            <v-text-field dense outlined filled clearable
+                                v-model="attributes.legend.filter"
+                                :label="attributes.legend.text"
+                                :prepend-icon="attributes.legend.icon"
+                                append-icon="keyboard"
+                                @click:append="keyboard = !keyboard"
+                            />
+                            <v-expand-transition>
+                                <div
+                                    v-if="keyboard"
+                                    class="pl-10 mb-4"
+                                >
+                                    <keyboard
+                                        :string="attributes.legend.filter"
+                                        layout="el_uc_adv"
+                                        v-on:input="(emit) => { attributes.legend.filter = emit }"
+                                    />
+                                </div>
+                            </v-expand-transition>
+                        </div>
+                        <v-text-field v-else dense outlined filled clearable
+                            v-model="attributes[i].filter"
+                            :label="item.text"
+                            :prepend-icon="item.icon"
+                        />
+                    </div>
+                </template>
+
+                <v-select dense outlined filled clearable
+                    v-model="attributes.side.filter"
+                    :items="search_sides"
+                    :label="attributes.side.text"
+                    :prepend-icon="attributes.side.icon"
+                    :menu-props="{ offsetY: true }"
+                    style="position: relative; z-index: 200"
+                />
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
+            <template v-slot:search-tile-header="slot">
                 {{ 'ID&nbsp;' + slot.item.id }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:search-tile-body="slot">
                 <div class="body-2 mb-3">
                     <span class="font-weight-bold" v-html="attributes.name.content(slot.item)"></span>,
                     <span v-html="attributes.side.content(slot.item)"></span>
                 </div>
                 <!-- Image -->
-                <Imager
+                <adv-img
                     :key="slot.item.id"
-                    :item="slot.item"
-                    hide_text
+                    :src="slot.item.image"
+                    square
+                    contain
                     class="mb-3"
-                ></Imager>
+                />
                 <div
                     class="body-2 font-weight-thin mb-1"
                     v-html="attributes.legend.content(slot.item)"
-                ></div>
-                <div 
+                />
+                <div
                     class="body-2"
                     v-html="attributes['design_' + language].content(slot.item)"
-                ></div>
-                <div 
+                />
+                <div
                     v-if="slot.item.comment"
                     class="caption mt-2"
                     v-html="attributes.comment.content(slot.item)"
-                ></div>
+                />
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
+            <template v-slot:editor="slot">
                 <v-row>
                     <v-col cols=12 md=6>
                         <v-row>
-                            <v-col cols=12 md=7 class="pt-0">
+                            <v-col cols=12 md=7>
                                 <v-text-field dense outlined filled clearable
                                     v-model="slot.item.name"
                                     :label="attributes.name.text"
                                     :prepend-icon="attributes.name.icon"
                                     hint="required"
                                     counter=255
-                                ></v-text-field>
-                            </v-col>                                
-                            <v-col cols=12 md=5 class="pt-0">
+                                />
+                            </v-col>
+                            <v-col cols=12 md=5>
                                 <v-select dense outlined filled
                                     v-model="slot.item.side"
                                     :items="sides"
                                     :label="attributes.side.text"
                                     :prepend-icon="attributes.side.icon"
-                                ></v-select>
+                                    :menu-props="{ offsetY: true }"
+                                />
                             </v-col>
                         </v-row>
                         <v-textarea dense outlined filled clearable
@@ -141,27 +128,26 @@
                             :label="attributes.comment.text"
                             :prepend-icon="attributes.comment.icon"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
                     <v-col cols=12 md=6>
                         <InputForeignKey
-                            v-for="(key, i) in ['design', 'legend']"
+                            v-for="(key) in ['design', 'legend']"
                             :key="key + slot.item.side"
-                            :entity="key + 's'" 
-                            :label="$root.label((slot.item.side === 1 ? 'reverse' : 'obverse') + ',' + key)" 
-                            :icon="attributes['id_' + key].icon" 
+                            :entity="key + 's'"
+                            :label="$root.label((slot.item.side == 1 ? 'reverse' : 'obverse') + ',' + key)"
+                            :icon="attributes['id_' + key].icon"
                             :sk="key === 'legend' ? 'el_uc_adv' : null"
                             :selected="slot.item['id_' + key]"
                             :conditions="[{ side: slot.item.side }]"
-                            :class="i === 0 ? 'mb-3' : ''"
                             style="width: 100%"
-                            v-on:select="(emit) => { item['id_' + key] = emit }"
-                        ></InputForeignKey>
+                            v-on:select="(emit) => { slot.item['id_' + key] = emit }"
+                        />
                     </v-col>
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -173,9 +159,9 @@ import keyboard from './../../modules/keyboard.vue'
 export default {
     components: {
         keyboard
-    }, 
+    },
     data () {
-        return { 
+        return {
             component:          'die',
             entity:             'dies',
             attributes:         {},
@@ -185,22 +171,31 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null }
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         },
 
         // Dropdowns
         sides () {
-            return this.$store.state.lists.dropdowns.sides.map((item) => { return { value: item.value, text: this.$root.label(item.text) }})
+            return this.$store.state.lists.dropdowns.sides.map((item) => { return {
+                value: item.value,
+                text: this.$root.label(item.text)
+            }})
+        },
+        search_sides () {
+            return this.$store.state.lists.dropdowns.sides.map((item) => { return {
+                value: this.dialog ? item.value : (item.value + ''),
+                text: this.$root.label(item.text)
+            }})
         },
     },
 
@@ -209,18 +204,14 @@ export default {
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -246,7 +237,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text } 
+                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text }
                 },
                 legend: {
                     default: null,
@@ -295,7 +286,7 @@ export default {
                     icon: 'short_text',
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' } 
+                    content: (item) => { return item?.comment ? item.comment : '--' }
                 },
             }
         }

@@ -1,92 +1,77 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
-            :sync="true"
+            sync
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            :defaultSortBy="'name_' + language"
-            defaultDisplay="cards"
-            cards
-            smallCards
+            :default-sort-by="'name_' + language + '.ASC'"
+            small-tiles
+            default-layout="tiles"
             gallery="id_design"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row class="mb-4">
-                    <v-col
-                        v-for="(key) in ['id', 'name_de', 'name_en']"
-                        :key="key"
-                        cols=12 
-                        sm=4 
-                        md=3
-                        class="mb-n4"
-                    >
-                        <v-text-field dense outlined filled clearable
-                            v-model="attributes[key].filter"
-                            :label="attributes[key].text"
-                            :prepend-icon="attributes[key].icon"
-                        ></v-text-field>
-                    </v-col>
-                    <v-col
-                        v-for="(key) in ['role', 'side', 'border_dots']"
-                        :key="key"
-                        cols=12 
-                        sm=4 
-                        md=3
-                        class="mb-n4"
-                    >
-                        <v-select dense outlined filled clearable
-                            v-model="attributes[key].filter"
-                            :items="key === 'side' ? sides : (key === 'role' ? roles : yesNo)"
-                            :label="attributes[key].text"
-                            :prepend-icon="attributes[key].icon"
-                        ></v-select>
-                    </v-col>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <v-text-field dense outlined filled clearable
+                    v-model="attributes[key].filter"
+                    v-for="(key) in ['id', 'name_de', 'name_en']"
+                    :key="key"
+                    :label="attributes[key].text"
+                    :prepend-icon="attributes[key].icon"
+                />
+                <v-select dense outlined filled clearable
+                    v-model="attributes[key].filter"
+                    v-for="(key) in ['role', 'side', 'border_dots']"
+                    :key="key"
+                    :items="key === 'side' ? search_sides : (key === 'role' ? search_roles : search_yesNo)"
+                    :label="attributes[key].text"
+                    :prepend-icon="attributes[key].icon"
+                    :menu-props="{ offsetY: true }"
+                    style="position: relative; z-index: 200"
+                />
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
+            <template v-slot:search-tile-header="slot">
                 {{ 'ID&nbsp;' + slot.item.id }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
-                <div 
+            <template v-slot:search-tile-body="slot">
+                <div
                     class="body-2 mb-3"
                     v-html="attributes.role.content(slot.item) + ', ' + attributes.side.content(slot.item)"
-                ></div>
+                />
                 <!-- Image -->
-                <Imager
+                <adv-img
                     :key="slot.item.id"
-                    :item="slot.item"
-                    hide_text
+                    :src="slot.item.image"
+                    square
+                    contain
                     class="mb-3"
-                ></Imager>
-                <div 
+                />
+                <div
                     v-for="(key) in [(language === 'de' ? 'de' : 'en'), (language === 'de' ? 'en' : 'de')]"
                     :key="key"
                     class="body-2 mb-3"
                     v-html="'(' + key.toUpperCase() + ')&ensp;' + attributes['name_' + key].content(slot.item)"
-                ></div>
+                />
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
+            <template v-slot:editor="slot">
                 <v-row>
-                    <v-col 
+                    <v-col
                         v-for="key in ['name_de', 'name_en']"
                         :key="key"
-                        cols=12 
+                        cols=12
                         md=6
                     >
                         <v-textarea dense outlined filled clearable
@@ -97,12 +82,12 @@
                             :prepend-icon="attributes[key].icon"
                             class="mb-3"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
-                    <v-col 
-                        v-for="key in ['border_dots', 'role', 'side']"
+                    <v-col
+                        v-for="key in ['role', 'side', 'border_dots']"
                         :key="key"
-                        cols=12 
+                        cols=12
                         md=3
                         class="mt-n5"
                     >
@@ -110,13 +95,14 @@
                             v-model="slot.item[key]"
                             :items="key === 'role' ? roles : (key === 'side' ? sides : yesNo)"
                             :label="attributes[key].text"
+                            :menu-props="{ offsetY: true }"
                             :prepend-icon="attributes[key].icon"
-                        ></v-select>     
+                        />
                     </v-col>
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -125,7 +111,7 @@
 <script>
 export default {
     data () {
-        return { 
+        return {
             component:          'design',
             entity:             'designs',
             attributes:         {},
@@ -134,28 +120,55 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null },
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         },
 
         // Dropdowns
         yesNo () {
-            return this.$store.state.lists.dropdowns.yesNo.map((item) => { return { value: item.value, text: this.$root.label(item.text) }})
+            return this.$store.state.lists.dropdowns.yesNo.map((item) => { return {
+                value: item.value,
+                text: this.$root.label(item.text)
+            }})
         },
         sides () {
-            return this.$store.state.lists.dropdowns.sides.map((item) => { return { value: item.value, text: this.$root.label(item.text) }})
+            return this.$store.state.lists.dropdowns.sides.map((item) => { return {
+                value: item.value,
+                text: this.$root.label(item.text)
+            }})
         },
         roles () {
-            return this.$store.state.lists.dropdowns.typeCoin.map((item) => { return { value: item.value, text: this.$root.label(item.text) }})
+            return this.$store.state.lists.dropdowns.typeCoin.map((item) => { return {
+                value: item.value,
+                text: this.$root.label(item.text)
+            }})
+        },
+        search_yesNo () {
+            return this.$store.state.lists.dropdowns.yesNo.map((item) => { return {
+                value: this.dialog ? item.value : (item.value + ''),
+                text: this.$root.label(item.text)
+            }})
+        },
+        search_sides () {
+            return this.$store.state.lists.dropdowns.sides.map((item) => { return {
+                value: this.dialog ? item.value : (item.value + ''),
+                text: this.$root.label(item.text)
+            }})
+        },
+        search_roles () {
+            return this.$store.state.lists.dropdowns.typeCoin.map((item) => { return {
+                value: this.dialog ? item.value : (item.value + ''),
+                text: this.$root.label(item.text)
+            }})
         }
     },
 
@@ -164,18 +177,14 @@ export default {
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -209,7 +218,7 @@ export default {
                     icon: 'filter_tilt_shift',
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.yesNo.find((row) => row.value == item.border_dots)?.text } 
+                    content: (item) => { return this.yesNo.find((row) => row.value == item.border_dots)?.text }
                 },
                 role: {
                     default: 2,
@@ -219,7 +228,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.roles.find((row) => row.value == item?.role)?.text } 
+                    content: (item) => { return this.roles.find((row) => row.value == item?.role)?.text }
                 },
                 side: {
                     default: 2,
@@ -229,7 +238,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text } 
+                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text }
                 }
             }
         }
