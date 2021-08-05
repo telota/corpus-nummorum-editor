@@ -69,26 +69,7 @@
                             :label="attributes.name.text"
                             :prepend-icon="attributes.name.icon"
                             hint="required"
-                            class="mb-3"
                             counter=255
-                        />
-                        <!-- geonames -->
-                        <v-text-field dense outlined filled clearable
-                            v-model="slot.item.geonames"
-                            :label="attributes.geonames.text"
-                            :prepend-icon="attributes.geonames.icon"
-                            :rules="[$handlers.rules.link]"
-                            counter=255
-                            class="mb-3"
-                            @click:prepend="$root.openInNewTab($handlers.constant.url.geonames + slot.item.geonames)"
-                        />
-                        <!-- Country -->
-                        <InputForeignKey
-                            entity="countries"
-                            :label="attributes.country.text"
-                            :icon="attributes.country.icon"
-                            :selected="slot.item.country ? slot.item.country.toLowerCase() : null"
-                            v-on:select="(emit) => { slot.item.country = emit }"
                         />
                     </v-col>
 
@@ -101,6 +82,32 @@
                             class="mb-3"
                             counter=255
                         />
+                    </v-col>
+
+                    <v-col cols=12 md=6>
+                        <!-- Country -->
+                        <InputForeignKey
+                            entity="countries"
+                            :label="attributes.country.text"
+                            :icon="attributes.country.icon"
+                            :selected="slot.item.country ? slot.item.country.toLowerCase() : null"
+                            v-on:select="(emit) => { slot.item.country = emit }"
+                        />
+                    </v-col>
+
+                    <v-col cols=12 md=6>
+                        <!-- geonames -->
+                        <v-text-field dense outlined filled clearable
+                            v-model="slot.item.geonames"
+                            :label="attributes.geonames.text"
+                            :prepend-icon="attributes.geonames.icon"
+                            :rules="[$handlers.rules.link]"
+                            counter=255
+                            @click:prepend="$root.openInNewTab($handlers.constant.url.geonames + slot.item.geonames)"
+                        />
+                    </v-col>
+
+                    <v-col cols=12 md=6>
                         <!-- Comment -->
                         <v-textarea dense outlined filled clearable
                             no-resize

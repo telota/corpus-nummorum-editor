@@ -364,18 +364,21 @@ class complex_select {
             foreach (['obverse', 'reverse'] as $side) {
                 $images[$i][$side]['digilib'] = null;
                 if ($is_dbi === true) $images[$i][$side]['path'] = null;
-                $src = trim($img[$side]['link'], '/');
 
-                if (substr($src, 0, 4) !== 'http') {
-                    $split = explode('.', $src);
-                    $ext = strtolower(end($split));
-                    if (substr($src, 0, 8) === 'storage/') $src = substr($src, 8);
-                    if ($is_dbi === true) $images[$i][$side]['path'] = $src;
+                if (!empty($img[$side]['link'])) {
+                    $src = trim($img[$side]['link'], '/');
 
-                    $images[$i][$side]['digilib'] = config('dbi.url.digilib_viewer').$src;
+                    if (substr($src, 0, 4) !== 'http') {
+                        $split = explode('.', $src);
+                        $ext = strtolower(end($split));
+                        if (substr($src, 0, 8) === 'storage/') $src = substr($src, 8);
+                        if ($is_dbi === true) $images[$i][$side]['path'] = $src;
 
-                    if ($ext === 'tif' || $ext === 'tiff') $images[$i][$side]['link'] = config('dbi.url.digilib_scaler').$src.'&dw=500&dh=500';
-                    else $images[$i][$side]['link'] = trim(config('dbi.url.storage'), '/').'/'.$src;
+                        $images[$i][$side]['digilib'] = config('dbi.url.digilib_viewer').$src;
+
+                        if ($ext === 'tif' || $ext === 'tiff') $images[$i][$side]['link'] = config('dbi.url.digilib_scaler').$src.'&dw=500&dh=500';
+                        else $images[$i][$side]['link'] = trim(config('dbi.url.storage'), '/').'/'.$src;
+                    }
                 }
             }
         }

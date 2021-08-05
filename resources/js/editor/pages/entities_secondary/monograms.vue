@@ -1,11 +1,10 @@
 <template>
 <div>
     <generic-entity-template
-        DISABLED-key="language"
         :entity="entity"
         :attributes="attributes"
-        defaultSortBy="combination.ASC"
-        smallTiles
+        default-sort-by="combination.ASC"
+        small-tiles
         gallery="id_monogram"
         linking
         :dialog="dialog"
@@ -24,7 +23,7 @@
                     v-model="attributes[i].filter"
                     :label="item.text"
                     :prepend-icon="item.icon"
-                ></v-text-field>
+                />
             </template>
             <v-text-field dense outlined filled clearable
                 v-model="attributes.combination.filter"
@@ -35,18 +34,12 @@
                 @click:append="keyboard = !keyboard"
             />
             <v-expand-transition>
-                <div v-if="keyboard" class="pl-10 mt-n5" style="position: relative;">
-                    <v-card
-                        tile
-                        class="pt-1 pl-1 grey_trip"
-                        style="display: block; position: absolute; z-index: 200"
-                    >
-                        <keyboard
-                            :string="attributes.combination.filter"
-                            layout="el_uc"
-                            v-on:input="(emit) => { attributes.combination.filter = emit.replace(' ', '').split('').join(' ').trim() }"
-                        ></keyboard>
-                    </v-card>
+                <div v-if="keyboard" class="pl-10 mt-n5">
+                    <keyboard
+                        :string="attributes.combination.filter"
+                        layout="el_uc"
+                        v-on:input="(emit) => { attributes.combination.filter = emit.replace(' ', '').split('').join(' ').trim() }"
+                    />
                 </div>
             </v-expand-transition>
         </template>
@@ -58,12 +51,13 @@
 
         <template v-slot:search-tile-body="slot">
             <!-- Image -->
-            <Imager
-                :key="slot.item.id"
-                :item="slot.item"
-                color_background="white"
-                hide_text
-            ></Imager>
+            <adv-img
+                :src="slot.item.image"
+                square
+                contain
+                background="white"
+            />
+
             <div class="body-2 mt-3">
                 <span class="font-weight-bold" v-html="attributes.name.content(slot.item)"></span>,
                 <span v-html="attributes.combination.content(slot.item)"></span>
@@ -122,12 +116,12 @@
                                     v-on="on"
                                     icon
                                     class="ml-1 mr-1"
-                                    @click="file_browser = true"
+                                    @click="fileManager = true"
                                 >
                                     <v-icon>folder_open</v-icon>
                                 </v-btn>
                             </template>
-                            <span>Open File Browser</span>
+                            <span>Open File Manager</span>
                         </v-tooltip>
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on }">
@@ -145,40 +139,23 @@
                 </v-col>
             </v-row>
 
-            <!-- Files Browser -->
-            <simpleSelectDialog
-                :active="file_browser"
-                icon="folder_open"
-                text="File Browser"
-                v-on:close="file_browser = false; file_select = null;"
-            >
-                <template v-slot:content>
-                    <files
-                        :prop_item="{ id: slot.item.image, parent: 'Monograms' }"
-                        class="mt-n2 mb-5"
-                        v-on:ChildEmit="(emit) => { file_select =  emit.id }"
-                        ></files>
-                    <v-btn tile block small color="blue_prim"
-                        v-text="file_select? (file_select === slot.item.image ? (file_select.split('/').pop() + ' is alreadey selected') : ('Select ' + file_select.split('/').pop())) : ('No File selected, yet')"
-                        :disabled="!file_select || file_select === slot.item.image"
-                        class="ml-n6"
-                        style="position: absolute; bottom: 0"
-                        @click="slot.item.image = file_select; file_browser = false; file_select = null;"
-                    ></v-btn>
-                </template>
-            </simpleSelectDialog>
+            <!-- FileManager -->
+            <file-manager
+                v-if="fileManager"
+                dialog
+                select
+                :selected="slot.item.image ? slot.item.image : 'Monograms'"
+                v-on:select="(emit) => { slot.item.image = emit ? emit : null }"
+                v-on:close="fileManager = false"
+            />
 
             <!-- Upload -->
             <upload
-                :prop_active="upload"
-                prop_target="storage/Monograms"
-                prop_key="image"
+                :show="upload"
+                directory="Monograms"
                 v-on:close="upload = false"
-                v-on:ChildEmit="(emit) => {
-                    slot.item.image = emit.url
-                    upload = false
-                }"
-            ></upload>
+                v-on:upload="(emit) => { slot.item.image = emit.path ? emit.path : null }"
+            />
         </template>
 
         <!-- Gallery Linking -->
@@ -189,6 +166,7 @@
                 :label="$root.label('side')"
                 prepend-icon="tonality"
                 style="width: 100%"
+                :menu-props="{ offsetY: true }"
             />
             <InputForeignKey
                 entity="positions"
@@ -207,12 +185,15 @@
 
 
 <script>
+import AdvImg from '../../modules/advImg.vue'
 import keyboard from './../../modules/keyboard.vue'
 
 export default {
     components: {
-        keyboard
+        keyboard,
+        AdvImg
     },
+
     data () {
         return {
             component:          'monogram',
@@ -222,8 +203,7 @@ export default {
             keyboard:           false,
 
             upload:             false,
-            file_browser:       false,
-            file_select:        null,
+            fileManager:        false
         }
     },
 
@@ -235,11 +215,10 @@ export default {
 
     computed: {
         sides () {
-            const self = this
             const sides = []
             this.$store.state.lists.dropdowns.sides.forEach((item) => {
                 if(item.value !== 2) {
-                    sides.push({ value: item.value, text: self.$root.label(item.text) })
+                    sides.push({ value: item.value, text: this.$root.label(item.text) })
                 }
             })
             return sides
@@ -265,7 +244,7 @@ export default {
                 image: {
                     default: null,
                     text: this.$root.label('image'),
-                    icon: 'image',
+                    icon: 'camera_alt',
                     header: true,
                     clone: false,
                     content: (item) => { return item?.image ? this.$handlers.format.image_tile(item.image, 30) : '--' }

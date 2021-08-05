@@ -1,119 +1,89 @@
 <template>
     <div>
-        <simpleDataTemplate
-            DISABLED-:key="language"
+        <generic-entity-template
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            defaultSortBy="name"
-            cards
-            smallCards
+            default-sort-by="name.ASC"
+            small-tiles
             gallery="id_person"
-            linking
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row class="mb-4">
-                    <template v-for="(item, key) in attributes">
-                        <v-col
-                            v-if="key === 'is_authority'"
-                            :key="key"
-                            cols=12 
-                            sm=4 
-                            md=3
-                            class="mb-n5"
-                        >
-                            <v-select dense outlined filled clearable
-                                v-model="attributes[key].filter"
-                                :items="yesNo"
-                                :label="attributes[key].text"
-                                :prepend-icon="attributes[key].icon"
-                            ></v-select>
-                        </v-col>
-                        <v-col
-                            v-else-if="key === 'alias'"
-                            :key="key"
-                            cols=12 
-                            sm=4 
-                            md=3
-                            class="mb-n5"
-                        >
-                            <v-text-field dense outlined filled clearable
-                                v-model="attributes[key].filter"
-                                :label="attributes[key].text"
-                                :prepend-icon="attributes[key].icon"
-                                append-icon="keyboard"
-                                @click:append="keyboard = !keyboard"
-                            ></v-text-field>
-                            <v-expand-transition>
-                                <div v-if="keyboard" class="pl-10 mt-n5" style="position: relative;">
-                                    <v-card
-                                        tile
-                                        class="pt-1 pl-1 grey_trip"
-                                        style="display: block; position: absolute; z-index: 200"
-                                    >
-                                        <keyboard                                            
-                                            :string="attributes[key].filter"
-                                            layout="el_uc"
-                                            v-on:input="(emit) => { attributes[key].filter = emit }"
-                                        ></keyboard>
-                                    </v-card>
-                                </div>
-                            </v-expand-transition>
-                        </v-col>
-                        <v-col
-                            v-else-if="item.filter !== undefined"
-                            :key="key"
-                            cols=12 
-                            sm=4 
-                            md=3
-                            class="mb-n5"
-                        >
-                            <v-text-field dense outlined filled clearable
-                                v-model="attributes[key].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, key) in attributes">
+                    <div v-if="key === 'is_authority'" :key="key">
+                        <v-select dense outlined filled clearable
+                            v-model="attributes[key].filter"
+                            :items="search_yesNo"
+                            :label="attributes[key].text"
+                            :prepend-icon="attributes[key].icon"
+                            :menu-props="{ offsetY: true }"
+                        />
+                    </div>
+
+                    <div v-else-if="key === 'alias'" :key="key">
+                        <v-text-field dense outlined filled clearable
+                            v-model="attributes[key].filter"
+                            :label="attributes[key].text"
+                            :prepend-icon="attributes[key].icon"
+                            append-icon="keyboard"
+                            @click:append="keyboard = !keyboard"
+                        />
+                        <v-expand-transition>
+                            <div v-if="keyboard" class="pl-10 mt-n5" >
+                                <keyboard
+                                    :string="attributes[key].filter"
+                                    layout="el_uc"
+                                    v-on:input="(emit) => { attributes[key].filter = emit }"
+                                />
+                            </div>
+                        </v-expand-transition>
+                    </div>
+
+                    <div v-else-if="item.filter !== undefined" :key="key">
+                        <v-text-field dense outlined filled clearable
+                            v-model="attributes[key].filter"
+                            :label="item.text"
+                            :prepend-icon="item.icon"
+                        />
+                    </div>
+                </template>
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
-                {{ 'ID&nbsp;' + slot.item.id }}
+            <template v-slot:content-tile-header="slot">
+                {{ 'ID&nbsp;' + slot.item.id + ', ' + attributes.name.content(slot.item) }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:content-tile-body="slot">
                 <div class="body-2 mb-3">
-                    <div class="font-weight-bold" v-html="attributes.name.content(slot.item)"></div>
-                    <div class="caption" v-html="attributes.nomisma_name.content(slot.item)"></div>
+                    <div class="font-weight-bold" v-html="attributes.name.content(slot.item)" />
+                    <div class="caption" v-html="attributes.nomisma_name.content(slot.item)" />
                 </div>
                 <div class="body-2 mb-3">
-                    <span v-html="slot.item.is_authority ? '(&#9733;)' : ''"></span>
-                    <span v-html="attributes.position.content(slot.item)"></span><br />
-                    <span class="caption" v-html="attributes.nomisma_role.content(slot.item)"></span>
+                    <span v-html="slot.item.is_authority ? '(&#9733;)' : ''" />
+                    <span v-html="attributes.position.content(slot.item)" /><br />
+                    <span class="caption" v-html="attributes.nomisma_role.content(slot.item)" />
                 </div>
                 <div
-                    class="body-2 mb-3" 
+                    class="body-2 mb-3"
                     v-html="attributes.active_time.content(slot.item)"
-                ></div>
+                 />
                 <div class="body-2">
-                    <div v-if="slot.item.caesar_start" class="caption" v-html="'Caesar: ' + attributes.caesar_start.content(slot.item)"></div>
-                    <div v-if="slot.item.augustus_start" class="caption" v-html="'Augustus: ' + attributes.augustus_start.content(slot.item)"></div>
+                    <div v-if="slot.item.caesar_start" class="caption" v-html="'Caesar: ' + attributes.caesar_start.content(slot.item)" />
+                    <div v-if="slot.item.augustus_start" class="caption" v-html="'Augustus: ' + attributes.augustus_start.content(slot.item)" />
                 </div>
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
+            <template v-slot:editor="slot">
                 <div>
                     <v-row>
                         <v-col cols=12 md=6>
@@ -124,17 +94,21 @@
                                 :prepend-icon="attributes.name.icon"
                                 hint="required" persistent-hint
                                 counter=255
-                                class="mb-3"
-                            ></v-text-field>
+                            />
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Nomisma -->
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item.nomisma_name"
                                 :label="attributes.nomisma_name.text"
                                 :prepend-icon="attributes.nomisma_name.icon"
                                 counter=255
-                                class="mb-3"
                                 @click:prepend="$root.openInNewTab((slot.item.nomisma_name.slice(0, 4) != 'http' ? $handlers.constant.url.nomisma : '') + slot.item.nomisma_name)"
-                            ></v-text-field>
+                            />
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Alias -->
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item.alias"
@@ -143,7 +117,7 @@
                                 append-icon="keyboard"
                                 counter=255
                                 @click:append="keyboard_e = !keyboard_e"
-                            ></v-text-field>
+                            />
                             <v-expand-transition>
                                 <div v-if="keyboard_e" class="pl-10 mb-1">
                                     <keyboard
@@ -153,6 +127,9 @@
                                     ></keyboard>
                                 </div>
                             </v-expand-transition>
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Active Time -->
                             <v-row>
                                 <v-col cols=6 class="pb-0">
@@ -162,7 +139,7 @@
                                         :prepend-icon="attributes.active_time.icon"
                                     ></v-text-field>
                                 </v-col>
-                                <v-col 
+                                <v-col
                                     v-for="key in ['date_start', 'date_end']"
                                     :key="key"
                                     cols=3
@@ -176,87 +153,98 @@
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
+                        </v-col>
+
+                        <v-col v-for="key in ['caesar', 'augustus']" :key="key" cols=12 md=6>
                             <!-- Caesar and Augustus -->
-                            <v-row v-for="key in ['caesar', 'augustus']" :key="key">
-                                <v-col 
+                            <v-row>
+                                <v-col
                                     v-for="add in ['uncertain', 'start']"
                                     :key="add"
-                                    :cols="add === 'uncertain' ? 6 : 3"
-                                    class="pb-0"
+                                    :cols="6"
                                 >
                                     <v-text-field dense outlined filled clearable
                                         v-model="slot.item[key + '_' + add]"
                                         :label="attributes[key + '_' + add].text"
                                         :prepend-icon="attributes[key + '_' + add].icon"
                                         :rules="add === 'start' ? [$handlers.rules.date] : []"
-                                    ></v-text-field>
+                                    />
                                 </v-col>
                             </v-row>
                         </v-col>
+
                         <v-col cols=12 md=6>
                             <!-- Position -->
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item.position"
                                 :label="attributes.position.text"
                                 :prepend-icon="attributes.position.icon"
-                                class="mb-3"
                                 counter=255
-                            ></v-text-field>
+                            />
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Nomisma -->
                             <v-text-field dense outlined filled clearable
                                 v-model="slot.item.nomisma_role"
                                 :label="attributes.nomisma_role.text"
                                 :prepend-icon="attributes.nomisma_role.icon"
-                                class="mb-3"
                                 counter=255
                                 @click:prepend="$root.openInNewTab((slot.item.nomisma_role.slice(0, 4) != 'http' ? $handlers.constant.url.nomisma : '') + slot.item.nomisma_role)"
-                            ></v-text-field>
+                            />
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Authority -->
                             <v-select dense outlined filled
                                 v-model="slot.item.is_authority"
                                 :items="yesNo"
                                 :label="attributes.is_authority.text"
                                 :prepend-icon="attributes.is_authority.icon"
-                                class="mb-3"
-                                style="width: 50%;"
-                            ></v-select> 
+                                :menu-props="{ offsetY: true }"
+                            />
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Definition -->
-                            <v-textarea dense outlined filled clearable 
+                            <v-textarea dense outlined filled clearable
                                 no-resize
                                 rows=1
                                 v-model="slot.item.definition"
                                 :label="attributes.definition.text"
                                 :prepend-icon="attributes.definition.icon"
-                                class="mb-3"
                                 counter=21845
-                            ></v-textarea>
+                            />
+                        </v-col>
+
+                        <v-col cols=12 md=6>
                             <!-- Comment -->
-                            <v-textarea dense outlined filled clearable 
+                            <v-textarea dense outlined filled clearable
                                 no-resize
                                 rows=3
                                 v-model="slot.item.comment"
                                 :label="attributes.comment.text"
                                 :prepend-icon="attributes.comment.icon"
                                 counter=21845
-                            ></v-textarea>
+                            />
                         </v-col>
                     </v-row>
                 </div>
             </template>
 
             <!-- Gallery Linking -->
-            <template v-slot:gallery-link="slot">            
+            <template v-slot:gallery-link="slot">
                 <InputForeignKey
-                    entity="functions" 
-                    :label="$root.label('function')" 
-                    icon="event_seat"                    
+                    entity="functions"
+                    :label="$root.label('function')"
+                    icon="event_seat"
                     :selected="slot.link.item.function"
                     style="width: 100%"
                     v-on:select="(emit) => { slot.link.item.function = emit }"
-                ></InputForeignKey>
+                />
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -268,58 +256,54 @@ import keyboard from './../../modules/keyboard.vue'
 export default {
     components: {
         keyboard
-    }, 
+    },
+
     data () {
-        return { 
+        return {
             component:          'person',
             entity:             'persons',
             attributes:         {},
             key_name_class:     'caption font-weight-thin text-uppercase mb-1',
             keyboard:           false,
             keyboard_e:         false,
-            
-            upload:             false,
-            file_browser:       false,
-            file_select:        null,
         }
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null }
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         },
+
         // Dropdowns
         yesNo () {
             return this.$store.state.lists.dropdowns.yesNo.map((item) => { return { value: item.value, text: this.$root.label(item.text) }})
         },
+        search_yesNo () {
+            return this.$store.state.lists.dropdowns.yesNo.map((item) => { return {
+                value: this.dialog ? item.value : (item.value + ''),
+                text: this.$root.label(item.text)
+            }})
+        },
     },
-
-    /*watch: {
-        language: function () { this.attributes = this.setAttributes() }
-    },*/
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -400,14 +384,14 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma_name) } 
+                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma_name) }
                 },
                 nomisma_role: {
                     default: null,
                     text: 'Nomisma ID (Role)',
                     icon: 'monetization_on',
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma_role) } 
+                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma_role) }
                 },
                 definition: {
                     default: null,
@@ -446,7 +430,7 @@ export default {
                 },
                 augustus_uncertain: {
                     default: null,
-                    text: this.$root.label('caesar_string'),
+                    text: this.$root.label('agustus_string'),
                     icon: 'notes',
                     clone: false,
                     content: (item) => { return item?.augustus_uncertain ? item.augustus_uncertain : '--' }

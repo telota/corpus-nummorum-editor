@@ -6,8 +6,8 @@
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            :defaultSortBy="'name_' + language + '.ASC'"
-            smallTiles
+            :default-sort-by="'name_' + language + '.ASC'"
+            small-tiles
             gallery="id_material"
             :dialog="dialog"
             :select="select"
@@ -50,7 +50,7 @@
             <template v-slot:editor="slot">
                 <v-row>
                     <v-col cols=12 md=6>
-                        <!-- JK: Name DE -->
+                        <!-- Name DE -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.name_de"
                             :label="attributes.name_de.text"
@@ -59,8 +59,10 @@
                             class="mb-3"
                             counter=255
                         />
+                    </v-col>
 
-                        <!-- JK: Name EN -->
+                    <v-col cols=12 md=6>
+                        <!-- Name EN -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.name_en"
                             :label="attributes.name_en.text"
@@ -69,8 +71,10 @@
                             class="mb-3"
                             counter=255
                         />
+                    </v-col>
 
-                        <!-- JK: Nomsima -->
+                    <v-col cols=12 md=6>
+                        <!-- Nomsima -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.nomisma"
                             :label="attributes.nomisma.text"
@@ -80,7 +84,7 @@
                         />
                     </v-col>
 
-                    <!-- JK: Comment -->
+                    <!-- Comment -->
                     <v-col cols=12 md=6>
                         <v-textarea dense outlined filled clearable
                             no-resize

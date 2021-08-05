@@ -19,9 +19,10 @@
         width="90%"
         :max-width="800"
         no-padding
+        :z-index="301"
         v-on:close="controls.active = false"
     >
-        <div style="position: relative; height: calc(100vh - 150px); width: 100%;">
+        <div style="position: relative; height: calc(100vh - 190px); width: 100%;">
             <v-card tile class="header_bg d-flex" style="height: 40px;">
 
                 <div
@@ -153,7 +154,7 @@
             <!-- Body -->
             <div
                 class="app_bg"
-                style="height: calc(100vh - 310px); position: relative;"
+                style="height: calc(100vh - 350px); position: relative;"
                 @drop.prevent="dropFile"
                 @dragover.prevent
             >
@@ -241,9 +242,9 @@
             </div>
 
             <!-- Footer -->
-            <div style="height: 120px;">
+            <div class="header_bg" style="height: 120px;">
                 <!-- Upload Options -->
-                <div class="pa-2 grey_prim" style="height: 80px;">
+                <div class="pa-2" style="height: 80px;">
 
                     <!-- Options
                     <div class="d-flex flex-wrap">

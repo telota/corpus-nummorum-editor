@@ -17,9 +17,6 @@ export default ({
         details: {
             loading: false,
             item: {}
-        },
-        galery: {
-            zoom: 1
         }
     },
 
@@ -28,19 +25,12 @@ export default ({
 
         setDirectoryExpanded (state, input)     { state.directory.expanded = input?.[0] ? input : [] },
 
-        setDirectoryExpandedAll (state, input) { state.directory.expandedAll = input },
+        setDirectoryExpandedAll (state, input)  { state.directory.expandedAll = input },
 
         setFilesItems (state, input)            { state.files.items = input?.[0] ? input : [] },
-        setDetailsItem (state, input)            { state.details.item = input?.path ? input : {} },
+        setDetailsItem (state, input)           { state.details.item = input?.path ? input : {} },
 
-        setLoading (state, input)               { state[input.key].loading = input.value },
-
-        setGaleryZoom (state, input) {
-            const newZoom = state.galery.zoom + input
-            if (newZoom >= 0 && newZoom < 3) state.galery.zoom = newZoom
-            //const newZoom = state.galery.zoom + input
-            //if (newZoom >= 5 && newZoom < 100) state.galery.zoom = newZoom
-        }
+        setLoading (state, input)               { state[input.key].loading = input.value }
     },
 
     actions: {
@@ -50,7 +40,7 @@ export default ({
             commit('setDirectoryItems', [])
 
             const path = this.state.baseURL + '/storage-api/index'
-            const response = await axios.get(path).catch((error) => console.error('DIRECTORY FETCH', error))
+            const response = await axios.get(path).catch((error) => console.error((error?.response?.status ?? 'unknown') + ' DIRECTORY FETCH', path))
 
             const data = response?.data?.directories
 
@@ -65,7 +55,7 @@ export default ({
             commit('setFilesItems', [])
 
             const path = this.state.baseURL + '/storage-api/index/' + payload.directory
-            const response = await axios.get(path).catch((error) => console.error('FILE FETCH', error))
+            const response = await axios.get(path).catch((error) => console.error((error?.response?.status ?? 'unknown') + ' FILE FETCH ERROR for ', path))
 
             const data = response?.data?.files
 
@@ -80,7 +70,7 @@ export default ({
             commit('setDetailsItem', {})
 
             const path = this.state.baseURL + '/storage-api/details/' + payload.path
-            const response = await axios.get(path).catch((error) => console.error('FILE FETCH', error))
+            const response = await axios.get(path).catch((error) => console.error((error?.response?.status ?? 'unknown') + ' DETAILS FETCH ERROR for ', path))
 
             const data = response?.data
 

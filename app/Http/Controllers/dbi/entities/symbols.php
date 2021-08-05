@@ -6,11 +6,11 @@ use App\Http\Controllers\dbi\dbiInterface;
 use DB;
 
 
-class symbols implements dbiInterface  { 
+class symbols implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
-    public function select ($user, $id) {        
+    public function select ($user, $id) {
         $query = DB::table(config('dbi.tablenames.symbols')) -> select([
             'id AS id',
             'symbol_de      AS name_de',
@@ -18,7 +18,7 @@ class symbols implements dbiInterface  {
             'comment        AS comment',
             DB::raw('IF(image IS NOT NULL, CONCAT(\'Symbols/\', image), NULL) AS image')
         ]);
-        
+
         // Set condition if ID is given
         if (!empty($id)) { $query -> where('id', $id); }
 
@@ -28,7 +28,7 @@ class symbols implements dbiInterface  {
         return $items;
     }
 
-    public function input ($user, $input) {        
+    public function input ($user, $input) {
         $validation = $this -> validateInput($input);
 
         if(empty($validation['error'][0])) {
@@ -75,12 +75,8 @@ class symbols implements dbiInterface  {
     // Helper-Functions ------------------------------------------------------------------
 
     public function validateInput ($input) {
-        if (empty($input['name_de'])) {
-            $error[] = config('dbi.responses.validation.general.name_de');
-        }
-        if (empty($input['name_en'])) {
-            $error[] = config('dbi.responses.validation.general.name_en');
-        }
+        if (empty($input['name_de'])) $error[] = config('dbi.responses.validation.general.name_de');
+        if (empty($input['name_en'])) $error[] = config('dbi.responses.validation.general.name_en');
 
         // Return validated input
         if (empty($error)) {
@@ -88,10 +84,10 @@ class symbols implements dbiInterface  {
                 $img_explode    = explode('/', $input['image']);
                 $input['image'] = end($img_explode);
             }
-            
+
             return ['input' => $input];
         }
         // Return Error
-        else { return ['error' => $error]; }
+        else return ['error' => $error];
     }
 }

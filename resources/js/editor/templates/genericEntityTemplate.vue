@@ -51,6 +51,7 @@
             :gallery="gallery"
             :select="select"
             :selected="selected"
+            :linking="linking"
             v-on:select="selectItem"
             v-on:close="close"
             v-on:add="newItem"
@@ -60,6 +61,10 @@
         >
             <template v-slot:editor="slot">
                 <slot name="editor" v-bind:item="slot.item" />
+            </template>
+
+            <template v-slot:gallery-link="slot">
+                <slot name="gallery-link" v-bind:link="slot.link" />
             </template>
         </edit-template>
 

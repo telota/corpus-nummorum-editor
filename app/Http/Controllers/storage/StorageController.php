@@ -127,7 +127,7 @@ class StorageController extends Controller {
             }*/
 
             $response[] = [
-                'success'       => empty($success) || empty($meta_name) ? false : true,
+                'success'       => empty($success) /*|| empty($meta_name)*/ ? false : true,
                 'path'          => $directory.$file_name,
                 'directory'     => $directory,
                 'name'          => $file_name,

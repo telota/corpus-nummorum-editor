@@ -66,6 +66,7 @@
                 </div>
 
                 <app-about></app-about>
+                <app-error></app-error>
                 <coin-type-details></coin-type-details>
                 <app-eye-protection></app-eye-protection>
             </v-app>

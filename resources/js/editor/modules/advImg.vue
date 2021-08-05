@@ -1,7 +1,7 @@
 <template>
 <div :style="'background-color:' + Background">
     <v-img
-        :src="img.src"
+        :src="img.src ? img.src : undefined"
         :contain="contain"
         :alt="img.name"
         :aspect-ratio="ratio"
@@ -56,8 +56,12 @@ export default {
     },
 
     computed: {
-        baseURL () { return this.$root.baseURL },
-        ratio () { return this.square ? 1 : 4/3 },
+        baseURL () {
+            return this.$root.baseURL
+        },
+        ratio () {
+            return this.square ? 1 : 4/3
+        },
         Background () {
             if (!this.background) return 'grey'
             if (this.$root.colors[this.background]) return this.$root.colors[this.background]
@@ -66,9 +70,7 @@ export default {
     },
 
     watch: {
-        src () {
-            this.setImg()
-        }
+        src () { this.setImg() }
     },
 
     mounted () {
@@ -77,16 +79,14 @@ export default {
 
     methods: {
         setImg () {
-            //if (this.src) {
-                const src = this.setImgSrc(this.src)
-                this.img = {
-                    loading: src ? true : false,
-                    src: src ? src : null,
-                    icon: this.setIcon(src),
-                    name: this.text ?? this.src?.split('/')?.pop()
-                }
-            /*}
-            else Object.keys(this.img).forEach((key) => this.img[key] = null)*/
+            const src = this.setImgSrc(this.src)
+
+            this.img = {
+                loading: src ? true : false,
+                src: src ?? null,
+                icon: this.setIcon(src),
+                name: this.text ?? this.src?.split('/')?.pop()
+            }
         },
 
         handleError (error) {
@@ -95,14 +95,16 @@ export default {
         },
 
         setImgSrc (src) {
-            src = src?.trim()
+            if (!src) return null
+
+            src = src.trim()
 
             if (src) {
                 if (src.slice(0, 5) === 'blob:' || src.slice(0,4) === 'http') return src
                 if (src.toLowerCase().includes('.tif')) return this.$root.digilib(src)
                 return this.baseURL + '/' + (src.includes('storage/') ? '' : 'storage/') + src
             }
-            else return null
+            return null
         },
 
         setIcon (src) {
@@ -111,7 +113,7 @@ export default {
                 if (this.displayable.includes(extension)) return 'broken_image'
                 return 'help_center'
             }
-            else return 'no_photography'
+            return 'no_photography'
         }
     }
 }

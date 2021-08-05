@@ -101,39 +101,31 @@
             <template v-slot:editor="slot">
                 <v-row>
                     <v-col cols=12 md=6>
-                        <v-row>
-                            <v-col cols=12 md=7>
-                                <v-text-field dense outlined filled clearable
-                                    v-model="slot.item.name"
-                                    :label="attributes.name.text"
-                                    :prepend-icon="attributes.name.icon"
-                                    hint="required"
-                                    counter=255
-                                />
-                            </v-col>
-                            <v-col cols=12 md=5>
-                                <v-select dense outlined filled
-                                    v-model="slot.item.side"
-                                    :items="sides"
-                                    :label="attributes.side.text"
-                                    :prepend-icon="attributes.side.icon"
-                                    :menu-props="{ offsetY: true }"
-                                />
-                            </v-col>
-                        </v-row>
-                        <v-textarea dense outlined filled clearable
-                            no-resize
-                            rows=2
-                            v-model="slot.item.comment"
-                            :label="attributes.comment.text"
-                            :prepend-icon="attributes.comment.icon"
-                            counter=21845
+                        <v-text-field dense outlined filled clearable
+                            v-model="slot.item.name"
+                            :label="attributes.name.text"
+                            :prepend-icon="attributes.name.icon"
+                            hint="required"
+                            counter=255
                         />
                     </v-col>
-                    <v-col cols=12 md=6>
+
+                    <v-col cols=12 md=6 lg=3>
+                        <v-select dense outlined filled
+                            v-model="slot.item.side"
+                            :items="sides"
+                            :label="attributes.side.text"
+                            :prepend-icon="attributes.side.icon"
+                            :menu-props="{ offsetY: true }"
+                        />
+                    </v-col>
+
+                    <v-col
+                        v-for="(key) in ['design', 'legend']"
+                        :key="key + slot.item.side"
+                        cols=12 md=6
+                    >
                         <InputForeignKey
-                            v-for="(key) in ['design', 'legend']"
-                            :key="key + slot.item.side"
                             :entity="key + 's'"
                             :label="$root.label((slot.item.side == 1 ? 'reverse' : 'obverse') + ',' + key)"
                             :icon="attributes['id_' + key].icon"
@@ -142,6 +134,17 @@
                             :conditions="[{ side: slot.item.side }]"
                             style="width: 100%"
                             v-on:select="(emit) => { slot.item['id_' + key] = emit }"
+                        />
+                    </v-col>
+
+                    <v-col cols=12 md=6>
+                        <v-textarea dense outlined filled clearable
+                            no-resize
+                            rows=2
+                            v-model="slot.item.comment"
+                            :label="attributes.comment.text"
+                            :prepend-icon="attributes.comment.icon"
+                            counter=21845
                         />
                     </v-col>
                 </v-row>

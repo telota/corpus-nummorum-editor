@@ -88,8 +88,8 @@
                         v-for="key in ['role', 'side', 'border_dots']"
                         :key="key"
                         cols=12
+                        sm=6
                         md=3
-                        class="mt-n5"
                     >
                         <v-select dense outlined filled
                             v-model="slot.item[key]"
@@ -122,7 +122,7 @@ export default {
     props: {
         dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: null },
+        selected:   { type: [Number, String], default: null }
     },
 
     computed: {

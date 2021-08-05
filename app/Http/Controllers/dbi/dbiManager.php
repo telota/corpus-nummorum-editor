@@ -32,9 +32,7 @@ class dbiManager {
             $provider = new dbiProvider(new $class());
             return $provider->provide_select($user, $id);
         }
-        else {
-            return ['error' => config('dbi.responses.general.insufficient_permissions')];
-        }
+        else return ['error' => config('dbi.responses.general.insufficient_permissions')];
     }
 
     public function input ($user, $entity) {
@@ -57,13 +55,9 @@ class dbiManager {
                     'code' => empty($input['id']) ? 201 : 200
                 ];
             }
-            else {
-                return ['error' => $this->errorMessage($response['error'])];
-            }
+            else return ['error' => $this->errorMessage($response['error'])];
         }
-        else {
-            return ['error' => config('dbi.responses.general.insufficient_permissions')];
-        }
+        else return ['error' => config('dbi.responses.general.insufficient_permissions')];
     }
 
     public function delete ($user, $entity) {
@@ -86,9 +80,7 @@ class dbiManager {
                 'id' => $input['id']
             ];
         }
-        else {
-            return ['error' => config('dbi.responses.general.insufficient_permissions')];
-        }
+        else return ['error' => config('dbi.responses.general.insufficient_permissions')];
     }
 
     public function connect ($user, $entity) {
@@ -103,9 +95,7 @@ class dbiManager {
 
             return ['success' => $this->successMessage('connected', $input['id'])];
         }
-        else {
-            return ['error' => config('dbi.responses.general.insufficient_permissions')];
-        }
+        else return ['error' => config('dbi.responses.general.insufficient_permissions')];
     }
 
     // Helper Functions ---------------------------------------------------
@@ -113,12 +103,8 @@ class dbiManager {
     public function checkEntity ($entity) {
         $class = 'App\Http\Controllers\dbi\entities\\'.$entity;
 
-        if (class_exists($class)) {
-            return $class;
-        }
-        else {
-            die (abort(404, 'Call to unknown resource "'.$entity.'"!'));
-        }
+        if (class_exists($class)) return $class;
+        else die (abort(404, 'Call to unknown resource "'.$entity.'"!'));
     }
 
     public function checkUser ($user, $entity, $mode, $input = NULL) {
@@ -147,7 +133,7 @@ class dbiManager {
             }
         }
         // Throw Error if mode is unknown
-        else { die (abort(404, 'Unknown Operation called!')); }
+        else die (abort(404, 'Unknown Operation called!'));
 
         return $user['level'] < $required ? false : true;
     }
@@ -163,7 +149,7 @@ class dbiManager {
     public function errorMessage ($errors) {
         foreach ($errors AS $error) {
             foreach ($error AS $key => $val) {
-                $message[$key] = (!empty($message[$key]) ? $message[$key].' ' : '').$val;
+                $message[$key] = (!empty($message[$key]) ? $message[$key]."\n" : '').$val;
             }
         }
         return $message;

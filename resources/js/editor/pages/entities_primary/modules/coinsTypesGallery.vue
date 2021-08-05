@@ -1,5 +1,5 @@
 <template>
-<div>
+<div ref="ctgallery">
     <template v-for="(e, i) in entities">
         <div
             :key="e"
@@ -31,12 +31,12 @@
                                     class="title text-uppercase"
                                     style="white-space: nowrap"
                                     v-html="$root.label(e) + counter[e]"
-                                ></div>
+                                />
                                 <v-icon
                                     :color="hover && data[e].items[0] ? 'blue_sec' : ''"
                                     class="ml-2"
                                     v-text="'expand_' + (data[e].expand ? 'less' : 'more')"
-                                ></v-icon>
+                                />
                             </div>
                         </template>
                     </v-hover>
@@ -91,10 +91,7 @@
                         <v-col
                             v-for="(item, i) in data[e].items"
                             :key="i"
-                            cols="12"
-                            :sm="cols.sm"
-                            :md="cols.md"
-                            :xl="cols.xl"
+                            :cols="cols"
                         >
                             <tradingcard
                                 :key="i + entity + item.id"
@@ -202,7 +199,9 @@ export default {
                 show: false,
                 entity: null,
                 item: { id: null }
-            }
+            },
+
+            width: 0
         }
     },
 
@@ -227,7 +226,6 @@ export default {
     computed: {
         // Localization
         l () { return this.$root.language },
-        labels () { return this.$root.labels },
 
         entities () {
             const entities = []
@@ -237,12 +235,12 @@ export default {
         },
 
         cols () {
-            return {
-                sm: this.big ? 12 : 6,
-                md: this.big ? 4 : 3,
-                lg: this.big ? 3 : 2,
-                xl: this.big ? 3 : 2
-            }
+            const width = this.width
+            if (width < 250) return 12
+            if (width < 750) return this.big ? 12 : 6
+            if (width < 1000) return this.big ? 6 : 4
+            if (width < 1500) return this.big ? 4 : 3
+            return this.big ? 3 : 2
         },
 
         counter () {
@@ -311,7 +309,16 @@ export default {
         }
     },
 
+    mounted () {
+        this.onResize()
+        window.addEventListener('resize', this.onResize, { passive: true })
+    },
+
     methods: {
+        async onResize () {
+            this.width = this.$refs?.ctgallery?.clientWidth ?? 0
+        },
+
         async GetItems (entity) {
             this.data[entity].loading    = true;
 
@@ -384,9 +391,7 @@ export default {
                     }
                 }
             }
-            else {
-                alert('mode is missing!')
-            }
+            else alert('mode is missing!')
         },
     }
 }

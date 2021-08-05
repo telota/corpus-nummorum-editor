@@ -1,60 +1,50 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            defaultSortBy="name"
-            cards
-            smallCards
+            :default-sort-by="'name.ASC'"
+            small-tiles
             gallery="id_mint"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row>
-                    <v-col
-                        v-for="key in ['id', 'name', ('name_' + language), ('region_' + language), 'nomisma']"
-                        :key="key"
-                        cols=12 
-                        sm=4 
-                        md=3
-                    >
-                        <v-text-field dense outlined filled clearable
-                            v-model="attributes[key].filter"
-                            :label="attributes[key].text"
-                            :prepend-icon="attributes[key].icon"
-                        ></v-text-field>
-                    </v-col>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <v-text-field dense outlined filled clearable
+                    v-for="key in ['id', 'name', ('name_' + language), ('region_' + language), 'nomisma']"
+                    :key="key"
+                    v-model="attributes[key].filter"
+                    :label="attributes[key].text"
+                    :prepend-icon="attributes[key].icon"
+                />
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
+            <template v-slot:search-tile-header="slot">
                 {{ 'ID&nbsp;' + slot.item.id }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:search-tile-body="slot">
                 <div class="body-2 mb-3">
-                    <div class="font-weight-bold" v-html="attributes.name.content(slot.item)"></div>
-                    <div class="caption" v-html="attributes.nomisma.content(slot.item)"></div>
+                    <div class="font-weight-bold" v-html="attributes.name.content(slot.item)" />
+                    <div class="caption" v-html="attributes.nomisma.content(slot.item)" />
                 </div>
                 <div class="body-2 mb-3">
-                    <span v-html="attributes['region_' + language].content(slot.item)"></span>, 
-                    <span v-html="attributes['name_' + language].content(slot.item)"></span>
+                    <span v-html="attributes['region_' + language].content(slot.item)" />,
+                    <span v-html="attributes['name_' + language].content(slot.item)" />
                 </div>
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ $root.label(component) + '&nbsp;' + slot.item.id }}
-            </template>
-
-            <template v-slot:editor-body="slot">
+            <template v-slot:editor="slot">
                 <v-row>
                     <!-- Name CN -->
                     <v-col cols=12 md=6>
@@ -64,7 +54,7 @@
                             :prepend-icon="attributes.name.icon"
                             hint="required" persistent-hint
                             counter=255
-                        ></v-text-field>
+                        />
                     </v-col>
 
                     <!-- Nomisma -->
@@ -75,12 +65,12 @@
                             :prepend-icon="attributes.nomisma.icon"
                             counter=255
                             @click:prepend="$root.openInNewTab((slot.item.nomisma.slice(0, 4) != 'http' ? $handlers.constant.url.nomisma : '') + slot.item.nomisma)"
-                        ></v-text-field>
+                        />
                     </v-col>
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -88,9 +78,9 @@
 
 <script>
 
-export default { 
+export default {
     data () {
-        return { 
+        return {
             component:          'mint',
             entity:             'mints',
             attributes:         {},
@@ -99,15 +89,15 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null }
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         }
@@ -118,18 +108,14 @@ export default {
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
@@ -191,7 +177,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) } 
+                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
                 },
             }
         }

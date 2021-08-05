@@ -1,69 +1,80 @@
 <template>
 <div>
     <component-toolbar />
-    <component-content>
-        <v-row class="pt-0 ma-0">
+    <component-content style="overflow-y: hidden">
+        <v-row class="pt-0 ma-0" no-gutters>
 
             <!-- Legends Index -->
             <v-col cols=3>
-                <v-card tile>
-                    <div class="pa-3">
-                        <v-text-field outlined filled clearable dense
-                            ref="searchString"
-                            v-model="search.string"
-                            :label="$root.label('legend')"
-                            append-icon="keyboard"
-                            class="mb-n4"
-                            v-on:click:append="showKB = !showKB"
-                        />
-                        <v-expand-transition>
-                            <div v-if="showKB" class="d-flex justify-center">
-                                <keyboard
-                                    :string="search.string"
-                                    layout="el_uc"
-                                    small
-                                    hide_options
-                                    v-on:input="keyboardInput"
-                                ></keyboard>
+                <v-card
+                    tile
+                    class="legend-tile sheet_bg"
+                    style="margin: 16px 8px 16px 16px;"
+                    :style="'outline: 1px solid ' + ($vuetify.theme.dark ? 'black' : 'grey')"
+                >
+                    <div style="flex: 0 1 auto;">
+                        <div class="pa-3">
+                            <v-text-field outlined filled clearable dense
+                                ref="searchString"
+                                v-model="search.string"
+                                :label="$root.label('legend')"
+                                append-icon="keyboard"
+                                class="mb-n4"
+                                v-on:click:append="showKB = !showKB"
+                            />
+                            <v-expand-transition>
+                                <div v-if="showKB" class="d-flex justify-center">
+                                    <keyboard
+                                        :string="search.string"
+                                        layout="el_uc"
+                                        small
+                                        hide_options
+                                        v-on:input="keyboardInput"
+                                    ></keyboard>
+                                </div>
+                            </v-expand-transition>
+                        </div>
+
+                        <div class="pl-3 pr-3 mt-n3 d-flex justify-center">
+                            <div class="d-flex align-center">
+                                <v-checkbox
+                                    v-model="search.transform"
+                                    label="use Pseudo-Greek"
+                                    class="mr-1"
+                                />
+                                <sup class="body-1" style="cursor: pointer;" @click="showLG = true"> *</sup>
                             </div>
-                        </v-expand-transition>
-                    </div>
-
-                    <div class="pl-3 pr-3 mt-n3 d-flex justify-center">
-                        <div class="d-flex align-center">
-                            <v-checkbox
-                                v-model="search.transform"
-                                label="use Pseudo-Greek"
-                                class="mr-1"
-                            />
-                            <sup class="body-1" style="cursor: pointer;" @click="showLG = true"> *</sup>
+                            <div class="d-flex align-center ml-5">
+                                <v-checkbox
+                                    v-model="search.regex"
+                                    label="use REGEX"
+                                    class="mr-1"
+                                />
+                                <sup class="body-1"><a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank"> *</a></sup>
+                            </div>
                         </div>
-                        <div class="d-flex align-center ml-5">
-                            <v-checkbox
-                                v-model="search.regex"
-                                label="use REGEX"
-                                class="mr-1"
-                            />
-                            <sup class="body-1"><a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank"> *</a></sup>
-                        </div>
-                    </div>
 
-                    <div class="pl-3 pr-3 pt-2">
-                        <v-text-field outlined filled clearable dense
-                            v-model="search.keywords"
-                            :label="$root.label('Keywords')"
-                            class="mb-n3"
+                        <div class="pl-3 pr-3 pt-2">
+                            <v-text-field outlined filled clearable dense
+                                v-model="search.keywords"
+                                :label="$root.label('Keywords')"
+                                class="mb-n3"
+                            />
+                        </div>
+
+                        <div
+                            class="text-center mb-2"
+                            v-text="loading ? 'Please wait ...' : (list.length + ' records' + (searchDisplay ? (' for \'' + searchDisplay + '\'') : ''))"
                         />
+
+                        <v-progress-linear :indeterminate="loading" height="1" />
                     </div>
 
-                    <div
-                        class="text-center mb-2"
-                        v-text="loading ? 'Please wait ...' : (list.length + ' records' + (searchDisplay ? (' for \'' + searchDisplay + '\'') : ''))"
-                    />
-
-                    <v-progress-linear :indeterminate="loading" height="1" />
-
-                    <v-virtual-scroll :items="list" item-height="60" height="700">
+                    <v-virtual-scroll
+                        :items="list"
+                        item-height="60"
+                        style="flex: 1 1 auto;"
+                    >
                         <template v-slot:default="{ item, index }">
                             <div
                                 class="pl-3 pr-3 d-flex align-center"
@@ -77,60 +88,69 @@
                             </div>
                         </template>
                     </v-virtual-scroll>
+
                 </v-card>
             </v-col>
 
             <!-- Legend Variants -->
             <v-col cols=3>
-                <v-card tile>
-                    <div class="pa-3">
-                        <v-row>
-                            <v-col cols="6">
-                                <v-select
-                                    v-model="search.role"
-                                    :items="[
-                                        { value: null, text:'All' },
-                                        { value: 0, text:'Coins' },
-                                        { value: 1, text:'Types' },
-                                        { value: 2, text:'Coins/Types' }
-                                    ]"
-                                    label="Entity"
-                                    outlined dense filled
-                                />
-                            </v-col>
+                <v-card
+                    tile
+                    class="legend-tile sheet_bg"
+                    style="margin: 16px 8px 16px 8px;"
+                    :style="'outline: 1px solid ' + ($vuetify.theme.dark ? 'black' : 'grey')"
+                >
+                    <div style="flex: 0 1 auto;">
+                        <div class="pa-3">
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-select
+                                        v-model="search.role"
+                                        :items="[
+                                            { value: null, text:'All' },
+                                            { value: 0, text:'Coins' },
+                                            { value: 1, text:'Types' },
+                                            { value: 2, text:'Coins/Types' }
+                                        ]"
+                                        label="Entity"
+                                        outlined dense filled
+                                    />
+                                </v-col>
 
-                            <v-col cols="6">
-                                <v-select
-                                    v-model="search.side"
-                                    :items="[
-                                        { value: null, text:'All' },
-                                        { value: 0, text:'Obverse' },
-                                        { value: 1, text:'Reverse' },
-                                        { value: 2, text:'Obverse/Reverse' }
-                                    ]"
-                                    label="Side"
-                                    outlined dense filled
-                                />
-                            </v-col>
-                        </v-row>
+                                <v-col cols="6">
+                                    <v-select
+                                        v-model="search.side"
+                                        :items="[
+                                            { value: null, text:'All' },
+                                            { value: 0, text:'Obverse' },
+                                            { value: 1, text:'Reverse' },
+                                            { value: 2, text:'Obverse/Reverse' }
+                                        ]"
+                                        label="Side"
+                                        outlined dense filled
+                                    />
+                                </v-col>
+                            </v-row>
+                        </div>
+
+                        <div
+                            class="text-center mb-2"
+                            v-text="listSelect === 0 ? '...' : (records.length + ' variants' + (records.length < recordsRaw.length ? (' (' + recordsRaw.length + ' in total)') : ''))"
+                        />
+
+                        <v-divider />
                     </div>
-
-                    <div
-                        class="text-center mb-2"
-                        v-text="listSelect === 0 ? '...' : (records.length + ' variants' + (records.length < recordsRaw.length ? (' (' + recordsRaw.length + ' in total)') : ''))"
-                    />
-
-                    <v-divider />
 
                     <div v-if="listSelect === 0">
                         <div class="body-1 pt-10 text-center" v-text="'Legend Variants'" />
                         <div class="caption pt-1 pb-10 text-center" v-text="'Click on a list item to show variants'" />
                     </div>
+
                     <v-virtual-scroll
                         v-else-if="records[0]"
                         :items="records"
                         item-height="100"
-                        height="701"
+                        style="flex: 1 1 auto;"
                     >
                         <template v-slot:default="{ item, index }">
                             <div
@@ -160,23 +180,26 @@
 
             <!-- Preview -->
             <v-col cols=6>
-                <v-card tile>
-                    <div class="pa-3">
-                        <ItemGallery
-                            v-if="recordSelect"
-                            :key="recordSelect"
-                            :entity="'legends'"
-                            :search_key="'id_legend'"
-                            :search_val="recordSelect ? recordSelect : 0"
-                            :tiles="4"
-                            :limit="8"
-                            color_main="grey_trip"
-                            color_hover="marked"
-                        />
-                        <div v-else>
-                            <div class="body-1 pt-7 text-center" v-text="'Related Types and Coins'" />
-                            <div class="caption pt-1 pb-7 text-center" v-text="'Click on a Variant to show Galery'" />
-                        </div>
+                <v-card
+                    tile
+                    class="pa-3 legend-tile sheet_bg"
+                    style="margin: 16px 16px 16px 8px; overflow-y: auto"
+                    :style="'outline: 1px solid ' + ($vuetify.theme.dark ? 'black' : 'grey')"
+                >
+                    <ItemGallery
+                        v-if="recordSelect"
+                        :key="recordSelect"
+                        :entity="'legends'"
+                        :search_key="'id_legend'"
+                        :search_val="recordSelect ? recordSelect : 0"
+                        :tiles="4"
+                        :limit="8"
+                        color_main="grey_trip"
+                        color_hover="marked"
+                    />
+                    <div v-else>
+                        <div class="body-1 pt-7 text-center" v-text="'Related Types and Coins'" />
+                        <div class="caption pt-1 pb-7 text-center" v-text="'Click on a Variant to show Galery'" />
                     </div>
                 </v-card>
             </v-col>
@@ -391,3 +414,11 @@ export default {
 }
 
 </script>
+
+<style lang="scss" scoped>
+    .legend-tile {
+        height: calc(100vh - 122px);
+        display: flex;
+        flex-flow: column;
+    }
+</style>

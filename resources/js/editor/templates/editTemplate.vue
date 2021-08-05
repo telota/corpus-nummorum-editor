@@ -34,16 +34,7 @@
             <div :class="divider" />
 
             <adv-btn
-                icon="delete"
-                color-hover="header_hover"
-                :disabled="!editorItem.id"
-                @click="deleteItem()"
-            />
-
-            <div :class="divider" />
-
-            <adv-btn
-                icon="add"
+                :icon="editorItem.id ? 'add' : 'clear'"
                 color-hover="header_hover"
                 @click="newItem()"
             />
@@ -53,6 +44,15 @@
                 color-hover="header_hover"
                 :disabled="!editorItem.id"
                 @click="cloneItem()"
+            />
+
+            <div :class="divider" />
+
+            <adv-btn
+                icon="delete"
+                color-hover="header_hover"
+                :disabled="!editorItem.id"
+                @click="deleteItem()"
             />
 
             <div :class="divider" />
@@ -83,8 +83,8 @@
                     style="cursor:pointer"
                     @click="editorExpanded = !editorExpanded"
                 >
-                    <div class="body-1 font-weight-bold" v-text="editorExpanded ? 'Edit Data' : 'Details'" />
-                    <v-icon class="ml-2 mr-3" v-text="editorExpanded ? 'expand_less' : 'edit'" />
+                    <div class="body-1 font-weight-bold" v-text="showEditor ? 'Edit Data' : 'Details'" />
+                    <v-icon class="ml-2 mr-3" v-text="showEditor ? 'expand_less' : 'edit'" />
                     <v-divider />
                 </div>
 
@@ -114,7 +114,7 @@
                         class="mt-10"
                     >
                         <template v-slot:link="slot">
-                            <div :key="slot.link.active">
+                            <div :key="slot.show">
                                 <slot name="gallery-link" v-bind:link="slot.link" />
                             </div>
                         </template>
@@ -346,7 +346,7 @@ export default {
                 this.$store.dispatch('showSnack', { color: 'success', message: response.success[this.language] })
                 if (!this.editorItem.id) this.$emit('id', response.id)
             }
-            else console.error('edit-template: Update/Creation: server-response was not ok');
+            else console.error('edit-template: Update/Creation: server-response was not ok')
 
             this.$root.loading = this.$root.loading = false
         },

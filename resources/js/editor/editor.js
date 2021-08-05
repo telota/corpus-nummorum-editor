@@ -48,6 +48,7 @@ Vue.component('app-dialog',         require('./app/appDialog.vue').default);
 //Vue.component('app-context-menu',   require('./app/appContextMenu.vue').default);
 Vue.component('app-about',          require('./app/appAbout.vue').default);
 Vue.component('app-eye-protection', require('./app/appEyeProtection.vue').default);
+Vue.component('app-error',          require('./app/appError.vue').default);
 
 Vue.component('simpleDataTemplate', require('./templates/simpleDataTemplate.vue').default);
 Vue.component('simpleSelectDialog', require('./templates/simpleDataSelectDialog.vue').default);
@@ -67,7 +68,6 @@ Vue.component('Imager',             require('./modules/Imager.vue').default);
 Vue.component('adv-img',            require('./modules/advImg.vue').default);
 Vue.component('InputForeignKey',    require('./modules/InputForeignKey.vue').default);
 Vue.component('SearchForeignKey',   require('./modules/SearchForeignKey.vue').default);
-Vue.component('ErrorDialog',        require('./modules/ErrorDialog.vue').default);
 Vue.component('ChildDialog',        require('./modules/ChildDialog.vue').default);
 Vue.component('ScreenKeys',         require('./modules/ScreenKeys.vue').default);
 Vue.component('files',              require('./modules/files.vue').default);
@@ -473,8 +473,8 @@ const editor = new Vue({
                                 console.log('RESPONSE CHECK: Server accepted input as valid:', response)
                             }
                             else {
-                                self.snackbar('Validation Issue!', 'error')
-                                self.error = { active: true, validation: response.data?.[self.language] ? response.data[self.language] : response.data }
+                                self.$store.dispatch('showSnack', { color: 'error', message: 'Validation Issue!' })
+                                self.error = { active: true, validation: response.data?.error ?? response.data }
                                 console.log('RESPONSE CHECK: Validation Issue: Server declined input as invalid:', response)
                             }
                         })
@@ -498,6 +498,7 @@ const editor = new Vue({
             this.error = {
                 active:     true,
                 validation: null,
+                status:     error?.response?.status ?? 'unknown',
                 resource:   error?.config?.url ?? 'unknown',
                 exception:  error?.response?.data?.exception ?? (error?.request?.data?.exception ?? 'unknown'),
                 message:    error?.response?.data?.message   ?? (error?.request?.data?.message   ?? (error?.message ?? '--') ),

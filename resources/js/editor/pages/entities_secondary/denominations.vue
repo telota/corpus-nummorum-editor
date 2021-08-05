@@ -56,20 +56,22 @@
                             :label="attributes.name_de.text"
                             :prepend-icon="attributes.name_de.icon"
                             hint="required"
-                            class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
+                    </v-col>
 
+                    <v-col cols=12 md=6>
                         <!-- Name EN -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.name_en"
                             :label="attributes.name_en.text"
                             :prepend-icon="attributes.name_en.icon"
                             hint="required"
-                            class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
+                    </v-col>
 
+                    <v-col cols=12 md=6>
                         <!-- Nomisma -->
                         <v-text-field dense outlined filled clearable
                             v-model="slot.item.nomisma"
@@ -77,7 +79,7 @@
                             :prepend-icon="attributes.nomisma.icon"
                             counter=255
                             @click:prepend="$root.openInNewTab((slot.item.nomisma.slice(0, 4) != 'http' ? $handlers.constant.url.nomisma : '') + slot.item.nomisma)"
-                        ></v-text-field>
+                        />
                     </v-col>
 
                     <!-- Comment -->
@@ -89,7 +91,7 @@
                             :label="attributes.comment.text"
                             :prepend-icon="attributes.comment.icon"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
                 </v-row>
             </template>
