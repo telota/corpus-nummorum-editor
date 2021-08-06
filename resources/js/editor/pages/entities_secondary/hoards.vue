@@ -3,7 +3,6 @@
         <generic-entity-template
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :default-sort-by="'name.ASC'"
             small-tiles
@@ -154,9 +153,6 @@ export default {
     computed: {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
-        },
-        headline () {
-            return this.$root.label(this.entity)
         }
     },
 
@@ -174,7 +170,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -184,7 +180,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 country: {
                     default: null,
@@ -193,7 +189,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.country ? item.country.toUpperCase() : '--' }
+                    content: (item) => item?.country ? item.country.toUpperCase() : '--'
                 },
                 findspot: {
                     default: null,
@@ -201,7 +197,7 @@ export default {
                     icon: 'pin_drop',
                     header: true,
                     sortable: true,
-                    content: (item) => { return item?.findspot ? item.findspot : '--' }
+                    content: (item) => item?.findspot ?? '--'
                 },
                 id_findspot: {
                     default: null,
@@ -209,7 +205,7 @@ export default {
                     icon: 'place',
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.id_findspot ? (item.findspot ? ('ID ' + item?.id_findspot + ', ' + item.findspot) : item.id_findspot ) : '--' }
+                    content: (item) => item?.id_findspot ? (item.findspot ? ('ID ' + item?.id_findspot + ', ' + item.findspot) : item.id_findspot ) : '--'
                 },
                 year: {
                     default: null,
@@ -218,7 +214,7 @@ export default {
                     header: true,
                     sortable: true,
                     clone: false,
-                    content: (item) => { return item?.year ? item?.year : '--' }
+                    content: (item) => item?.year ?? '--'
                 },
                 link: {
                     default: null,
@@ -226,14 +222,14 @@ export default {
                     icon: 'link',
                     header: true,
                     clone: false,
-                    content: (item) => { return item.link ? (item.link.split('//').pop().split('ww.').pop().split('/')[0] + this.$handlers.format.resource_link(item.link)) : '--' }
+                    content: (item) => item.link ? (item.link.split('//').pop().split('ww.').pop().split('/')[0] + this.$handlers.format.resource_link(item.link)) : '--'
                 },
                 description: {
                     default: null,
                     text: this.$root.label('description'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.description ? item.description : '--' }
+                    content: (item) => item?.description ?? '--'
                 },
                 reference: {
                     default: null,
@@ -241,14 +237,14 @@ export default {
                     icon: 'notes',
                     sortable: true,
                     clone: true,
-                    content: (item) => { return item?.reference ? item.reference : '--' }
+                    content: (item) => item?.reference ?? '--'
                 },
                 comment: {
                     default: null,
                     text: this.$root.label('comment'),
                     icon: 'short_text',
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
+                    content: (item) => item?.comment ?? '--'
                 }
             }
         }

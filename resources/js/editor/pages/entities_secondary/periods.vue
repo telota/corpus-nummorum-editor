@@ -4,7 +4,6 @@
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             default-sort-by="date_start.ASC"
             small-tiles
@@ -110,9 +109,6 @@ export default {
     computed: {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
-        },
-        headline () {
-            return this.$root.label(this.entity)
         }
     },
 
@@ -134,7 +130,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name_de: {
                     default: null,
@@ -144,7 +140,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name_de ? item.name_de : '--' }
+                    content: (item) => item?.name_de ?? '--'
                 },
                 name_en: {
                     default: null,
@@ -154,7 +150,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name_en ? item.name_en : '--' }
+                    content: (item) => item?.name_en ?? '--'
                 },
                 date_start: {
                     default: null,
@@ -163,7 +159,7 @@ export default {
                     header: true,
                     sortable: true,
                     clone: false,
-                    content: (item) => { return item?.date_start ? this.$handlers.format.year(this.language, item.date_start) : '--' }
+                    content: (item) => item?.date_start ? this.$handlers.format.year(this.language, item.date_start) : '--'
                 },
                 date_end: {
                     default: null,
@@ -172,7 +168,7 @@ export default {
                     header: true,
                     sortable: true,
                     clone: false,
-                    content: (item) => { return item?.date_end ? this.$handlers.format.year(this.language, item.date_end) : '--' }
+                    content: (item) => item?.date_end ? this.$handlers.format.year(this.language, item.date_end) : '--'
                 },
                 nomisma: {
                     default: null,
@@ -182,7 +178,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
+                    content: (item) => this.$handlers.format.nomisma_link(item.nomisma)
                 }
             }
         }

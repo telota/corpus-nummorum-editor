@@ -96,6 +96,7 @@ export default {
     },
 
     created () {
+        this.$root.setTitle('Regions')
         this.getItems()
     },
 

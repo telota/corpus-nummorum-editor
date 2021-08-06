@@ -6,32 +6,33 @@ use App\Http\Controllers\dbi\dbiInterface;
 use DB;
 
 
-class objectgroups implements dbiInterface  { 
+class objectgroups implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
     public function select ($user, $id) {
         $select = [
             'id             AS id',
-            'objectgroup    AS name',                
+            'objectgroup    AS name',
             'description_de AS description_de',
             'description_en AS description_en',
-            'comment        AS comment'
+            'comment        AS comment',
+            DB::Raw('IF(objectgroup LIKE "%emission%", 1, 0) AS is_emission')
         ];
 
-        if ($user['level'] > 9) { 
+        if ($user['level'] > 9) {
             $select[] = 'id_creator AS creator';
             $select[] = 'id_editor AS editor';
             $select[] = 'created_at';
             $select[] = 'updated_at';
         }
 
-        $query = DB::table(config('dbi.tablenames.objectgroups')) -> select($select);
-        
-        // Set condition if ID is given
-        if (!empty($id)) { $query -> where('id', $id); }
+        $query = DB::table(config('dbi.tablenames.objectgroups'))->select($select);
 
-        $dbi = $query -> get();
+        // Set condition if ID is given
+        if (!empty($id)) $query->where('id', $id);
+
+        $dbi = $query->get();
         $items = json_decode($dbi, TRUE);
 
         return $items;
@@ -68,7 +69,7 @@ class objectgroups implements dbiInterface  {
             return $ID;
         }
         // Validation Error
-        else { return ['error' => $validation['error']]; }
+        else return ['error' => $validation['error']];
     }
 
     public function delete ($user, $input) {
@@ -87,15 +88,11 @@ class objectgroups implements dbiInterface  {
     // Helper-Functions ------------------------------------------------------------------
 
     public function validateInput ($input) {
-        if (empty($input['name'])) {
-            $error[] = config('dbi.responses.validation.general.name');
-        }
+        if (empty($input['name'])) $error[] = config('dbi.responses.validation.general.name');
 
         // Return validated input
-        if (empty($error)) {
-            return ['input' => $input];
-        }
+        if (empty($error)) return ['input' => $input];
         // Return Error
-        else { return ['error' => $error]; }
+        else return ['error' => $error];
     }
 }

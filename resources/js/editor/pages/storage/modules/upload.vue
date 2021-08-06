@@ -1,28 +1,18 @@
 <template>
 <div>
 
-    <!-- Activator -->
-    <slot name="activator" v-bind:controls="controls">
-        <advbtn
-            icon="cloud_upload"
-            tooltip="upload Files to current Directory"
-            :disabled="controls.disabled"
-            v-on:click="controls.active = true"
-        />
-    </slot>
-
     <!-- Dialog -->
     <small-dialog
-        :show="controls.active"
+        :show="show"
         icon="cloud_upload"
-        :text="'Upload to \'/' + dir + '\''"
+        :text="'Upload | /' + dir"
         width="90%"
         :max-width="800"
         no-padding
         :z-index="301"
-        v-on:close="controls.active = false"
+        v-on:close="$emit('close', true)"
     >
-        <div style="position: relative; height: calc(100vh - 190px); width: 100%;">
+        <div style="position: relative; height: calc(100vh - 160px); width: 100%;">
             <v-card tile class="header_bg d-flex" style="height: 40px;">
 
                 <div
@@ -154,7 +144,7 @@
             <!-- Body -->
             <div
                 class="app_bg"
-                style="height: calc(100vh - 350px); position: relative;"
+                style="height: calc(100vh - 320px); position: relative;"
                 @drop.prevent="dropFile"
                 @dragover.prevent
             >
@@ -319,7 +309,8 @@ export default {
     },
 
     props: {
-        directory: { type: [String, Boolean], default: null }
+        show:       { type: Boolean, default: false },
+        directory:  { type: [String, Boolean], default: null }
     },
 
     computed: {

@@ -27,6 +27,10 @@
             v-on:add="newItem"
             v-on:close="close"
         >
+            <template v-slot:right>
+                <slot name="right" />
+            </template>
+
             <template v-slot:filters>
                 <slot name="filters" />
             </template>
@@ -52,6 +56,7 @@
             :select="select"
             :selected="selected"
             :linking="linking"
+            :no-edit="noEdit"
             v-on:select="selectItem"
             v-on:close="close"
             v-on:add="newItem"
@@ -109,6 +114,7 @@ export default {
         gallery:        { type: String, default: null },
         linking:        { type: Boolean, default: false },
         sync:           { type: Boolean, default: false },
+        noEdit:         { type: Boolean, default: false },
 
         itemLabel:      { type: String, default: null },
 
@@ -168,7 +174,7 @@ export default {
         },
 
         close () {
-            ++ this.closing
+            ++this.closing
         }
     }
 }

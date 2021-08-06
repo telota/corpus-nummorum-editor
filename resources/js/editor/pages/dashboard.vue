@@ -291,26 +291,29 @@ export default {
         }
     },
 
+    computed: {
+        // Localization
+        l () {
+            return this.$root.language
+        },
+        labels () {
+            return this.$root.labels
+        },
+        data_user () {
+            return this.$root.user
+        }
+    },
+
     created () {
         this.$root.setTitle('Dashboard')
         this.getData()
     },
 
-    mounted () {
-    },
-
-    computed: {
-        // Localization
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        data_user () { return this.$root.user }
-    },
-
     methods: {
         async getData () {
-            this.$root.loading    = true
-            this.data       = await this.$root.DBI_SELECT_GET('dashboard')
-            this.$root.loading    = false
+            this.loading = true
+            this.data = await this.$root.DBI_SELECT_GET('dashboard')
+            this.loading = false
         },
 
         num (number) {

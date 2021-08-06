@@ -46,7 +46,7 @@ class StorageController extends Controller {
         else {
 
             $directory = trim($directory, '/');
-            if (substr($directory, 0, 11) === 'coin-images') $directory = $handler->redirectCoinImages($directory);
+            //if (substr($directory, 0, 11) === 'coin-images') $directory = $handler->redirectCoinImages($directory);
             $this->directoryCheck($directory);
 
             $list = Storage::files($directory);

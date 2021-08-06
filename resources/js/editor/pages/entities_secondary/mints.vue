@@ -4,7 +4,6 @@
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :default-sort-by="'name.ASC'"
             small-tiles
@@ -97,9 +96,6 @@ export default {
     computed: {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
-        },
-        headline () {
-            return this.$root.label(this.entity)
         }
     },
 
@@ -121,7 +117,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -131,7 +127,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 name_de: {
                     default: null,
@@ -140,7 +136,7 @@ export default {
                     header: this.language === 'de',
                     sortable: this.language === 'de',
                     filter: null,
-                    content: (item) => { return item?.name_de ? item.name_de : '--' }
+                    content: (item) => item?.name_de ?? '--'
                 },
                 name_en: {
                     default: null,
@@ -149,7 +145,7 @@ export default {
                     header: this.language != 'de',
                     sortable: this.language != 'de',
                     filter: null,
-                    content: (item) => { return item?.name_en ? item.name_en : '--' }
+                    content: (item) => item?.name_en ?? '--'
                 },
                 region_de: {
                     default: null,
@@ -158,7 +154,7 @@ export default {
                     header: this.language === 'de',
                     sortable: this.language === 'de',
                     filter: null,
-                    content: (item) => { return item?.region_de ? item.region_de : '--' }
+                    content: (item) => item?.region_de ?? '--'
                 },
                 region_en: {
                     default: null,
@@ -167,7 +163,7 @@ export default {
                     header: this.language != 'de',
                     sortable: this.language != 'de',
                     filter: null,
-                    content: (item) => { return item?.region_en ? item.region_en : '--' }
+                    content: (item) => item?.region_en ?? '--'
                 },
                 nomisma: {
                     default: null,
@@ -177,7 +173,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
+                    content: (item) => this.$handlers.format.nomisma_link(item.nomisma)
                 },
             }
         }

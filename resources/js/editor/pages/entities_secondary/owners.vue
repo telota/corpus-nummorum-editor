@@ -3,7 +3,6 @@
         <generic-entity-template
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :default-sort-by="'name.ASC'"
             small-tiles
@@ -184,9 +183,6 @@ export default {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
         },
-        headline () {
-            return this.$root.label(this.entity)
-        },
 
         // Dropdowns
         yesNo () {
@@ -235,7 +231,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -245,7 +241,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 type: {
                     default: null,
@@ -255,7 +251,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item.type ? this.owner_types.find((row) => row.value == item.type)?.text : '--' }
+                    content: (item) => item.type ? (this.owner_types.find((row) => row.value == item.type)?.text ?? '--') : '--'
                 },
                 country: {
                     default: null,
@@ -265,7 +261,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.country ? item.country.toUpperCase() : '--' }
+                    content: (item) => item?.country ? item.country.toUpperCase() : '--'
                 },
                 city: {
                     default: null,
@@ -275,7 +271,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.city ? item.city : '--' }
+                    content: (item) => item?.city ?? '--'
                 },
                 link: {
                     default: null,
@@ -283,7 +279,7 @@ export default {
                     icon: 'link',
                     header: true,
                     clone: false,
-                    content: (item) => { return item.link ? (item.link.split('//').pop().split('ww.').pop().split('/')[0] + this.$handlers.format.resource_link(item.link)) : '--' }
+                    content: (item) => item.link ? (item.link.split('//').pop().split('ww.').pop().split('/')[0] + this.$handlers.format.resource_link(item.link)) : '--'
                 },
                 nomisma: {
                     default: null,
@@ -292,7 +288,7 @@ export default {
                     header: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
+                    content: (item) => this.$handlers.format.nomisma_link(item.nomisma)
                 },
                 is_name_public: {
                     default: 0,
@@ -301,19 +297,19 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return this.yesNo.find((row) => row.value == item.is_name_public)?.text }
+                    content: (item) => this.yesNo.find((row) => row.value == item.is_name_public)?.text ?? '--'
                 },
                 is_checked: {
                     default: 0,
                     text: this.$root.label('checked'),
                     icon: 'how_to_reg',
-                    content: (item) => { return this.yesNo.find((row) => row.value == item.is_checked)?.text }
+                    content: (item) => this.yesNo.find((row) => row.value == item.is_checked)?.text ?? '--'
                 },
                 id_user: {
                     default: null,
                     text: this.$root.label('comment'),
                     icon: 'account_circle',
-                    content: (item) => { return item?.id_user ? item.id_user : '--' }
+                    content: (item) => item?.id_user ?? '--'
                 }
             }
         }

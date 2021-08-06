@@ -10,8 +10,8 @@ import Vuetify from 'vuetify';
 import router from './plugins/router';
 import store from './plugins/Store';
 //import VueProgressBar from 'vue-progressbar'
-import AxiosAjaxDetct from './plugins/AxiosAjaxDetect';
-import { mapState } from 'vuex';
+//import AxiosAjaxDetct from './plugins/AxiosAjaxDetect';
+//import { mapState } from 'vuex';
 
 // this is the vuetify theming options
 Vue.use(Vuetify);
@@ -50,13 +50,13 @@ Vue.component('app-about',          require('./app/appAbout.vue').default);
 Vue.component('app-eye-protection', require('./app/appEyeProtection.vue').default);
 Vue.component('app-error',          require('./app/appError.vue').default);
 
-Vue.component('simpleDataTemplate', require('./templates/simpleDataTemplate.vue').default);
-Vue.component('simpleSelectDialog', require('./templates/simpleDataSelectDialog.vue').default);
+//Vue.component('simpleDataTemplate', require('./templates/simpleDataTemplate.vue').default);
+//Vue.component('simpleSelectDialog', require('./templates/simpleDataSelectDialog.vue').default);
 Vue.component('component-toolbar',  require('./templates/componentToolbar.vue').default);
 Vue.component('component-content',  require('./templates/componentContent.vue').default);
 
-Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').default);
-Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
+//Vue.component('ItemsTemplate',      require('./modules/ItemsTemplate.vue').default);
+//Vue.component('InputTemplate',      require('./modules/InputTemplate.vue').default);
 
 Vue.component('generic-entity-template',      require('./templates/genericEntityTemplate.vue').default);
 Vue.component('sheet-template',      require('./templates/sheetTemplate.vue').default);
@@ -68,9 +68,9 @@ Vue.component('Imager',             require('./modules/Imager.vue').default);
 Vue.component('adv-img',            require('./modules/advImg.vue').default);
 Vue.component('InputForeignKey',    require('./modules/InputForeignKey.vue').default);
 Vue.component('SearchForeignKey',   require('./modules/SearchForeignKey.vue').default);
-Vue.component('ChildDialog',        require('./modules/ChildDialog.vue').default);
+//Vue.component('ChildDialog',        require('./modules/ChildDialog.vue').default);
 Vue.component('ScreenKeys',         require('./modules/ScreenKeys.vue').default);
-Vue.component('files',              require('./modules/files.vue').default);
+//Vue.component('files',              require('./modules/files.vue').default);
 Vue.component('upload',             require('./modules/upload.vue').default);
 Vue.component('subheader',          require('./modules/subheader.vue').default);
 Vue.component('wysiwyg',            require('./modules/wysiwyg.vue').default);
@@ -90,11 +90,11 @@ Vue.component('clipboard-copy',     require('./modules/clipboardCopy.vue').defau
 // Primary Entities
 //Vue.component('ItemEdit',           require('./pages/entities_primary/ItemEdit.vue').default);
 //Vue.component('ItemEditInput',      require('./pages/entities_primary/ItemEditInput.vue').default);
-Vue.component('ItemInputTemplate',  require('./templates/itemInputTemplate.vue').default);
+//Vue.component('ItemInputTemplate',  require('./templates/itemInputTemplate.vue').default);
 //Vue.component('ItemSearch',         require('./pages/entities_primary/ItemSearch.vue').default);
-Vue.component('ItemCopy',           require('./pages/entities_primary/ItemCopy.vue').default);
-Vue.component('ItemDetails',        require('./pages/entities_primary/ItemDetails.vue').default);
-Vue.component('detailsdialog',      require('./pages/entities_primary/modules/detailsDialog.vue').default);
+//Vue.component('ItemCopy',           require('./pages/entities_primary/ItemCopy.vue').default);
+//Vue.component('ItemDetails',        require('./pages/entities_primary/ItemDetails.vue').default);
+//Vue.component('detailsdialog',      require('./pages/entities_primary/modules/detailsDialog.vue').default);
 Vue.component('ItemGallery',        require('./pages/entities_primary/modules/coinsTypesGallery.vue').default);
 Vue.component('commandbar',         require('./pages/entities_primary/modules/commandBar.vue').default);
 Vue.component('coin-images',        require('./pages/entities_primary/modules/coinImages.vue').default);

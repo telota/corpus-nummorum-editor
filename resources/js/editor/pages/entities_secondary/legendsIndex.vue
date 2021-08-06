@@ -207,21 +207,18 @@
 
         <small-dialog
             :show="showLG"
-            :width="175"
+            :width="300"
+            icon="text_rotation_none"
+            text="Pseudo Greek"
             v-on:close="showLG = false"
         >
-            <div class="d-flex justify-center">
-                <table>
-                    <tr>
-                        <td colspan="3" align="center">GREEK &emsp; LATIN</td>
-                    </tr>
-                    <tr v-for="(greek, latin) in latinGreek" :key="latin">
-                        <td v-html="greek" />
-                        <td v-html="'&emsp;=>&emsp;'" />
-                        <td v-html="latin" />
-                    </tr>
-                </table>
-            </div>
+            <v-row>
+                <template v-for="(greek, latin, i) in latinGreek">
+                    <v-col cols=2 :key="greek" class="text-end" v-html="greek" />
+                    <v-col cols=2 :key="i" class="text-center" v-html="'=>'" />
+                    <v-col cols=2 :key="latin" v-html="latin" />
+                </template>
+            </v-row>
         </small-dialog>
 
     </component-content>

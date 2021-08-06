@@ -11,12 +11,12 @@ class coinofthemonth implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
-    public function select ($user, $id) {        
+    public function select ($user, $id) {
         $query = DB::table(config('dbi.tablenames.com').' AS c')
             -> leftJoin (config('dbi.tablenames.com_strings').' AS s', 'c.id', '=', 's.id_com')
             -> select ([
                 'c.id           AS id',
-                'c.year         AS release_year',                
+                'c.year         AS release_year',
                 'c.month        AS release_month',
                 'c.presented_by AS presented_by',
                 'c.file_image   AS image',
@@ -29,10 +29,13 @@ class coinofthemonth implements dbiInterface  {
             ]);
 
         // Set condition if ID is given
-        if (!empty($id)) { $query -> where(DB::raw('CONCAT(c.year, "-", LPAD(c.month, 2, 0))'), $id); }
+        if (!empty($id)) $query->where(function ($subquery) use ($id) {
+            $subquery->orWhere(DB::raw('CONCAT(c.year, "-", LPAD(c.month, 2, 0))'), $id);
+            $subquery->orWhere('c.id', $id);
+        });
 
-        $dbi = $query 
-            -> orderBy('c.year', 'desc')            
+        $dbi = $query
+            -> orderBy('c.year', 'desc')
             -> orderBy('c.month', 'desc')
             -> get();
 
@@ -49,14 +52,14 @@ class coinofthemonth implements dbiInterface  {
             $items[$id]['header_'.$item['language']]    = $item['header'];
             $items[$id]['teaser_'.$item['language']]    = $item['teaser'];
             $items[$id]['text_'.$item['language']]      = $item['text'];
-            
+
             $items[$id]['image']                        = !empty (explode ('/', $item['image']) [1]) ? $item['image'] : ('CoinOfMonth/'.$item['image']);
         }
 
         return isset($items) ? array_values($items) : [];
     }
 
-    public function input ($user, $input) {        
+    public function input ($user, $input) {
         $validation = $this -> validateInput($input);
 
         if(empty($validation['error'][0])) {
@@ -64,7 +67,7 @@ class coinofthemonth implements dbiInterface  {
 
             $ID = DB::transaction(function () use ($input) {
                 $values = [
-                    'presented_by'  => $input['presented_by'], 
+                    'presented_by'  => $input['presented_by'],
                     'file_image'    => $input['image'],
                     'id_coin'       => !$input['is_type'] ? $input['id_cn'] : null,
                     'id_type'       => $input['is_type'] ? $input['id_cn'] : null,
@@ -81,15 +84,15 @@ class coinofthemonth implements dbiInterface  {
                     DB::table(config('dbi.tablenames.com')) -> where('id', $input['id']) -> update($values);
                     $ID = $input['id'];
                 }
-                
+
                 // Write text strings in helper table
                 foreach ($input['strings'] as $string) {
                     DB::table(config('dbi.tablenames.com_strings')) -> updateOrInsert([
-                        'id_com'        => $ID, 
+                        'id_com'        => $ID,
                         'language'      => $string ['language'],
                     ], [
-                        'title'         => $string ['header'], 
-                        'teaser'        => $string ['teaser'], 
+                        'title'         => $string ['header'],
+                        'teaser'        => $string ['teaser'],
                         'description'   => $string ['text']
                     ]);
                 }
@@ -126,7 +129,7 @@ class coinofthemonth implements dbiInterface  {
 
     public function validateInput ($input) {
         // Check Text
-        if ((empty($input['header_en']) || empty($input['teaser_en']) || empty($input['text_en'])) 
+        if ((empty($input['header_en']) || empty($input['teaser_en']) || empty($input['text_en']))
             &&
             (empty($input ['header_de']) || empty($input['teaser_de']) || empty($input['text_de']))
         ) {
@@ -135,15 +138,15 @@ class coinofthemonth implements dbiInterface  {
         // JK: check image
         if (empty($input['image'])) {
             $error[] = config('dbi.responses.validation.general.image');
-        }        
+        }
         // JK: Check if selected coin/type exists
         if (empty($input['id_cn'])) {
             $error[] = config('dbi.responses.validation.com.no_id');
-        } 
-        else if (!DB::table(config('dbi.tablenames.'.($input['is_type'] ? 'types' : 'coins'))) -> where('id', $input['id_cn']) -> exists() ) {            
+        }
+        else if (!DB::table(config('dbi.tablenames.'.($input['is_type'] ? 'types' : 'coins'))) -> where('id', $input['id_cn']) -> exists() ) {
             $error[] = config('dbi.responses.validation.com.unknown_'.($input['is_type'] ? 'type' : 'coin'));
         }
-        
+
         // Return validated input
         if (empty($error)) {
             // JK: Define Variables for DB actions
@@ -154,18 +157,18 @@ class coinofthemonth implements dbiInterface  {
             $validation['id_cn']           = empty($input['id_cn'])          ? NULL : $input['id_cn'];
             $img_explode                   = explode('/', $input['image']);
             $validation['image']           = end($img_explode);
-            
+
             // JK: handle Release Date
             if (empty($input['release'])) {
                 $validation['release_year'] = date('n') < 12 ? date('Y') : (date('Y') + 1);
                 $validation['release_month'] = date('n') < 12 ? (date('n') + 1) : 1;
-            } 
+            }
             else {
                 $date_explode = explode('-', $input['release']);
                 $validation['release_year'] = $date_explode[0];
                 $validation['release_month'] = $date_explode[1];
             }
-            
+
             // Create language arrays
             foreach (['de', 'en'] as $language) {
                 if (!empty($input['header_'.$language]) && !empty($input['teaser_'.$language]) && !empty($input['text_'.$language])) {
@@ -176,8 +179,8 @@ class coinofthemonth implements dbiInterface  {
                         'text'      => empty($input['text_'.$language])    ? NULL : trim($input['text_'.$language])
                     ];
                 }
-            }           
-            
+            }
+
             return ['input' => $validation];
         }
         // Return Error

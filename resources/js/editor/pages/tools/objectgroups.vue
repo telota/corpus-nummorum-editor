@@ -1,46 +1,40 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
             :headline="headline"
             :attributes="attributes"
-            defaultSortBy="name"
-            cards
-            smallCards
+            default-sort-by="name.ASC"
+            small-tiles
             gallery="id_group"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
-                <v-row>
-                    <template v-for="(item, i) in attributes">
-                        <v-col
-                            v-if="item.filter !== undefined"
-                            :key="i"
-                            cols=12 
-                            sm=4 
-                            md=3
-                        >
-                            <v-text-field dense outlined filled clearable
-                                v-model="attributes[i].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                </v-row>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, i) in attributes">
+                    <v-text-field dense outlined filled clearable
+                        v-if="item.filter !== undefined"
+                        :key="i"
+                        v-model="attributes[i].filter"
+                        :label="item.text"
+                        :prepend-icon="item.icon"
+                    />
+                </template>
             </template>
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
+            <template v-slot:content-tile-header="slot">
                 {{ 'ID&nbsp;' + slot.item.id }}
             </template>
 
-            <template v-slot:content-cards-body="slot">
+            <template v-slot:content-tile-body="slot">
                 <div class="body-2 mb-3">
                     <div class="font-weight-bold" v-html="attributes.name.content(slot.item)"></div>
                     <!--<div class="caption" v-html="attributes.nomisma.content(slot.item)"></div>-->
@@ -48,12 +42,8 @@
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                {{ slot.item.name + '&ensp;(' + slot.item.id + ')' }}
-            </template>
-
-            <template v-slot:editor-body="slot">
-                <v-row>                    
+            <template v-slot:editor="slot">
+                <v-row>
                     <v-col cols=12 md=6>
                         <!-- Name -->
                         <v-text-field dense outlined filled clearable
@@ -61,12 +51,13 @@
                             :label="attributes.name.text"
                             :prepend-icon="attributes.name.icon"
                             hint="required"
-                            class="mb-3"
                             counter=255
-                        ></v-text-field>
+                        />
+                    </v-col>
 
+                    <v-col cols=12 md=6>
                         <!-- Comment -->
-                        <v-textarea dense outlined filled clearable 
+                        <v-textarea dense outlined filled clearable
                             no-resize
                             rows=3
                             v-model="slot.item.comment"
@@ -74,26 +65,29 @@
                             :prepend-icon="attributes.comment.icon"
                             class="mt-2"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
 
                     <!-- Description -->
-                    <v-col cols=12 md=6>
-                        <v-textarea dense outlined filled clearable 
-                            v-for="(lang) in ['de', 'en']"
-                            :key="'description' + lang"
+                    <v-col
+                        v-for="(lang) in ['de', 'en']"
+                        :key="'description' + lang"
+                        cols=12
+                        md=6
+                    >
+                        <v-textarea dense outlined filled clearable
                             no-resize
                             rows=2
                             v-model="slot.item['description_' + lang]"
                             :label="attributes['description_' + lang].text"
                             :prepend-icon="attributes['description_' + lang].icon"
                             counter=21845
-                        ></v-textarea>
+                        />
                     </v-col>
                 </v-row>
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -101,9 +95,9 @@
 
 <script>
 
-export default { 
+export default {
     data () {
-        return { 
+        return {
             component:          'objectgroup',
             entity:             'objectgroups',
             attributes:         {},
@@ -112,15 +106,15 @@ export default {
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: 0 }
+        selected:   { type: [Number, String], default: null },
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-        
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
+        },
         headline () {
             return this.$root.label(this.entity)
         }
@@ -133,18 +127,18 @@ export default {
     created () {
         this.attributes = this.setAttributes()
     },
-    
+
     methods: {
         setAttributes () {
             return {
-                id: { 
-                    default: null, 
+                id: {
+                    default: null,
                     text: 'ID',
                     icon: 'fingerprint',
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -154,7 +148,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 description_de: {
                     default: null,
@@ -163,7 +157,7 @@ export default {
                     header: this.language === 'de' ? true : false,
                     filter: this.language === 'de' ? null : undefined,
                     clone: false,
-                    content: (item) => { return item?.description_de ? item.description_de : '--' }
+                    content: (item) => item?.description_de ?? (item?.description_en ?? '--')
                 },
                 description_en: {
                     default: null,
@@ -172,14 +166,22 @@ export default {
                     header: this.language !== 'de' ? true : false,
                     filter: this.language !== 'de' ? null : undefined,
                     clone: false,
-                    content: (item) => { return item?.description_en ? item.description_en : '--' }
+                    content: (item) => item?.description_en ?? (item?.description_de ?? '--')
                 },
                 comment: {
                     default: null,
                     text: this.$root.label('comment'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
+                    content: (item) => item?.comment ?? '--'
+                },
+                is_emission: {
+                    default: null,
+                    text: this.$root.label('status'),
+                    icon: 'category',
+                    header: true,
+                    sortable: true,
+                    content: (item) => item?.is_emission ? 'Emission' : 'Class'
                 },
 
                 creator: { default: null },

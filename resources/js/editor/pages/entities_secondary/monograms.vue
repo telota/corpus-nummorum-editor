@@ -185,13 +185,11 @@
 
 
 <script>
-import AdvImg from '../../modules/advImg.vue'
 import keyboard from './../../modules/keyboard.vue'
 
 export default {
     components: {
-        keyboard,
-        AdvImg
+        keyboard
     },
 
     data () {
@@ -239,7 +237,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 image: {
                     default: null,
@@ -247,7 +245,7 @@ export default {
                     icon: 'camera_alt',
                     header: true,
                     clone: false,
-                    content: (item) => { return item?.image ? this.$handlers.format.image_tile(item.image, 30) : '--' }
+                    content: (item) => item?.image ? this.$handlers.format.image_tile(item.image, 30) : '--'
                 },
                 combination: {
                     default: null,
@@ -257,7 +255,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.combination ? item.combination : '--' }
+                    content: (item) => item?.combination ?? '--'
                 },
                 name: {
                     default: null,
@@ -267,7 +265,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 }
             }
         }

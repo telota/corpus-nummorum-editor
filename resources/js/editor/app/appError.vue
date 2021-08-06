@@ -4,34 +4,39 @@
     icon="warning"
     :text="'Warning: ' + (error.validation ? 'Validation Issue' : 'System Error')"
     background="tile_bg"
+    no-padding
     v-on:close="$root.error.active = false"
 >
     <!-- Validation Issue -->
-    <div v-if="error.validation">
-        <p class="mb-5 text-center">
-            Sorry, a validation issue occured.<br />
-            Please revise your data and try again.<br/>
-            Thank you!
-        </p>
-        <p style="white-space: pre-line">
-            <b>Message:</b><br/>
-            <span v-html="printValidation(error.validation)" />
-        </p>
-    </div>
+    <div style="height: 50vh; overflow-y: auto">
+        <div class="pa-3">
+            <div v-if="error.validation">
+                <p class="mb-5 text-center">
+                    Sorry, a validation issue occured.<br />
+                    Please revise your data and try again.<br/>
+                    Thank you!
+                </p>
+                <p style="white-space: pre-line">
+                    <b>Message:</b><br/>
+                    <span v-html="printValidation(error.validation)" />
+                </p>
+            </div>
 
-    <!-- Error -->
-    <div v-else>
-        <p class="mb-5 text-center">
-            Sorry, a System Error occured.<br />
-            Please provide the information given below to our IT Team.<br/>
-            Thank you!
-        </p>
+            <!-- Error -->
+            <div v-else>
+                <p class="mb-5 text-center">
+                    Sorry, a System Error occured.<br />
+                    Please provide the information given below to our IT Team.<br/>
+                    Thank you!
+                </p>
 
-        <p><b>Status:&ensp;</b>{{ error.status }}</p>
-        <p><b>Resource:&ensp;</b>{{ error.resource ? error.resource : '--' }}</p>
-        <p><b>Exception:&ensp;</b>{{ error.exception ? error.exception : '--' }}</p>
-        <p><b>Message:&ensp;</b>{{ error.message ? error.message : '--' }}</p>
-        <p><b>Parameters:&ensp;</b><span class="caption">{{ error.params ? error.params : '--' }}</span></p>
+                <p><b>Status:&ensp;</b>{{ error.status }}</p>
+                <p><b>Resource:&ensp;</b>{{ error.resource ? error.resource : '--' }}</p>
+                <p><b>Exception:&ensp;</b>{{ error.exception ? error.exception : '--' }}</p>
+                <p><b>Message:&ensp;</b>{{ error.message ? error.message : '--' }}</p>
+                <p><b>Parameters:&ensp;</b><span class="caption">{{ error.params ? error.params : '--' }}</span></p>
+            </div>
+        </div>
     </div>
 
     <v-btn text block v-text="'Close'" @click="$root.error.active = false" />

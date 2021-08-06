@@ -12,22 +12,14 @@
         <component-toolbar :dialog="dialog">
 
             <!-- Upload -->
-            <upload
-                :directory="currentDir"
-                v-on:update="setFileIndex"
-                v-on:setPath="setCurrentPath"
-            >
-                <template v-slot:activator="slot">
-                    <div class="pr-2">
-                    <adv-btn
-                        icon="cloud_upload"
-                        :tooltip="'upload Files to current Directory (/' + currentDir + ')'"
-                        :disabled="!currentDir || directoryLoading"
-                        v-on:click="slot.controls.active = true"
-                    />
-                    </div>
-                </template>
-            </upload>
+            <div class="pr-2">
+                <adv-btn
+                    icon="cloud_upload"
+                    :tooltip="'upload Files to current Directory (/' + currentDir + ')'"
+                    :disabled="!currentDir || directoryLoading"
+                    v-on:click="upload = true"
+                />
+            </div>
 
             <!-- Breadcrumbs -->
             <breadcrumbs
@@ -142,6 +134,15 @@
 
     </dialog-template>
 
+    <!-- Upload -->
+    <upload
+        :show="upload"
+        :directory="currentDir"
+        v-on:update="setFileIndex"
+        v-on:setPath="setCurrentPath"
+        v-on:close="upload = false"
+    />
+
 </div>
 </template>
 
@@ -171,6 +172,7 @@ export default {
             showDetails: null,
             marked: [],
             closing: 0,
+            upload: false
         }
     },
 
@@ -178,7 +180,8 @@ export default {
         dialog:     { type: Boolean, default: false },
         routedPath: { type: String, default: null },
         select:     { type: Boolean, default: false },
-        selected:   { type: String, default: null }
+        selected:   { type: String, default: null },
+        identifier: { type: String, default: null }
     },
 
     computed:{
@@ -310,7 +313,8 @@ export default {
         },
 
         emitSelect (emit) {
-            this.$emit('select', emit)
+            if (this.identifier) this.$emit('select', { key: this.identifier, path: emit })
+            else this.$emit('select', emit)
             if (confirm(emit + ' has been selected. Close Dialog?')) ++this.closing
         }
     }

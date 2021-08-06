@@ -3,7 +3,6 @@
         <generic-entity-template
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             default-sort-by="name.ASC"
             small-tiles
@@ -279,9 +278,6 @@ export default {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
         },
-        headline () {
-            return this.$root.label(this.entity)
-        },
 
         // Dropdowns
         yesNo () {
@@ -309,7 +305,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -319,7 +315,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 alias: {
                     default: null,
@@ -329,7 +325,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.alias ? item.alias : '--' }
+                    content: (item) => item?.alias ?? '--'
                 },
                 position: {
                     default: null,
@@ -339,7 +335,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.position ? item.position : '--' }
+                    content: (item) => item?.position ?? '--'
                 },
                 is_authority: {
                     default: 0,
@@ -349,7 +345,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.yesNo.find((row) => row.value == item.is_authority)?.text }
+                    content: (item) => this.yesNo.find((row) => row.value == item.is_authority)?.text ?? '--'
                 },
                 date_start: {
                     default: null,
@@ -358,7 +354,7 @@ export default {
                     header: true,
                     sortable: true,
                     clone: false,
-                    content: (item) => { return item?.date_start ? this.$handlers.format.year(this.language, item.date_start) : '--' }
+                    content: (item) => item?.date_start ? this.$handlers.format.year(this.language, item.date_start) : '--'
                 },
                 date_end: {
                     default: null,
@@ -367,14 +363,14 @@ export default {
                     header: true,
                     sortable: true,
                     clone: false,
-                    content: (item) => { return item?.date_end ? this.$handlers.format.year(this.language, item.date_end) : '--' }
+                    content: (item) => item?.date_end ? this.$handlers.format.year(this.language, item.date_end) : '--'
                 },
                 active_time: {
                     default: null,
                     text: this.$root.label('active_time'),
                     icon: 'settings_ethernet',
                     clone: false,
-                    content: (item) => { return item?.active_time ? item.active_time : '--' }
+                    content: (item) => item?.active_time ?? '--'
                 },
                 nomisma_name: {
                     default: null,
@@ -384,56 +380,56 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma_name) }
+                    content: (item) => this.$handlers.format.nomisma_link(item.nomisma_name)
                 },
                 nomisma_role: {
                     default: null,
                     text: 'Nomisma ID (Role)',
                     icon: 'monetization_on',
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma_role) }
+                    content: (item) => this.$handlers.format.nomisma_link(item.nomisma_role)
                 },
                 definition: {
                     default: null,
                     text: this.$root.label('definition'),
                     icon: 'info',
                     clone: false,
-                    content: (item) => { return item?.definition ? item.definition : '--' }
+                    content: (item) => item?.definition ?? '--'
                 },
                 comment: {
                     default: null,
                     text: this.$root.label('comment'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
+                    content: (item) => item?.comment ?? '--'
                 },
                 caesar_start: {
                     default: null,
                     text: this.$root.label('caesar_start'),
                     icon: 'play_circle_outline',
                     clone: false,
-                    content: (item) => { return item?.caesar_start ? this.$handlers.format.year(this.language, item.caesar_start) : '--' }
+                    content: (item) => item?.caesar_start ? this.$handlers.format.year(this.language, item.caesar_start) : '--'
                 },
                 caesar_uncertain: {
                     default: null,
                     text: this.$root.label('caesar_string'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.caesar_uncertain ? item.caesar_uncertain : '--' }
+                    content: (item) => item?.caesar_uncertain ?? '--'
                 },
                 augustus_start: {
                     default: null,
                     text: this.$root.label('augustus_start'),
                     icon: 'play_circle_outline',
                     clone: false,
-                    content: (item) => { return item?.augustus_start ? this.$handlers.format.year(this.language, item.augustus_start) : '--' }
+                    content: (item) => item?.augustus_start ? this.$handlers.format.year(this.language, item.augustus_start) : '--'
                 },
                 augustus_uncertain: {
                     default: null,
                     text: this.$root.label('agustus_string'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.augustus_uncertain ? item.augustus_uncertain : '--' }
+                    content: (item) => item?.augustus_uncertain ?? '--'
                 },
             }
         }

@@ -5,7 +5,6 @@
             sync
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :default-sort-by="'name_' + language + '.ASC'"
             small-tiles
@@ -129,9 +128,6 @@ export default {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
         },
-        headline () {
-            return this.$root.label(this.entity)
-        },
 
         // Dropdowns
         yesNo () {
@@ -190,7 +186,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name_de: {
                     default: null,
@@ -200,7 +196,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.name_de ? item.name_de : '--' }
+                    content: (item) => item?.name_de ?? '--'
                 },
                 name_en: {
                     default: null,
@@ -210,7 +206,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.name_en ? item.name_en : '--' }
+                    content: (item) => item?.name_en ?? '--'
                 },
                 border_dots: {
                     default: 0,
@@ -218,7 +214,7 @@ export default {
                     icon: 'filter_tilt_shift',
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.yesNo.find((row) => row.value == item.border_dots)?.text }
+                    content: (item) => this.yesNo.find((row) => row.value == item.border_dots)?.text ?? '--'
                 },
                 role: {
                     default: 2,
@@ -228,7 +224,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.roles.find((row) => row.value == item?.role)?.text }
+                    content: (item) => this.roles.find((row) => row.value == item?.role)?.text ?? '--'
                 },
                 side: {
                     default: 2,
@@ -238,7 +234,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text }
+                    content: (item) => this.sides.find((row) => row.value == item?.side)?.text ?? '--'
                 }
             }
         }

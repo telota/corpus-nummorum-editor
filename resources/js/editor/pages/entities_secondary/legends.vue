@@ -4,9 +4,8 @@
             sync
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
-            :default-sort-by="'name_' + language + '.ASC'"
+            :default-sort-by="'legend.ASC'"
             small-tiles
             gallery="id_legend"
             :dialog="dialog"
@@ -291,9 +290,6 @@ export default {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
         },
-        headline () {
-            return this.$root.label(this.entity)
-        },
 
         // Dropdowns
         languages () {
@@ -330,7 +326,6 @@ export default {
 
     created () {
         this.attributes = this.setAttributes()
-
         const self = this
         setInterval(function() {
             self.cursor.blink = !self.cursor.blink
@@ -347,13 +342,13 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 legend_sort: {
                     default: null,
                     text: this.$root.label('legend'),
                     icon: 'translate',
-                    content: (item) => { return item?.legend_sort ? item.legend_sort : '--' }
+                    content: (item) => item?.legend_sort ?? '--'
                 },
                 legend: {
                     default: null,
@@ -363,14 +358,14 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.legend ? ('<span class="font-weight-thin">' + item.legend + '</span>') : '--' }
+                    content: (item) => item?.legend ? ('<span class="font-weight-thin">' + item.legend + '</span>') : '--'
                 },
                 full_text: {
                     default: null,
                     text: this.$root.label('legend_full_text'),
                     icon: 'short_text',
                     clone: false,
-                    content: (item) => { return item?.full_text ? item.full_text : '--' }
+                    content: (item) => item?.full_text ?? '--'
                 },
                 direction:   {
                     default: null,
@@ -380,7 +375,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.direction ? (item.image ? this.$handlers.format.image_tile(item.image, 30) : item.direction) : '--' }
+                    content: (item) => item?.direction ? (item.image ? this.$handlers.format.image_tile(item.image, 30) : item.direction) : '--'
                 },
                 language: {
                     default: 'el',
@@ -390,7 +385,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.languages.find((row) => row.value == item.language.toLowerCase())?.text }
+                    content: (item) => this.languages.find((row) => row.value == item.language.toLowerCase())?.text ?? '--'
                 },
                 role: {
                     default: 0,
@@ -400,7 +395,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.roles.find((row) => row.value == item?.role)?.text }
+                    content: (item) => this.roles.find((row) => row.value == item?.role)?.text ?? '--'
                 },
                 side: {
                     default: 0,
@@ -410,7 +405,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text }
+                    content: (item) => this.sides.find((row) => row.value == item?.side)?.text ?? '--'
                 },
                 keywords: {
                     default: null,
@@ -419,21 +414,15 @@ export default {
                     header: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.keywords ? item.keywords : '--' }
+                    content: (item) => item?.keywords ?? '--'
                 },
                 comment: {
                     default: null,
                     text: this.$root.label('comment'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
-                },
-
-                /*created_at: {
-                    default: null,
-                    text: this.$root.label('created_at'),
-                    sortable: true
-                }*/
+                    content: (item) => item?.comment ?? '--'
+                }
             }
         },
 
@@ -452,17 +441,16 @@ export default {
                 return input + state.slice(cursor)
             }
         },
+
         setKeyboardCursor (key, i) {
             this.cursor.legend = i
         },
+
         provideString (key, input) {
-            if (this.cursor[key] === null || !input) {
-                return input
-            }
-            else {
-                return input.slice(0, this.cursor[key])
-            }
+            if (this.cursor[key] === null || !input) return input
+            return input.slice(0, this.cursor[key])
         },
+
         moveCursor (key, state, forward) {
             if (state) {
                 const length = state.split('').length

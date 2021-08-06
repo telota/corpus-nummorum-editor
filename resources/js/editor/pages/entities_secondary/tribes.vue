@@ -4,7 +4,6 @@
             :key="language"
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :defaultSortBy="'name_' + language + '.ASC'"
             smallTiles
@@ -107,9 +106,6 @@ export default {
     computed: {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
-        },
-        headline () {
-            return this.$root.label(this.entity)
         }
     },
 
@@ -131,7 +127,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name_de: {
                     default: null,
@@ -141,7 +137,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.name_de ? item.name_de : '--' }
+                    content: (item) => item?.name_de ?? '--'
                 },
                 name_en: {
                     default: null,
@@ -151,7 +147,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.name_en ? item.name_en : '--' }
+                    content: (item) => item?.name_en ?? '--'
                 },
                 nomisma: {
                     default: null,
@@ -161,15 +157,8 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.nomisma_link(item.nomisma) }
-                },
-                /*comment: {
-                    default: null,
-                    text: this.$root.label('comment'),
-                    icon: 'notes',
-                    clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
-                }*/
+                    content: (item) => this.$handlers.format.nomisma_link(item.nomisma)
+                }
             }
         }
     }

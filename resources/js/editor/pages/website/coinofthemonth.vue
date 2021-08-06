@@ -1,289 +1,249 @@
 <template>
     <div>
-        <simpleDataTemplate
+        <generic-entity-template
             :key="language"
             :entity="entity"
-            :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
-            defaultSortBy="release.desc"
-            defaultDisplay="cards"
-            cards
+            default-sort-by="release.DESC"
+            default-layout="tiles"
+            :dialog="dialog"
             :select="select"
             :selected="selected"
-            v-on:select="(emit) => { $emit('select', emit); $emit('close') }"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
         >
-            <!-- Search ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:search>
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <div style="position: relative">
+                    <v-menu
+                        offset-y
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                    >
+                        <template v-slot:activator="{ on }">
+                            <v-text-field dense outlined filled clearable
+                                v-model="attributes.release.filter"
+                                :label="attributes.release.text"
+                                :prepend-icon="attributes.release.icon"
+                                readonly
+                                hint="Release always on 1st of month" persistent-hint
+                                v-on="on"
+                            />
+                        </template>
+                        <v-card tile>
+                            <v-date-picker v-model="attributes.release.filter" landscape />
+                        </v-card>
+                    </v-menu>
+                </div>
+
+                <template v-for="(item, i) in attributes">
+                    <v-text-field dense outlined filled clearable
+                        v-if="item.filter !== undefined && i !== 'release'"
+                        :key="i"
+                        v-model="attributes[i].filter"
+                        :label="item.text"
+                        :prepend-icon="item.icon"
+                    />
+                </template>
+            </template>
+
+            <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:search-tile-header="slot">
+                <div v-html="attributes.release.content(slot.item)" class="mr-5" />
+                <div class="d-flex body-2">
+                    <div v-html="'ID&nbsp;' + attributes.id.content(slot.item) + ','" class="mr-1" />
+                    <div v-html="attributes.id_cn.content(slot.item)" />
+                </div>
+            </template>
+
+            <template v-slot:search-tile-body="slot">
+                <adv-img
+                    :src="slot.item.image"
+                    square
+                    contain
+                    background="white"
+                />
+                <div class="body-1 font-weight-bold mb-3 mt-3" v-html="attributes['header_' + language].content(slot.item)" />
+                <div class="body-2 mb-3" v-html="attributes['teaser_' + language].content(slot.item)" />
+                <div class="body-2 text-right" v-html="attributes.presented_by.content(slot.item)" />
+            </template>
+
+            <!-- Editor ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:editor="slot">
                 <v-row>
-                    <v-col cols=12 sm=4 md=3>
-                        <v-menu
-                            offset-y
+                    <!-- Release Date -->
+                    <v-col cols="12" md="6" lg="3">
+                        <v-menu offset-y
                             :close-on-content-click="false"
                             transition="scale-transition"
                         >
                             <template v-slot:activator="{ on }">
                                 <v-text-field dense outlined filled clearable
-                                    v-model="attributes.release.filter"
+                                    v-model="slot.item.release"
                                     :label="attributes.release.text"
                                     :prepend-icon="attributes.release.icon"
                                     readonly
                                     hint="Release always on 1st of month" persistent-hint
                                     v-on="on"
-                                ></v-text-field>
+                                />
                             </template>
                             <v-card tile>
-                                <v-date-picker v-model="attributes.release.filter"></v-date-picker>
+                                <v-date-picker v-model="slot.item.release" landscape />
                             </v-card>
                         </v-menu>
                     </v-col>
-                    <template v-for="(item, i) in attributes">
-                        <v-col
-                            v-if="item.filter !== undefined && i !== 'release'"
-                            :key="i"
-                            cols=12
-                            sm=4
-                            md=3
-                        >
-                            <v-text-field dense outlined filled clearable
-                                v-model="attributes[i].filter"
-                                :label="item.text"
-                                :prepend-icon="item.icon"
-                            ></v-text-field>
-                        </v-col>
-                    </template>
-                </v-row>
-            </template>
 
-            <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:content-cards-header="slot">
-                <div v-html="attributes.release.content(slot.item)" class="mr-5"></div>
-                <div v-html="attributes.id_cn.content(slot.item)"></div>
-            </template>
+                    <!-- Creator -->
+                    <v-col cols="12" md="6" lg="3">
+                        <v-text-field dense outlined filled clearable
+                            v-model="slot.item.presented_by"
+                            :label="attributes.presented_by.text"
+                            prepend-icon="person"
+                            hint="not required"
+                            counter=255
+                        />
+                    </v-col>
 
-            <template v-slot:content-cards-body="slot">
-                <Imager
-                    v-if="slot.item.image"
-                    :item="slot.item"
-                    color_background="white"
-                    contain
-                ></Imager>
-                <div class="body-1 font-weight-bold mb-3 mt-3" v-html="attributes['header_' + language].content(slot.item)"></div>
-                <div class="body-2 mb-3" v-html="attributes['teaser_' + language].content(slot.item)"></div>
-                <div class="body-2 text-right" v-html="attributes.presented_by.content(slot.item)"></div>
-            </template>
-
-            <!-- Editor ---------------------------------------------------------------------------------------------------- -->
-            <template v-slot:editor-header="slot">
-                <div class="d-flex">
-                    <div v-html="'ID&nbsp;' + slot.item.id + ', ' + slot.item.release"></div>
-                    <div v-if="slot.item.id" class="ml-5">
-                        <a
-                            :href="'https://www.corpus-nummorum.eu/coin-of-the-month/' + slot.item.release.substring(0, 7).replace('-', '/')"
-                            target="_blank"
-                            v-text="'Preview'"
-                        ></a>
-                    </div>
-                </div>
-            </template>
-
-            <template v-slot:editor-body="slot">
-                <div>
-                    <v-row>
-                        <!-- JK: Release Date -->
-                        <v-col cols="12" md="6">
-                            <v-menu offset-y
-                                :close-on-content-click="false"
-                                transition="scale-transition"
-                            >
-                                <template v-slot:activator="{ on }">
-                                    <v-text-field dense outlined filled clearable
-                                        v-model="slot.item.release"
-                                        :label="attributes.release.text"
-                                        :prepend-icon="attributes.release.icon"
-                                        readonly
-                                        hint="Release always on 1st of month" persistent-hint
-                                        v-on="on"
-                                    ></v-text-field>
-                                </template>
-                                <v-card tile>
-                                    <v-date-picker v-model="slot.item.release"></v-date-picker>
-                                </v-card>
-                            </v-menu>
-                        </v-col>
-
-                        <!-- JK: Creator -->
-                        <v-col cols="12" md="6">
-                            <v-text-field dense outlined filled clearable
-                                v-model="slot.item.presented_by"
-                                :label="attributes.presented_by.text"
-                                prepend-icon="person"
-                                hint="not required"
-                                counter=255
-                            ></v-text-field>
-                        </v-col>
-
-                        <!-- JK: Coin/Type? -->
-                        <v-col cols="12" md="6">
-                            <div class="d-flex">
-                                <v-text-field dense outlined filled
-                                    v-model="slot.item.id_cn"
-                                    :label="slot.item.is_type ? 'Type ID' : 'Coin ID'"
-                                    hint="Click on arrows to switch ID"
-                                    :prepend-icon="slot.item.is_type ? 'blur_circular' : 'copyright'"
-                                ></v-text-field>
-
-                                <v-tooltip bottom>
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn v-on="on" icon @click="slot.item.is_type = !slot.item.is_type" class="mr-1 ml-2">
-                                            <v-icon>swap_horiz</v-icon>
-                                        </v-btn>
-                                    </template>
-                                    <span>Switch to {{ slot.item.is_type ? 'Coin' : 'Type' }} ID</span>
-                                </v-tooltip>
-
-                                <v-tooltip bottom >
-                                    <template v-slot:activator="{ on }">
-                                        <a :href="(slot.item.is_type ? 'https://www.corpus-nummorum.eu/types/' : 'http://www.corpus-nummorum.eu/CN_') + slot.item.id_cn" target="_blank">
-                                            <v-btn v-on="on" icon :disabled="!slot.item.id_cn">
-                                                <v-icon>link</v-icon>
-                                            </v-btn>
-                                        </a>
-                                    </template>
-                                    <span>open linked {{ !slot.item.is_type ? 'coin' : 'type' }} in new tab</span>
-                                </v-tooltip>
-                            </div>
-                        </v-col>
-
-                        <!-- JK: Image -->
-                        <v-col cols="12" md="6">
-                            <div class="component-wrap d-flex">
-                                <v-text-field dense outlined filled clearable
-                                    v-model="slot.item.image"
-                                    :label="attributes.image.text"
-                                    :prepend-icon="attributes.image.icon"
-                                    disabled
-                                ></v-text-field>
-
-                                <!-- Files -->
-                                <v-tooltip bottom>
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn
-                                            v-on="on"
-                                            icon
-                                            class="ml-1 mr-1"
-                                            @click="file_browser = true"
-                                        >
-                                            <v-icon>folder_open</v-icon>
-                                        </v-btn>
-                                    </template>
-                                    <span>Open File Browser</span>
-                                </v-tooltip>
-                                <v-tooltip bottom>
-                                    <template v-slot:activator="{ on }">
-                                        <v-btn
-                                            v-on="on"
-                                            icon
-                                            @click="upload = true"
-                                        >
-                                            <v-icon>cloud_upload</v-icon>
-                                        </v-btn>
-                                    </template>
-                                    <span>Direct Upload</span>
-                                </v-tooltip>
-                            </diV>
-                        </v-col>
-
-                        <!-- JK: Description -->
-                        <v-col
-                            v-for="(l) in ['de', 'en']"
-                            :key="l"
-                            cols="12" sm="12" md="6"
-                        >
-                            <subheader :label="l.toUpperCase()" class="mb-5"></subheader>
-                            <!-- Header -->
-                            <v-textarea dense outlined filled no-resize
-                                v-model="slot.item['header_' + l]"
-                                :label="attributes['header_' + l].text"
-                                rows="2"
-                                hint="visible on preview: yes"
-                                counter=255
-                            ></v-textarea>
-                            <!-- Teaser -->
-                            <v-textarea dense outlined filled no-resize
-                                v-model="slot.item['teaser_' + l]"
-                                :label="attributes['teaser_' + l].text"
-                                rows="5"
-                                hint="visible on preview: yes"
-                                counter=21845
-                                class="mt-5"
-                            ></v-textarea>
-                            <!-- Text -->
-                            <wysiwyg
-                                v-model="slot.item['text_' + l]"
-                                :label="attributes['text_' + l].text"
-                                :counter="21845"
-                                filled
-                                outlined
-                                :unique="l"
+                    <!-- Coin/Type? -->
+                    <v-col cols="12" md="6" lg="3">
+                        <div class="d-flex">
+                            <coins-types-selector
+                                :entity="slot.item.is_type ? 'types' : 'coins'"
+                                :selected="slot.item.id_cn"
+                                v-on:select="(emit) => { slot.item.id_cn = emit }"
                             />
-                        </v-col>
 
-                    </v-row>
+                            <v-tooltip bottom>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn v-on="on" icon @click="slot.item.is_type = !slot.item.is_type" class="mr-1 ml-2">
+                                        <v-icon>swap_horiz</v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>Switch to {{ slot.item.is_type ? 'Coin' : 'Type' }} ID</span>
+                            </v-tooltip>
 
-                    <!-- Files Browser -->
-                    <simpleSelectDialog
-                        :active="file_browser"
-                        icon="folder_open"
-                        text="File Browser"
-                        v-on:close="file_browser = false; file_select = null;"
+                            <v-tooltip bottom >
+                                <template v-slot:activator="{ on }">
+                                    <a :href="(slot.item.is_type ? 'https://www.corpus-nummorum.eu/types/' : 'http://www.corpus-nummorum.eu/CN_') + slot.item.id_cn" target="_blank">
+                                        <v-btn v-on="on" icon :disabled="!slot.item.id_cn">
+                                            <v-icon>link</v-icon>
+                                        </v-btn>
+                                    </a>
+                                </template>
+                                <span>open linked {{ !slot.item.is_type ? 'coin' : 'type' }} in new tab</span>
+                            </v-tooltip>
+                        </div>
+                    </v-col>
+
+                    <!-- Image -->
+                    <v-col cols=12 md=6>
+                        <div class="d-flex">
+                            <v-text-field dense outlined filled clearable
+                                v-model="slot.item.image"
+                                :label="attributes.image.text"
+                                :prepend-icon="attributes.image.icon"
+                                disabled
+                                counter=255
+                            />
+
+                            <!-- Files -->
+                            <v-tooltip bottom>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn
+                                        v-on="on"
+                                        icon
+                                        class="ml-1 mr-1"
+                                        @click="fileManager = true"
+                                    >
+                                        <v-icon>folder_open</v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>Open File Manager</span>
+                            </v-tooltip>
+                            <v-tooltip bottom>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn
+                                        v-on="on"
+                                        icon
+                                        @click="upload = true"
+                                    >
+                                        <v-icon>cloud_upload</v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>Direct Upload</span>
+                            </v-tooltip>
+                        </diV>
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <!-- Description -->
+                    <v-col
+                        v-for="(l) in ['de', 'en']"
+                        :key="l"
+                        cols="12" sm="12" md="6"
                     >
-                        <template v-slot:content>
-                            <files
-                                :prop_item="{ id: slot.item.image, parent: 'CoinOfMonth' }"
-                                class="mt-n2 mb-5"
-                                v-on:ChildEmit="(emit) => { file_select =  emit.id }"
-                                ></files>
-                            <v-btn tile block small color="blue_prim"
-                                v-text="file_select? (file_select === slot.item.image ? (file_select.split('/').pop() + ' is alreadey selected') : ('Select ' + file_select.split('/').pop())) : ('No File selected, yet')"
-                                :disabled="!file_select || file_select === slot.item.image"
-                                class="ml-n6"
-                                style="position: absolute; bottom: 0"
-                                @click="slot.item.image = file_select; file_browser = false; file_select = null;"
-                            ></v-btn>
-                        </template>
-                    </simpleSelectDialog>
+                        <subheader :label="l.toUpperCase()" class="mb-5" />
+                        <!-- Header -->
+                        <v-textarea dense outlined filled no-resize
+                            v-model="slot.item['header_' + l]"
+                            :label="attributes['header_' + l].text"
+                            rows="2"
+                            hint="visible on preview: yes"
+                            counter=255
+                        />
+                        <!-- Teaser -->
+                        <v-textarea dense outlined filled no-resize
+                            v-model="slot.item['teaser_' + l]"
+                            :label="attributes['teaser_' + l].text"
+                            rows="5"
+                            hint="visible on preview: yes"
+                            counter=21845
+                            class="mt-5"
+                        />
+                        <!-- Text -->
+                        <wysiwyg
+                            v-model="slot.item['text_' + l]"
+                            :label="attributes['text_' + l].text"
+                            :counter="21845"
+                            filled
+                            outlined
+                            :unique="l"
+                        />
+                    </v-col>
 
-                    <!-- Upload -->
-                    <upload
-                        :prop_active="upload"
-                        prop_target="storage/CoinOfMonth"
-                        prop_key="image"
-                        v-on:close="upload = false"
-                        v-on:ChildEmit="(emit) => {
-                            slot.item.image = emit.url
-                            upload = false
-                        }"
-                    ></upload>
-                </div>
+                </v-row>
+
+                <!-- FileManager -->
+                <file-manager
+                    v-if="fileManager"
+                    dialog
+                    select
+                    :selected="slot.item.image ? slot.item.image : directory"
+                    v-on:select="(emit) => { slot.item.image = emit ? emit : null }"
+                    v-on:close="fileManager = false"
+                />
+
+                <!-- Upload -->
+                <upload
+                    :show="upload"
+                    :directory="directory"
+                    v-on:close="upload = false"
+                    v-on:upload="(emit) => { slot.item.image = emit.path ? emit.path : null }"
+                />
             </template>
 
-        </simpleDataTemplate>
+        </generic-entity-template>
     </div>
 </template>
 
 
 
 <script>
-import wysiwyg from '../../modules/wysiwyg.vue'
-
-//import tinymce from '@tinymce/tinymce-vue'
-
+import coinsTypesSelector from '../entities_primary/modules/coinsTypesSelector.vue';
 export default {
-  components: { wysiwyg },
-    /*components: {
-        tinymce
-    },*/
+  components: { coinsTypesSelector },
     data () {
         return {
             component:          'Coin of the Month',
@@ -292,31 +252,28 @@ export default {
             key_name_class:     'caption font-weight-thin text-uppercase mb-1',
 
             upload:             false,
-            file_browser:       false,
-            file_select:        null,
+            fileManager:        false,
+            directory:          'CoinOfMonth',
             htmleditor:         false
         }
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
         selected:   { type: [Number, String], default: 0 }
     },
 
     computed: {
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
-        language () { return this.$root.language === 'de' ? 'de' : 'en' },
-
-        headline () {
-            return this.$root.label('coin_of_the_month')
+        language () {
+            return this.$root.language === 'de' ? 'de' : 'en'
         },
 
         release () {
             const date = new Date ();
             const date_month = date.getMonth() < 11 ? (date.getMonth() + 2) : 1;
             const date_year = date_month != 1 ? date.getFullYear() : (date.getFullYear() + 1);
-            return date_year+'-'+(date_month > 9 ? date_month : ('0'+date_month))+'-01';
+            return date_year + '-' + (date_month > 9 ? date_month : ('0'+date_month)) + '-01';
         }
     },
 
@@ -325,10 +282,6 @@ export default {
     },
 
     created () {
-        this.$store.commit('setBreadcrumbs', [ // JK: Set Breadcrumbs
-            { label: this.$root.label(this.entity), to:'' }
-        ]);
-
         this.attributes = this.setAttributes()
     },
 
@@ -339,7 +292,7 @@ export default {
                     default: null,
                     text: 'ID',
                     icon: 'fingerprint',
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 release: {
                     default: this.release,
@@ -349,7 +302,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.release ? this.$handlers.format.date(this.language, item.release) : '--' }
+                    content: (item) => item?.release ? this.$handlers.format.date(this.language, item.release) : '--'
                 },
                 presented_by: {
                     default: this.$root.user.fullname,
@@ -359,21 +312,21 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.presented_by ? item.presented_by : '--' }
+                    content: (item) => item?.presented_by ?? '--'
                 },
                 image: {
                     default: null,
                     text: this.$root.label('image'),
                     icon: 'label',
                     clone: false,
-                    content: (item) => { return item?.image ? item.image : null }
+                    content: (item) => item?.image ?? '--'
                 },
                 is_type: {
                     default: 0,
                     text: 'Art',
                     icon: 'flaky',
                     clone: true,
-                    content: (item) => { return item?.is_type ? 'Typ' : 'Münze' }
+                    content: (item) => item?.is_type ? 'Typ' : 'Münze'
                 },
                 id_cn: {
                     default: null,
@@ -395,7 +348,7 @@ export default {
                     header: this.language === 'de' ? true : false,
                     filter: this.language === 'de' ? null : undefined,
                     clone: false,
-                    content: (item) => { return item?.header_de ? item.header_de : '--' }
+                    content: (item) => item?.header_de ?? '--'
                 },
                 header_en: {
                     default: null,
@@ -404,35 +357,35 @@ export default {
                     header: this.language === 'en' ? true : false,
                     filter: this.language === 'en' ? null : undefined,
                     clone: false,
-                    content: (item) => { return item?.header_en ? item.header_en : '--' }
+                    content: (item) => item?.header_en ?? '--'
                 },
                 teaser_de: {
                     default: null,
                     text: this.$root.label('teaser') + ' (DE)',
                     icon: 'short_text',
                     clone: false,
-                    content: (item) => { return item?.teaser_de ? item.teaser_de : '--' }
+                    content: (item) => item?.teaser_de ?? '--'
                 },
                 teaser_en: {
                     default: null,
                     text: this.$root.label('teaser') + ' (EN)',
                     icon: 'short_text',
                     clone: false,
-                    content: (item) => { return item?.teaser_en ? item.teaser_en : '--' }
+                    content: (item) => item?.teaser_en ?? '--'
                 },
                 text_de: {
                     default: null,
                     text: this.$root.label('text') + ' (DE)',
                     icon: 'short_text',
                     clone: false,
-                    content: (item) => { return item?.text_de ? item.text_de : '--' }
+                    content: (item) => item?.text_de ?? '--'
                 },
                 text_en: {
                     default: null,
                     text: this.$root.label('text') + ' (EN)',
                     icon: 'short_text',
                     clone: false,
-                    content: (item) => { return item?.text_en ? item.text_en : '--' }
+                    content: (item) => item?.text_en ?? '--'
                 }
             }
         }

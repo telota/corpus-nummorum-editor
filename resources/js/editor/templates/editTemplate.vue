@@ -36,13 +36,14 @@
             <adv-btn
                 :icon="editorItem.id ? 'add' : 'clear'"
                 color-hover="header_hover"
+                :disabled="noEdit"
                 @click="newItem()"
             />
 
             <adv-btn
                 icon="library_add"
                 color-hover="header_hover"
-                :disabled="!editorItem.id"
+                :disabled="!editorItem.id || noEdit"
                 @click="cloneItem()"
             />
 
@@ -51,13 +52,21 @@
             <adv-btn
                 icon="delete"
                 color-hover="header_hover"
-                :disabled="!editorItem.id"
+                :disabled="!editorItem.id || noEdit"
                 @click="deleteItem()"
             />
 
             <div :class="divider" />
 
-            <v-hover v-slot="{ hover }">
+            <div
+                v-if="noEdit"
+                style="width: 200px; height: 50px; cursor: default"
+                class="d-flex align-center justify-center font-weight-bold text-uppercase grey--text"
+            >
+                <div v-text="'Not editable'" />
+            </div>
+
+            <v-hover v-else v-slot="{ hover }">
                 <div
                     class="d-flex align-center justify-center headline font-weight-bold text-uppercase"
                     :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
@@ -103,7 +112,7 @@
                 </v-expand-transition>
 
                 <!-- Gallery -->
-                <v-expand-transition :key="editorItem.id">
+                <v-expand-transition v-if="gallery" :key="editorItem.id">
                     <ItemGallery
                         v-if="editorItem.id"
                         :entity="entity"
@@ -206,6 +215,7 @@ export default {
         linking:        { type: Boolean, default: false },
 
         itemLabel:      { type: String, default: null },
+        noEdit:         { type: Boolean, default: false },
 
         select:         { type: Boolean, default: false },
         selected:       { type: [Number, String], default: null }
@@ -219,11 +229,11 @@ export default {
         toolbarHeader () {
             if (this.id.slice(0, 6) === 'clone-' && this.mode === 'clone') return 'Clone ' + this.editorItemLabel + ' ' + this.id.slice(6)
             else if (this.id === 'new' || this.id.slice(0, 6) === 'clone-') return 'Add new Item'
-            else return 'Edit ' + this.editorItemLabel + ' ' + this.id
+            else return (this.noEdit ? '' : 'Edit ') + this.editorItemLabel + ' ' + this.id
         },
 
         showEditor () {
-            return this.editorExpanded || !this.editorItem.id
+            return !this.noEdit && (this.editorExpanded || !this.editorItem.id)
         }
     },
 
@@ -270,26 +280,20 @@ export default {
 
         setEditorItemToDefault () {
             const defaultItem = {}
+
             Object.keys(this.attributes).forEach((key) => {
-                defaultItem[key] = typeof this.attributes[key].default !== 'object' ? { ... this.attributes[key].default } : this.attributes[key].default
+                if (typeof this.attributes[key].default === 'object' && this.attributes[key].default !== null) {
+                    defaultItem[key] = { ... this.attributes[key].default }
+                }
+                else defaultItem[key] = this.attributes[key].default
             })
+
             this.editorItem = defaultItem
         },
 
         async setEditorItem (id) {
-            if (id) {
-                this.editorItem = await this.getSingleItem(id)
-                console.log(this.editorItem)
-            }
+            if (id) this.editorItem = await this.getSingleItem(id)
             else console.error('edit-template: setEditorItem: no id given')
-        },
-
-        setEditorItemToDefault () {
-            const defaultItem = {}
-            Object.keys(this.attributes).forEach((key) => {
-                defaultItem[key] = typeof this.attributes[key].default !== 'object' ? { ... this.attributes[key].default } : this.attributes[key].default
-            })
-            this.editorItem = defaultItem
         },
 
         async setCloningItem (id) {

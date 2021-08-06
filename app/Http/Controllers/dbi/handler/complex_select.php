@@ -367,6 +367,7 @@ class complex_select {
 
                 if (!empty($img[$side]['link'])) {
                     $src = trim($img[$side]['link'], '/');
+                    if ($is_dbi === true) $images[$i][$side]['path'] = $src;
 
                     if (substr($src, 0, 4) !== 'http') {
                         $split = explode('.', $src);

@@ -1,100 +1,74 @@
 <template>
     <div>
-        <v-row>            
-            <v-col cols=12 md=7 lg=8 xl=9>
-                <v-card tile>
-                    <v-app-bar color="sysbar">
-                        <div class="headline">Zotero Library</div>
-                        <v-spacer></v-spacer>
-                        <v-text-field
-                            dense outlined filled clearable
-                            v-model="search"
-                            prepend-icon="search"
-                            label="Search"
-                            single-line
-                            hide-details
-                            class="ml-5 mr-5"
-                        ></v-text-field>
-                        <v-btn tile color="blue_prim" v-text="'update'" :disabled="$root.user.level < 12" @click="fetchZotero()"></v-btn>
-                    </v-app-bar>
+        <generic-entity-template
+            :key="refresh"
+            :entity="entity"
+            :name="$root.label(component)"
+            :headline="headline"
+            :attributes="attributes"
+            default-sort-by="author.ASC"
+            small-tiles
+            no-edit
+            gallery="id_reference"
+            :dialog="dialog"
+            :select="select"
+            :selected="selected"
+            v-on:select="(emit) => { $emit('select', emit) }"
+            v-on:close="$emit('close')"
+            v-on:setFilter="(emit) => { this.attributes[emit.key].filter = emit.value }"
+        >
+            <template v-slot:right>
+                <div
+                    v-if="loading"
+                    style="width: 200px; height: 50px; cursor: default"
+                    class="d-flex align-center justify-center font-weight-bold text-uppercase grey--text"
+                >
+                    <div v-text="'Updating ...'" />
+                </div>
 
-                    <v-data-table
-                        :items="items"
-                        :headers="headers"
-                        :loading="loading"
-                        :search="search"
-                        :items-per-page="20"
-                        :footer-props="{
-                            'items-per-page-options': [20, 50, 100]
-                        }"
-                        @click:row="selectItem"
-                    ></v-data-table>
-                </v-card>
-            </v-col>
+                <v-hover v-else v-slot="{ hover }">
+                    <div
+                        class="d-flex align-center justify-center headline font-weight-bold light-blue--text text--darken-2"
+                        :class="hover ? 'header_hover' : 'header_bg'"
+                        style="width: 200px; height: 50px; cursor: pointer;'"
+                        @click="fetchZotero()"
+                    >
+                        <v-icon v-text="'sync_problem'" class="mr-2" color="light-blue darken-2" />
+                        <div v-text="'Zoteroupdate'" />
+                    </div>
+                </v-hover>
+            </template>
 
-            <v-col cols=12 md=5 lg=4 xl=3>
-                <v-card tile min-height="300">
+            <!-- Filter ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:filters>
+                <template v-for="(item, i) in attributes">
+                    <div
+                        v-if="item.filter !== undefined"
+                        :key="'filter' + i"
+                    >
+                        <v-text-field dense outlined filled clearable
+                            v-model="attributes[i].filter"
+                            :label="item.text"
+                            :prepend-icon="item.icon"
+                        />
+                    </div>
+                </template>
+            </template>
 
-                    <v-app-bar color="sysbar">
-                        <div class="headline" style="width: 100%">
-                            <span 
-                                v-if="log"
-                                v-text="'Update Log'"
-                            ></span> 
-                            <a 
-                                v-else-if="item.id"
-                                :href="item.link" 
-                                target="_blank"
-                            >
-                                <div class="invert--text d-flex">
-                                    <div v-text="item.id"></div>
-                                    <v-spacer></v-spacer>
-                                    <v-icon v-text="'link'"></v-icon>
-                                </div>
-                            </a>
-                            <span 
-                                v-else 
-                                v-text="'No Item selected'"
-                            ></span>
-                        </div>
-                    </v-app-bar>
-                    
-                    <v-expand-transition>
-                        <v-card-text >
-                            <div v-if="log">
-                                <div v-html="log_parsed"></div>
-                            </div> 
-                                                   
-                            <table v-else-if="item.id" style="border-collapse: collapse; border-spacing: 0;">
-                                <tr v-for="(val, key) in item" :key="key">
-                                    <td
-                                        class="pa-1 d-flex align-start font-weight-thin text-uppercase pr-5"
-                                        style="white-space: nowrap"
-                                        v-text="key.replaceAll('_', ' ')"></td>                                
-                                    <td class="pa-1">
-                                        <a 
-                                            v-if="key === 'link' && val"
-                                            :href="val"
-                                            target="_blank"
-                                            v-text="val.split('//').pop()"
-                                        ></a>
-                                        <span v-else v-text="val ? val : '--'"></span>
-                                    </td>
-                                </tr>
-                            </table>
+            <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
+            <template v-slot:search-tile-header="slot">
+                <span v-html="attributes.id.content(slot.item)" />
+            </template>
 
-                            <div v-else>
-                                Zotero Library is updated every night automatically.<br/><br/>
-                                However, fully authorised users are permitted to trigger a manual update.
-                            </div>
-                        </v-card-text>
-                    </v-expand-transition>
-                    
-                </v-card>
-            
-            </v-col>
-        </v-row>        
-    
+            <template v-slot:search-tile-body="slot">
+                <div class="body-2">
+                    <div class="font-weight-bold mb-1" v-html="attributes.author.content(slot.item) + ' ' + attributes.year.content(slot.item)" />
+                    <div class="mb-1" v-html="attributes.title_short.content(slot.item)" />
+                    <div class="mb-2" v-html="attributes.place.content(slot.item)" />
+                    <div class="caption" v-html="attributes.status.content(slot.item) + ', updated: ' + attributes.updated_at.content(slot.item)" />
+                </div>
+            </template>
+        </generic-entity-template>
     </div>
 </template>
 
@@ -105,54 +79,18 @@ export default {
     data () {
         return {
             entity:     'bibliography',
+            component:  'Reference',
+            headline:   'Bibliography',
             loading:    false,
-            items:      [],
-            item:       {},
-            search:     '',
-            log:        null,
-
-            headers: [
-                { 
-                    value: 'id',
-                    text: 'ZoteroID' 
-                },
-                { 
-                    value: 'author',
-                    text: 'Author' 
-                },
-                { 
-                    value: 'year',
-                    text: 'Year' 
-                },
-                { 
-                    value: 'title_short',
-                    text: 'Title'
-                },
-                {
-                    value: 'created_at',
-                    text: 'Added',
-                    filterable: false
-                },
-                { 
-                    value: 'updated_at',
-                    text: 'Modified',
-                    filterable: false
-                },
-                {
-                    value: 'fetched_at',
-                    text: 'Checked',
-                    filterable: false 
-                },
-                { 
-                    value: 'status',
-                    text: 'Status',
-                    sortable: false
-                }
-            ]
+            refresh:    0,
+            attributes: {}
         }
     },
 
     props: {
+        dialog:     { type: Boolean, default: false },
+        select:     { type: Boolean, default: false },
+        selected:   { type: [Number, String], default: null }
     },
 
     computed: {
@@ -168,57 +106,117 @@ export default {
             else {
                 return '--'
             }
-        }       
+        }
     },
 
     created () {
-        this.getItems()
+        this.attributes = this.setAttributes()
     },
-    
+
     methods: {
-        selectItem(item, selector) {
-            this.log = null
-            this.item = item
-        },
-
-        async getItems () {
-            this.loading = true
-
-            let dbi = {}
-            dbi = await this.$root.DBI_SELECT_GET(this.entity, null)
-            
-            if (dbi?.contents?.[0]?.id) {
-                this.items = dbi.contents
+        setAttributes () {
+            return {
+                id: {
+                    default: null,
+                    text: 'ID',
+                    icon: 'fingerprint',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    content: (item) => {
+                        if (!item.link) return item?.id ?? '--'
+                        return item.id + this.$handlers.format.resource_link(item.link)
+                    }
+                },
+                author: {
+                    default: null,
+                    text: this.$root.label('author'),
+                    icon: 'person',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    content: (item) => item?.author ?? '--'
+                },
+                year: {
+                    default: null,
+                    text: this.$root.label('year'),
+                    icon: 'history',
+                    sortable: true,
+                    filter: null,
+                    content: (item) => {
+                        if (!item?.year) return '--'
+                        if (!item?.year?.includes('-')) return item?.year ?? '--'
+                        return this.$handlers.format.date(this.language, item?.year)
+                    }
+                },
+                title_short: {
+                    default: null,
+                    text: this.$root.label('short_title'),
+                    icon: 'short_text',
+                    filter: null,
+                    content: (item) => item?.title_short ?? '--'
+                },
+                title: {
+                    default: null,
+                    text: this.$root.label('title'),
+                    icon: 'notes',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    content: (item) => item?.title_short ?? (item?.title ?? '--')
+                },
+                place: {
+                    default: null,
+                    text: this.$root.label('place'),
+                    icon: 'place',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    content: (item) => item?.place ?? '--'
+                },
+                status: {
+                    default: null,
+                    text: this.$root.label('status'),
+                    icon: 'public',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    content: (item) => item?.status ?? '--'
+                },
+                updated_at: {
+                    default: null,
+                    text: this.$root.label('update'),
+                    icon: 'event',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    content: (item) => this.$handlers.format.date(this.language, item?.updated_at)
+                },
             }
-
-            this.loading = false
         },
 
         async fetchZotero () {
             if (this.$root.user.level > 11) {
                 alert('Updating Zotero Titles might take a while. Please contact the IT team if any problems occure.')
-                this.$root.loading = true
+
+                this.$root.loading = this.loading = true
                 const self = this
+
+                this.$store.dispatch('showSnack', { message: 'Updating Bibliography ... please wait!' })
 
                 await axios.post('dbi/' + this.entity + '/input', {})
                     .then((response) => {
                         console.log(response?.data)
-                        self.log = response?.data ? response.data : null
-                        self.$root.snackbar({
-                            en: 'Zotero Titles were updated',
-                            de: 'Zotero-Titel aktualisiert'
-                        }, 'success');
-                        self.getItems()
+                        this.$store.dispatch('showSnack', { color: 'success', message: 'Bibliography was updated!' })
+                        ++this.refresh
                     })
                     .catch((error) => {
                         self.$root.AXIOS_ERROR_HANDLER(error)
                     })
 
-                this.$root.loading = false
+                this.$root.loading = this.loading =  false
             }
-            else {
-                alert('You are not permitted to update Zotero References. Please contact an administrator.')
-            }
+            else alert('You are not permitted to update Zotero References. Please contact an administrator.')
         }
     }
 }

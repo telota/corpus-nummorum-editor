@@ -5,7 +5,6 @@
             sync
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :default-sort-by="'name.ASC'"
             small-tiles
@@ -183,9 +182,6 @@ export default {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
         },
-        headline () {
-            return this.$root.label(this.entity)
-        },
 
         // Dropdowns
         sides () {
@@ -220,7 +216,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -230,7 +226,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 side: {
                     default: 0,
@@ -240,7 +236,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return this.sides.find((row) => row.value == item?.side)?.text }
+                    content: (item) => this.sides.find((row) => row.value == item?.side)?.text ?? '--'
                 },
                 legend: {
                     default: null,
@@ -249,7 +245,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.legend ? item.legend : '--' }
+                    content: (item) => item?.legend ?? '--'
                 },
                 design_de: {
                     default: null,
@@ -258,7 +254,7 @@ export default {
                     header: this.language === 'de',
                     sortable: this.language === 'de',
                     filter: null,
-                    content: (item) => { return item?.design_de ? item.design_de : '--' }
+                    content: (item) => item?.design_de ?? '--'
                 },
                 design_en: {
                     default: null,
@@ -267,21 +263,21 @@ export default {
                     header: this.language != 'de',
                     sortable: this.language != 'de',
                     filter: null,
-                    content: (item) => { return item?.design_en ? item.design_en : '--' }
+                    content: (item) => item?.design_en ?? '--'
                 },
                 id_legend: {
                     default: null,
                     text: this.$root.label('legend'),
                     icon: 'translate',
                     clone: true,
-                    content: (item) => { return item?.legend ? item.legend : (item?.id_legend ? item.id_legend : '--') }
+                    content: (item) => item?.legend ?? (item?.id_legend ?? '--')
                 },
                 id_design: {
                     default: null,
                     text: this.$root.label('design'),
                     icon: 'notes',
                     clone: true,
-                    content: (item) => { return item?.['design_' + this.language] ? item['design_' + this.language] : (item?.id_design ? item.id_design : '--') }
+                    content: (item) => item?.['design_' + this.language] ?? (item?.id_design ?? '--')
                 },
                 comment: {
                     default: null,
@@ -289,7 +285,7 @@ export default {
                     icon: 'short_text',
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
+                    content: (item) => item?.comment ?? '--'
                 },
             }
         }

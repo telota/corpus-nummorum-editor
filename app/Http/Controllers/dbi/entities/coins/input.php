@@ -129,18 +129,20 @@ class input {
         $data = [];
 
         foreach($images as $i) {
-            $data [] = [
+            $data[] = [
                 'id'                => empty($i['id']) ? null : $i['id'],
-                'o_link'            => $i['obverse']['link'],
-                'r_link'            => $i['reverse']['link'],
+                'o_link'            => $i['obverse']['path'],
+                'r_link'            => $i['reverse']['path'],
                 'o_photographer'    => $i['obverse']['photographer'],
                 'r_photographer'    => $i['reverse']['photographer'],
-                'kind'              => $i['obverse']['kind'] === 'original' ? 'original' : 'plastercast',
+                'kind'              => empty($i['kind']) ? ($i['obverse']['kind'] === 'original' ? 'original' : 'plastercast') : ($i['kind'] === 'original' ? 'original' : 'plastercast'),
                 'path'              => ''
             ];
         }
 
-        $this -> helpers($config, 'images', $ID, $data);
+        //die (print_r($data));
+
+        $this->helpers($config, 'images', $ID, $data);
     }
 
 

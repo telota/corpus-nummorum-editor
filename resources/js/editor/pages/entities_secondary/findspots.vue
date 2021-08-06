@@ -3,7 +3,6 @@
         <generic-entity-template
             :entity="entity"
             :name="$root.label(component)"
-            :headline="headline"
             :attributes="attributes"
             :default-sort-by="'name.ASC'"
             small-tiles
@@ -148,9 +147,6 @@ export default {
     computed: {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
-        },
-        headline () {
-            return this.$root.label(this.entity)
         }
     },
 
@@ -168,7 +164,7 @@ export default {
                     header: true,
                     sortable: true,
                     filter: null,
-                    content: (item) => { return item?.id ? item.id : '--' }
+                    content: (item) => item?.id ?? '--'
                 },
                 name: {
                     default: null,
@@ -178,7 +174,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.name ? item.name : '--' }
+                    content: (item) => item?.name ?? '--'
                 },
                 alias: {
                     default: null,
@@ -188,7 +184,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: false,
-                    content: (item) => { return item?.alias ? item.alias : '--' }
+                    content: (item) => item?.alias ?? '--'
                 },
                 country: {
                     default: null,
@@ -198,7 +194,7 @@ export default {
                     sortable: true,
                     filter: null,
                     clone: true,
-                    content: (item) => { return item?.country ? item.country.toUpperCase() : '--' }
+                    content: (item) => item?.country ? item.country.toUpperCase() : '--'
                 },
                 geonames: {
                     default: null,
@@ -206,28 +202,28 @@ export default {
                     icon: 'link',
                     header: true,
                     clone: false,
-                    content: (item) => { return this.$handlers.format.geonames_link(item.geonames) }
+                    content: (item) => this.$handlers.format.geonames_link(item.geonames)
                 },
                 comment: {
                     default: null,
                     text: this.$root.label('comment'),
                     icon: 'notes',
                     clone: false,
-                    content: (item) => { return item?.comment ? item.comment : '--' }
+                    content: (item) => item?.comment ?? '--'
                 },
                 latitude: {
                     default: null,
                     text: this.$root.label('latitude'),
                     icon: 'my_location',
                     clone: false,
-                    content: (item) => { return item?.latitude ? item.latitude : '--' }
+                    content: (item) => item?.latitude ?? '--'
                 },
                 longitude: {
                     default: null,
                     text: this.$root.label('longitude'),
                     icon: 'my_location',
                     clone: false,
-                    content: (item) => { return item?.longitude ? item.longitude : '--' }
+                    content: (item) => item?.longitude ?? '--'
                 }
             }
         }

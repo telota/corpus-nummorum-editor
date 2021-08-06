@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\dbi\entities;
 
 use App\Http\Controllers\dbi\dbiInterface;
-use DB; 
+use DB;
 
 
-class link implements dbiInterface { 
+class link implements dbiInterface {
 
     // Controller-Functions ------------------------------------------------------------------
 
@@ -18,14 +18,14 @@ class link implements dbiInterface {
         if (in_array($input['add_entity'], ['coins', 'types', 'monograms', 'persons', 'symbols'])) {
             if ($input['mode'] === 'link') {
                 $handler = new linkHandler;
-                return $handler -> link($user, $input);
+                return $handler->link($user, $input);
             }
-            else if ($input['mode'] === 'unlink') { 
-                $handler = new linkHandler;           
-                return $handler -> unlink($user, $input);
+            else if ($input['mode'] === 'unlink') {
+                $handler = new linkHandler;
+                return $handler->unlink($user, $input);
             }
             else {
-                die (abort(404, 'Not supported!')); 
+                die (abort(404, 'Not supported!'));
             }
         }
         else {
@@ -89,7 +89,7 @@ class linkHandler {
             if (!empty(config('dbi.tablenames.'.$table))) {
                 $table = config('dbi.tablenames.'.$table);
                 DB::table($table) -> updateOrInsert($where, $where);
-    
+
                 foreach (config('dbi.responses.linking.unlinked') AS $key => $val) {
                     $message[$key] = 'cn '.$input['add_entity'].' '.$input['add_id'].' '.$val.' cn '.$input['entity'].' '.$input['id'];
                 }

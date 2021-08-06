@@ -2,7 +2,7 @@
 <div>
 
     <v-fade-transition>
-        <div v-if="show" class="dialog-overlay" :style="'z-index:' + zIndex + ' Important!'">
+        <div v-if="show" class="dialog-overlay" :style="'z-index:' + zIndex">
         </div>
     </v-fade-transition>
 
@@ -56,7 +56,7 @@ export default {
         show:       { type: Boolean, default: false },
         icon:       { type: String, default: 'launch' },
         text:       { type: String, default: 'Dialog' },
-        width:      { type: [Number, String], default: '50%' },
+        width:      { type: [Number, String], default: '85%' },
         maxWidth:   { type: [Number, String], default: 500 },
         noPadding:  { type: Boolean, default: false },
         background: { type: String, default: null },

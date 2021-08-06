@@ -242,15 +242,19 @@ const router = new Router({
         // ----------------------------------------------------------------------------------------------
         // Public Relations
         {
-            path: '/news',
+            path: '/news/:id?',
             name: 'news',
             component: require ('./../pages/website/news').default,
         },
         {
-            path: '/coin-of-the-month',
+            path: '/coinofthemonth/:id?', //'/coin-of-the-month/:id?',
             name: 'coinofthemonth',
             component: require ('./../pages/website/coinofthemonth').default,
         },
+        /*{
+            path: '/coinofthemonth/:id?',
+            redirect: '/coin-of-the-month/:id?'
+        },*/
 
 
         // ----------------------------------------------------------------------------------------------

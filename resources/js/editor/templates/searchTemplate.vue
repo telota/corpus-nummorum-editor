@@ -21,6 +21,9 @@
             v-on:layout="(emit) => { this.layout = emit }"
             v-on:add="$emit('add', true)"
         >
+            <template v-slot:right>
+                <slot name="right" />
+            </template>
         </pagination-bar>
 
     </div>
@@ -249,7 +252,7 @@ export default {
         },
 
         sorted () {
-            const split = this.pagination.sort_by.trim().split(/[s.]+/)
+            const split = this.pagination.sort_by.trim().split(/[\s.]+/)
             return {
                 value: split[0],
                 desc: split[1] && split[1]?.toLowerCase() === 'desc'

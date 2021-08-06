@@ -51,9 +51,8 @@
                             public: 1,
                             copyright: 1
                         }
-                    });
-                    setImgIndex(item.images ? (item.images.length - 1) : 0)"
-                ></subheader>
+                    })"
+                />
 
                 <!-- Content -->
                 <v-row>
@@ -193,7 +192,7 @@
                                                 <v-icon
                                                     v-text="side === 'obverse' ? 'arrow_downward' : 'arrow_upward'"
                                                     @click="item.images[i][side === 'obverse' ? 'reverse' : 'obverse'].copyright = set[side].copyright"
-                                                ></v-icon>
+                                                />
                                             </template>
                                         </v-select>
                                     </div>
@@ -204,21 +203,23 @@
                 </v-row>
 
                 <!-- Image File Browser -->
-                <ChildDialog v-if="files_dialog.active"
-                    :prop_active="files_dialog.active"
-                    prop_component="files"
-                    :prop_item="{ parent: 'coins', key: files_dialog.key, id: files_dialog.id }"
-                    v-on:assignment="ImgBrowser"
+                <file-manager
+                    v-if="files_dialog.active"
+                    dialog
+                    select
+                    :selected="files_dialog.id  ? files_dialog.id  : directory"
+                    :identifier="files_dialog.key"
+                    v-on:select="ImgBrowser"
                     v-on:close="files_dialog = { active: false, key: null, id: null }"
                 />
 
                 <!-- Image Direct Upload -->
                 <upload
-                    :prop_active="upload_dialog.active"
-                    prop_target="storage/coins"
-                    :prop_key="upload_dialog.key"
-                    v-on:ChildEmit="ImgUpload"
+                    :show="upload_dialog.active"
+                    :directory="defaultUploadDirectory"
+                    :identifier="upload_dialog.key"
                     v-on:close="upload_dialog = { active: false, key: null }"
+                    v-on:upload="ImgUpload"
                 />
 
                 <!-- Image Links -->
@@ -1451,7 +1452,7 @@
                 </div>
 
                 <!-- Groups -->
-                <div class="mt-2">
+                <div class="mt-6">
                     <subheader
                         :label="labels.objectgroups"
                         :count="item.groups"
@@ -1461,15 +1462,15 @@
                     />
 
                     <div class="mt-n3" v-for="(iterator, i) in item.groups" :key="i">
-                        <div v-if="!edit_relations.groups[i]" class="d-flex component-wrap">
+                        <div v-if="!edit_relations.groups[i]" class="d-flex justify-space-between">
                             <InputForeignKey
                                 entity="objectgroups"
                                 label="Object Group"
                                 icon="control_camera"
+                                :style="'width:' + ($vuetify.breakpoint.mdAndUp ? '50%' : '100%')"
                                 :selected="item.groups[i].id"
                                 v-on:select="(emit) => { item.groups[i].id = emit }"
                             />
-                            <v-spacer></v-spacer>
                             <v-btn icon class="ml-3" @click="DeleteRelation('groups', i)" ><v-icon>delete</v-icon></v-btn>
                         </div>
 
@@ -1499,57 +1500,73 @@
         </sheet-template>
     </div>
 
-
     <!-- Dialog Inheritance ---------------------------------------------------------- -->
-    <v-dialog v-model="dialog_inheritance.active" persistent scrollable max-width="600px">
-        <v-card tile>
+    <small-dialog
+        :show="dialog_inheritance.active"
+        :icon="'sync' + (inherited[dialog_inheritance.key] === 1 ? '_disabled' : '')"
+        :text="(inherited[dialog_inheritance.key] === 1 ? 'Dea' : 'A')+'ctivating coin-type-synchronisation'"
+        v-on:close="closeDialogInheritance()"
+    >
+        <div>
+            <div v-if="inherited[dialog_inheritance.key] === 1">
+                Deactivating coin-type-synchronisation (inheritance) will allow you to set an individual value for
+                <b v-text="dialog_inheritance.label"></b>.
+                But any update on <b v-text="'cn type ' + inherited.id_type"></b> will be ignored.
+            </div>
+            <div v-else>
+                Activating coin-type-synchronisation (inheritance) will replace the individual value for
+                <b v-text="dialog_inheritance.label"></b> with the value of Type <b v-text="'cn type ' + inherited.id_type"></b>:
+                <div class="pa-4" v-html="dialog_inheritance.value"></div>
+                Any update on <b v-text="'cn type ' + inherited.id_type"></b> will automatically update the coin value.
+            </div>
+            <div class="mt-4">
+                Would you like to proceed?
+            </div>
+        </div>
 
-            <!-- System Header -->
-            <dialogbartop
-                :icon="'sync' + (inherited[dialog_inheritance.key] === 1 ? '_disabled' : '')"
-                :text="(inherited[dialog_inheritance.key] === 1 ? 'Dea' : 'A')+'ctivating coin-type-synchronisation'"
-                v-on:close="closeDialogInheritance()"
-            />
-
-            <v-card-text class="mt-5" style="min-height: 200px">
-                <div v-if="inherited[dialog_inheritance.key] === 1">
-                    Deactivating coin-type-synchronisation (inheritance) will allow you to set an individual value for
-                    <b v-text="dialog_inheritance.label"></b>.
-                    But any update on <b v-text="'cn type ' + inherited.id_type"></b> will be ignored.
-                </div>
-                <div v-else>
-                    Activating coin-type-synchronisation (inheritance) will replace the individual value for
-                    <b v-text="dialog_inheritance.label"></b> with the value of Type <b v-text="'cn type ' + inherited.id_type"></b>:
-                    <div class="pa-4" v-html="dialog_inheritance.value"></div>
-                    Any update on <b v-text="'cn type ' + inherited.id_type"></b> will automatically update the coin value.
-                </div>
-                <div class="mt-4">
-                    Would you like to proceed?
-                </div>
-            </v-card-text>
-
-            <v-card-actions class="mt-n5">
-                <v-spacer />
-                <v-btn text class="mr-5" @click="closeDialogInheritance()">
-                    <v-icon>clear</v-icon>
-                </v-btn>
-                <v-btn text @click="toggleInheritance(dialog_inheritance.key)">
-                    <v-icon>done</v-icon>
-                </v-btn>
-                <v-spacer />
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+        <div class="d-flex justify-center">
+            <v-btn text class="mr-5" @click="closeDialogInheritance()">
+                <v-icon>clear</v-icon>
+            </v-btn>
+            <v-btn text @click="toggleInheritance(dialog_inheritance.key)">
+                <v-icon>done</v-icon>
+            </v-btn>
+        </div>
+    </small-dialog>
 
     <!-- Dialog Inheritance Manager ---------------------------------------------------------- -->
-    <simpleSelectDialog
-        :active="inherit_manager.active"
+    <dialog-template
+        v-if="inherit_manager.active"
+        dialog
         :text="$root.label('inheritance_management')"
         icon="sync"
         v-on:close="inherit_manager = { active: false, data: {} }"
     >
-        <template v-slot:content>
-            <div>
+        <div class="header_bg component-toolbar component-toolbar-dialog">
+            <div class="d-flex">
+                <v-btn
+                    text
+                    v-text="'Activate Inheritance for all Values'"
+                    style="height: 50px;"
+                    @click="inheritanceAll()"
+                />
+                <v-spacer />
+                <v-hover v-slot="{ hover }">
+                    <div
+                        class="d-flex align-center justify-center headline font-weight-bold text-uppercase light-blue--text text--darken-2"
+                        :class="hover ? ' header_hover' : ' header_bg'"
+                        style="width: 200px; height: 50px; cursor: pointer;"
+                        @click="inheritanceUpdate()"
+                    >
+                        <v-icon v-text="'save'" class="mr-2 light-blue--text text--darken-2" />
+                        <div v-text="'save'" />
+                    </div>
+                </v-hover>
+            </div>
+        </div>
+
+        <div class="component-content component-content-dialog tile_bg">
+            <div class="pa-3">
                 <p>
                     Here you can enable or disable inheritance for the individual values.<br/>
                     For these changes to take effect, please click "save" in this dialog (otherwise they will be discarded).
@@ -1558,14 +1575,9 @@
                     <span class="font-weight-bold error--text">Important Note:</span>
                     If some values are displayed incorrectly, please close this dialog, save your latest changes, and then reopen the dialog.
                 </p>
-                <v-btn
-                    text
-                    block
-                    v-text="'Activate Inheritance for all Values'"
-                    @click="inheritanceAll()"
-                ></v-btn>
             </div>
-            <v-row class="mt-n6">
+
+            <v-row class="ma-0 pa-0">
                 <v-col
                     v-for="(record, key) in inherit_manager.data"
                     :key="key"
@@ -1614,21 +1626,8 @@
                     </v-radio-group>
                 </v-col>
             </v-row>
-        </template>
-        <template v-slot:actions>
-            <div class="pb-2 pt-2 d-flex justify-center">
-                <div style="width: 50%">
-                    <v-btn
-                        tile
-                        block
-                        color="blue_prim"
-                        v-text="$root.label('save')"
-                        @click="inheritanceUpdate()"
-                    />
-                </div>
-            </div>
-        </template>
-    </simpleSelectDialog>
+        </div>
+    </dialog-template>
 
 </div>
 </template>
@@ -1683,6 +1682,8 @@ export default {
                 active: false,
                 data: {}
             },
+
+            directory: 'coin-images',
 
             // Relation Keys
             edit_relations: {},
@@ -1768,6 +1769,10 @@ export default {
             else {
                 return true
             }
+        },
+
+        defaultUploadDirectory () {
+            return this.directory + '/' + (Math.floor(this.id / 5000) * 5000)
         }
     },
 
@@ -1916,17 +1921,18 @@ export default {
 
         // Image Handler -----------------------------------------------------------------------
         ImgBrowser (emit) {
+            console.log('test', emit)
             const split = emit.key.split('_');
-            this.item.images[split[0]][split[1]].path = emit.id;
-            this.item.images[split[0]][split[1]].link = emit.id;
+            this.item.images[split[0]][split[1]].path = emit.path;
+            this.item.images[split[0]][split[1]].link = emit.path;
             this.files_dialog = { active: false, key: null, id: null };
         },
 
         // JK: Upload Dialog
         ImgUpload (emit) {
             const split = emit.key.split('_')
-            this.item.images[split[0]][split[1]].path = emit.url
-            this.item.images[split[0]][split[1]].link = emit.url
+            this.item.images[split[0]][split[1]].path = emit.path
+            this.item.images[split[0]][split[1]].link = emit.path
             this.upload_dialog = { active: false, key: null }
         },
 
