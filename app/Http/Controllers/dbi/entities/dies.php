@@ -8,7 +8,7 @@ use Request;
 use DB;
 
 
-class dies implements dbiInterface  { 
+class dies implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
@@ -18,14 +18,19 @@ class dies implements dbiInterface  {
             'base' => config('dbi.tablenames.dies').' AS di',
             'joins' => [
                 [config('dbi.tablenames.legends').' AS le', 'di.id_legend', '=', 'le.id'],
-                [config('dbi.tablenames.designs').' AS de', 'di.id_design', '=', 'de.id'] 
+                [config('dbi.tablenames.designs').' AS de', 'di.id_design', '=', 'de.id']
             ]
         ];
 
         // DB Pre Query if no ID is given
         if (empty($id)) {
             $input = Request::post();
-            
+
+            if (!empty($input['side'])) {
+                if ($input['side'] === 'o') $input['side'] = [0, 2];
+                else if ($input['side'] === 'r') $input['side'] = [1, 2];
+            }
+
             $allowed_keys = [
                 'where' => [
                     'id'                => 'di.id',
@@ -34,8 +39,8 @@ class dies implements dbiInterface  {
                     'id_legend'         => 'di.id_legend',
                     'side'              => 'di.side',
                     'legend'            => [
-                        ['raw' => '(SELECT GROUP_CONCAT(le.legend SEPARATOR "|") FROM '.config('dbi.tablenames.legends').' AS le WHERE le.id = di.id_legend GROUP BY le.id)'], 
-                        'LIKE', 
+                        ['raw' => '(SELECT GROUP_CONCAT(le.legend SEPARATOR "|") FROM '.config('dbi.tablenames.legends').' AS le WHERE le.id = di.id_legend GROUP BY le.id)'],
+                        'LIKE',
                         '%', '%'
                     ],
                     'design'            => [['raw' => 'CONCAT_WS("|", de.design_de, de.design_en)'], 'LIKE', '%', '%'],
@@ -89,7 +94,7 @@ class dies implements dbiInterface  {
                 -> get();
 
             $dbi = json_decode($dbi, TRUE);
-            /*$select = [                
+            /*$select = [
                 'di.id              AS  id',
                 'di.name_die        AS  name',
                 'di.comment         AS  comment',
@@ -107,8 +112,8 @@ class dies implements dbiInterface  {
         }
 
         return empty($id) ? [
-            'pagination'    => $prequery['pagination'], 
-            'where'         => $prequery['where'], 
+            'pagination'    => $prequery['pagination'],
+            'where'         => $prequery['where'],
             'contents'      => $dbi
         ] : $dbi;
     }

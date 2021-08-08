@@ -1,47 +1,47 @@
 <template>
 <div>
-    <v-card tile :loading="loading">
-        <!-- Header -->
-        <v-card tile class="grey_prim pr-3 pl-5 mb-3">
-            <v-row>
-                <v-col cols=6 md=3>
-                    <div class="headline" v-text="'Userverwaltung'"></div>
-                </v-col>
-                <v-col cols=6 md=3>
-                    
-                </v-col>
-                <v-col cols=12 md=6>
-                    <div class="d-flex justify-end">
-                        <v-btn
-                            tile 
-                            color="blue_prim"
-                            v-html="'CN Team'" 
-                            :disabled="tab === 'team'"
-                            @click="tab = 'team'"
-                        ></v-btn>
-                        <v-btn
-                            tile 
-                            color="blue_prim"
-                            v-html="'Community'"
-                            :disabled="tab === 'community'"
-                            class="ml-4"
-                            @click="tab = 'community'"
-                        ></v-btn>
-                        <v-btn
-                            tile
-                            :color="items.new.length > 0 ? 'blue_prim' : null"
-                            :disabled="tab === 'new' || items.new.length < 1" 
-                            class="ml-4"
-                            v-html="items.new.length < 1 ? 'Keine neuen Registrierungen' : (items.new.length + '&nbsp;neue Registrierung' + (items.new.length > 1 ? 'en' : ''))" 
-                            @click="tab = 'new'"
-                        ></v-btn>
-                    </div>
-                </v-col>
-            </v-row>
-        </v-card>
+    <!-- Toolbar -->
+    <component-toolbar>
+        <v-row class="pa-0 ma-0">
+            <v-col cols=6 md=3>
+                <div class="headline" v-text="'Userverwaltung'"></div>
+            </v-col>
+            <v-col cols=6 md=3>
 
-        <!-- Table -->
-        <v-card-text>
+            </v-col>
+            <v-col cols=12 md=6>
+                <div class="d-flex justify-end">
+                    <v-btn
+                        tile
+                        color="blue_prim"
+                        v-html="'CN Team'"
+                        :disabled="tab === 'team'"
+                        @click="tab = 'team'"
+                    ></v-btn>
+                    <v-btn
+                        tile
+                        color="blue_prim"
+                        v-html="'Community'"
+                        :disabled="tab === 'community'"
+                        class="ml-4"
+                        @click="tab = 'community'"
+                    ></v-btn>
+                    <v-btn
+                        tile
+                        :color="items.new.length > 0 ? 'blue_prim' : null"
+                        :disabled="tab === 'new' || items.new.length < 1"
+                        class="ml-4"
+                        v-html="items.new.length < 1 ? 'Keine neuen Registrierungen' : (items.new.length + '&nbsp;neue Registrierung' + (items.new.length > 1 ? 'en' : ''))"
+                        @click="tab = 'new'"
+                    ></v-btn>
+                </div>
+            </v-col>
+        </v-row>
+    </component-toolbar>
+
+    <!-- Content -->
+    <component-content>
+        <sheet-template>
             <table>
                 <tr>
                     <td v-for="(header, h) in headers" :key="'header' + h">
@@ -50,26 +50,26 @@
                     <td colspan=3></td>
                 </tr>
                 <tr v-for="(item, i) in items[tab]" :key="'tr' + i">
-                    <td 
-                        v-for="(header, h) in headers" 
+                    <td
+                        v-for="(header, h) in headers"
                         :key="'tr' + i + 'td' + h"
                         class="pt-1"
                         :class="item.level === 0 ? 'grey--text' : ''"
                     >
-                        <div 
-                            v-if="header.value === 'email'" 
+                        <div
+                            v-if="header.value === 'email'"
                             class="mt-2"
                             :title="item.level === 0 ? 'Email wird gespeichert, um erneute Registrierung mit dieser Adresse zu unterbinden.' : 'Emailadressen sind unique.'"
                             v-html="item[header.value] + '&nbsp;' + $handlers.format.email_link(item[header.value])"
                         ></div>
-                        <div 
-                            v-else 
-                            class="mt-2" 
+                        <div
+                            v-else
+                            class="mt-2"
                             v-text="item[header.value]"
                         ></div>
                     </td>
                     <!-- Rank -->
-                    <td class="pt-1" style="width: 1%" align="right">              
+                    <td class="pt-1" style="width: 1%" align="right">
                         <v-menu offset-y transition="scale-transition">
                             <template v-slot:activator="{ on }">
                                 <v-btn
@@ -83,8 +83,8 @@
                             </template>
                             <v-list>
                                 <template v-for="(rank, r) in ranks.filter(v => v.hide === false)">
-                                    <div 
-                                        v-if="rank.value === null"                                       
+                                    <div
+                                        v-if="rank.value === null"
                                         :key="'rank' + r"
                                         class="font-weight-bold mt-1"
                                     >
@@ -92,7 +92,7 @@
                                         <v-divider class="mt-1"></v-divider>
                                     </div>
                                     <v-list-item
-                                        v-else                                        
+                                        v-else
                                         :key="'rank' + r"
                                         @click="items[tab][i].level = rank.value"
                                     >
@@ -117,21 +117,23 @@
                     </td>
                 </tr>
             </table>
-        </v-card-text>
-    </v-card>         
-    
+        </sheet-template>
+    </component-content>
+
 </div>
 </template>
 
 
 
 <script>
+import sheetTemplate from '../../templates/sheetTemplate.vue'
 
 export default {
+  components: { sheetTemplate },
     data () {
         return {
             entity:     'users',
-            search:     '',            
+            search:     '',
             tab:        'team',
             loading:    false,
 
@@ -174,7 +176,7 @@ export default {
         }
         this.getItems();
     },
-    
+
     methods: {
         async getItems () {
             this.loading = true
@@ -195,7 +197,7 @@ export default {
         },
 
         showRank (level) {
-            const text = this.ranks.find(item => item.value === level)            
+            const text = this.ranks.find(item => item.value === level)
             return text.text ? text.text : level
         },
 
@@ -231,7 +233,7 @@ export default {
 
                 this.$root.loading = false
             }
-        }   
+        }
     }
 }
 

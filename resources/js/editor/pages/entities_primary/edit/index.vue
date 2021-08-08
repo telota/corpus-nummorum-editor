@@ -306,6 +306,23 @@
                     <subheader :label="labels.issue" class="mb-3"></subheader>
 
                     <v-row>
+                        <v-col cols=12 :sm="entity === 'coins' ? 6 : 12" class="font-weight-bold orange--text pl-10 mb-5">
+                            <template v-if="item.authority">
+                                <div
+                                    v-if="item.authority === 1 && !item.authority_person"
+                                    v-text="'Type of Coinage is Ruler - please select an authority Person'"
+                                />
+                                <div
+                                    v-if="item.authority === 2 && !item.authority_group"
+                                    v-text="'Type of Coinage is Tribe - please select an authority Group'"
+                                />
+                                <div
+                                    v-if="item.authority === 3 && !item.mint"
+                                    v-text="'Type of Coinage is Mint - please select a Mint'"
+                                />
+                            </template>
+                        </v-col>
+
                         <v-col v-if="entity === 'coins'" cols="12" sm="6" class="font-weight-bold">
                             <div style="width: 0; white-space:nowrap">
                                 <v-checkbox
@@ -321,23 +338,6 @@
                                     </template>
                                 </v-checkbox>
                             </div>
-                        </v-col>
-
-                        <v-col cols=12 sm=6 class="text-end font-weight-bold orange--text">
-                            <template v-if="item.authority">
-                                <div
-                                    v-if="item.authority === 1 && !item.authority_person"
-                                    v-text="'Type of Coinage is Ruler - please select a Person'"
-                                />
-                                <div
-                                    v-if="item.authority === 2 && !item.authority_group"
-                                    v-text="'Type of Coinage is Tribe - please select a Tribe'"
-                                />
-                                <div
-                                    v-if="item.authority === 3 && !item.mint"
-                                    v-text="'Type of Coinage is Mint - please select a Mint'"
-                                />
-                            </template>
                         </v-col>
 
                         <v-col cols="12" sm="6">
@@ -775,6 +775,7 @@
                                 :label="labels[key.k]"
                                 :icon="key.i"
                                 :selected="item[key.k]"
+                                style="width: 100%"
                                 v-on:select="(emit) => { item[key.k] = emit }"
                             />
                         </v-col>
@@ -798,12 +799,13 @@
                             <div>
                                 <div class="mt-n3" v-for="(iterator, i) in item[key.k]" :key="i">
                                     <!-- Input -->
-                                    <div v-if="!edit_relations[key.k][i]" class="d-flex component-wrap">
+                                    <div v-if="!edit_relations[key.k][i]" class="d-flex">
                                         <InputForeignKey
                                             :entity="key.k"
                                             :label="(i + 1) + '. ' + labels[key.k].slice(0, -1)"
                                             :icon="key.i"
                                             :selected="item[key.k][i].id"
+                                            style="width: 100%"
                                             v-on:select="(emit) => { item[key.k][i].id = emit }"
                                         />
                                         <v-spacer />
@@ -811,13 +813,13 @@
                                     </div>
 
                                     <!-- String -->
-                                    <div v-else class="d-flex component-wrap align-center mb-7 mt-3">
+                                    <div v-else class="d-flex align-center mb-7 mt-3">
                                         <v-icon class="mr-5">link</v-icon>
                                         <div v-html="edit_relations[key.k][i]"></div>
                                         <v-spacer />
                                         <v-btn icon
                                             :disabled="!edit_relations[key.k][i]"
-                                            @click="eEditRelation(key.k, i)"
+                                            @click="EditRelation(key.k, i)"
                                         >
                                             <v-icon>edit</v-icon>
                                         </v-btn>

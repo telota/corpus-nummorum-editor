@@ -1,13 +1,24 @@
 <template>
-<div>
-    <v-row>
-        <v-col
-            v-for="(list, name) in items"
-            :key="name"
-            cols=12
-            sm=6
-        >
-            <v-card :height="$root.position.height - 35">
+<div><!-- Toolbar -->
+    <component-toolbar>
+        <div class="title text-uppercase pl-3 pr-3" v-text="'CN Editor Backend Log'" />
+        <v-spacer />
+        <div class="pr-3" style="width: 400px; max-width: 75%;">
+            <v-text-field
+                dense clearable
+                v-model="search.cn_editor"
+                prepend-icon="search"
+                class="mt-2"
+                append-outer-icon="sync"
+                @click:append-outer="getItems()"
+            />
+        </div>
+    </component-toolbar>
+
+    <!-- Content -->
+    <component-content style="overflow-y: hidden">
+        <div class="sheet_bg">
+            <!--<div style="height: 50px;">
                 <div
                     class="pa-3 d-flex align-center justify-space-between"
                     style="height: 49px;"
@@ -24,35 +35,38 @@
                     />
                 </div>
                 <v-progress-linear :indeterminate="loading" :height="1" />
+            </div>-->
 
-                <v-virtual-scroll
-                    :items="filterItems(list, search[name])"
-                    :item-height="100"
-                    style="width: 100%"
-                    :height="$root.position.height - 85"
-                    :dis-bench="3"
-                >
-                    <template v-slot:default="{ item }">
-                        <div style="height: 100px; overflow: hidden; cursor: pointer" @click="showDialog(item)">
-                            <div class="caption pa-3">
-                                <div class="font-weight-bold mb-1" v-text="item.slice(1, 20)" />
-                                <div v-text="item.slice(22)" />
-                            </div>
+            <v-virtual-scroll
+                :items="filterItems(items.cn_editor, search.cn_editor)"
+                :item-height="75"
+                style="overflow-y: scroll; height: calc(100vh - 90px);"
+                :dis-bench="3"
+            >
+                <template v-slot:default="{ item }">
+                    <div style="height: 75px; overflow: hidden; cursor: pointer" @click="showDialog(item)">
+                        <div class="caption pa-3">
+                            <div class="font-weight-bold mb-1" v-text="item.slice(1, 20)" />
+                            <div v-text="item.slice(22)" />
                         </div>
-                    </template>
-                </v-virtual-scroll>
-            </v-card>
-        </v-col>
-    </v-row>
+                    </div>
+                </template>
+            </v-virtual-scroll>
+        </div>
+    </component-content>
 
-    <v-dialog tile v-model="dialog.active" width="50%" scrollable>
-        <v-card tile>
-            <v-card-text class="pt-4">
-                <div class="font-weight-bold mb-1 body-2" v-text="dialog.data.slice(1, 20)" />
-                <div v-text="dialog.data.slice(22)" />
-            </v-card-text>
-        </v-card>
-    </v-dialog>
+    <small-dialog
+        :show="dialog.active"
+        width="50%"
+        icon="note"
+        text="Log Record"
+        v-on:close="dialog.active = false"
+    >
+        <div class="font-weight-bold mb-1 body-2" v-text="dialog.data.slice(1, 20)" />
+        <div style="height: 50vh; overflow-y: auto;">
+            <div style="white-space: pre-line" v-text="printRecord(dialog.data.slice(22))" />
+        </div>
+    </small-dialog>
 
 </div>
 </template>
@@ -90,17 +104,18 @@ export default {
 
     methods:  {
         async getItems () {
-            this.loading = true
+            this.loading = this.$root.loading = true
 
             await axios.get('/dbi/logs')
                 .then((response) => {
-                    this.items = response?.data?.contents
+                    console.log(response?.data?.contents)
+                    this.items.cn_editor = response?.data?.contents?.cn_editor ?? []
                 })
                 .catch((error) => {
                     console.error(error)
                 })
 
-            this.loading = false
+            this.loading = this.$root.loading = false
         },
 
         filterItems (list, search) {
@@ -114,6 +129,10 @@ export default {
                 active: true,
                 data
             }
+        },
+
+        printRecord (data) {
+            return data.replaceAll('SQLSTATE', '\n\nSQLSTATE').replaceAll(';', ';\n')
         }
     }
 }

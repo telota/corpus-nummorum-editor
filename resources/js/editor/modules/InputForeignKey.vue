@@ -148,6 +148,7 @@
                 dialog
                 select
                 :selected="selected"
+                :conditions="conditions"
                 v-on:select="forwardSelection"
                 v-on:close="dialog = false"
             />

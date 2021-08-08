@@ -28,8 +28,8 @@ class generic_select {
         foreach ($input as $key => $value) {
             if (in_array($key, array_keys($allowed_where)) && ($value !== null && $value !== '')) {
 
-                if ($key === 'id' && !empty($value[1])) {
-                    $whereIn['id'] = $value;
+                if (($key === 'id' || $key === 'side') && !empty($value[1])) {
+                    $whereIn[$key] = $value;
                 }
 
                 else if (!is_array($allowed_where[$key]) || isset($allowed_where[$key]['raw'])) {

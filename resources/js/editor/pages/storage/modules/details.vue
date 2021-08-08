@@ -215,8 +215,9 @@ export default {
                 this.vIndex = 0
                 this.fetchData(this.currentFile)
             }
+            else this.item = null
         },
-        expanded () { this.$emit('expand', this.expanded) }
+        //expanded () { this.$emit('expand', this.expanded) }
     },
 
     created () {

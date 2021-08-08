@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="entity === 'types' || !select"
-        v-html="$root.label('linked_' + (entity === 'coins' ? 'types' : 'coins')) + ':&nbsp;' + length"
+        v-html="$root.label('linked_' + oppositeEntity) + ':&nbsp;' + length"
     />
     <v-hover v-else v-slot="{ hover }">
         <div
@@ -11,7 +11,7 @@
             @click="$store.commit('setDetailsDialog', { entity: 'types', id: select.id })"
         >
             <div class="text-truncate" v-text="(select.inherited ? 'Inherited from' : 'Linked to') + ' cn'" />
-            <div v-html="'&nbsp;' + entity.slice(0, -1) + '&nbsp;' + select.id" />
+            <div v-html="'&nbsp;' + oppositeEntity.slice(0, -1) + '&nbsp;' + select.id" />
         </div>
     </v-hover>
 </template>
@@ -29,6 +29,10 @@ export default {
         length () {
             const length = this.item[this.entity === 'coins' ? 'types' : 'coins']?.length
             return length ?? 0
+        },
+
+        oppositeEntity () {
+            return this.entity === 'coins' ? 'types' : 'coins'
         },
 
         select () {

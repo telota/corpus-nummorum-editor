@@ -22,6 +22,7 @@ class logs implements dbiInterface  {
             $year = date('Y');
             $log = null;
             $log = @file_get_contents($root.'/storage/logs/'.($name === 'cn_website' ? ('laravel-'.date('Y-m-d').'.logl') : 'laravel.log'));
+            $log = mb_convert_encoding($log, 'UTF-8');
             $items[$name] = [];
 
             if (!empty($log)) {

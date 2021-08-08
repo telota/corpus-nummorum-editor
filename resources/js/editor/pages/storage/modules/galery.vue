@@ -211,6 +211,7 @@ export default {
                 await this.$store.dispatch('fetchFiles', { directory: this.currentDir })
                 if (this.currentFile && !this.items.includes(this.currentFile)) alert(this.currentFile + ' was not found')
             }
+            else this.$store.commit('setFilesItems', [])
         },
 
         mark (item, push = false) {

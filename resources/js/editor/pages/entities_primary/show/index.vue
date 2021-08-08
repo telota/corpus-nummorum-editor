@@ -105,7 +105,7 @@
                     color-hover="header_hover"
                     color-text="blue_sec"
                     :tooltip="'publish ' + name"
-                    :disabled="$root.user.level < 18 && (status !== 0 || status !== 2)"
+                    :disabled="$root.user.level < 18 || (status !== 0 || status !== 2)"
                     @click="publish()"
                 />
             </div>

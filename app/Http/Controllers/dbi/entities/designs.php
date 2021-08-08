@@ -8,7 +8,7 @@ use Request;
 use DB;
 
 
-class designs implements dbiInterface  { 
+class designs implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
@@ -18,7 +18,12 @@ class designs implements dbiInterface  {
         // DB Pre Query if no ID is given
         if (empty($id)) {
             $input = Request::post();
-            
+
+            if (!empty($input['side'])) {
+                if ($input['side'] === 'o') $input['side'] = [0, 2];
+                else if ($input['side'] === 'r') $input['side'] = [1, 2];
+            }
+
             $allowed_keys = [
                 'where' => [
                     'id'            => 'id',
@@ -55,7 +60,7 @@ class designs implements dbiInterface  {
                 -> leftJoin(config('dbi.tablenames.images').' AS c_img', 'c_img.CoinID', '=', 'c.id')
                 -> leftJoin(config('dbi.tablenames.types').' AS t', DB::raw('IF(d.side = 1, t.id_design_r, t.id_design_o)'), '=', 'd.id')
                 -> leftJoin(config('dbi.tablenames.images').' AS t_img', 't_img.ImageID', '=', 't.id_imageset')
-                -> select([                
+                -> select([
                     'd.id             AS id',
                     'd.design_de      AS name_de',
                     'd.design_en      AS name_en',
@@ -83,9 +88,9 @@ class designs implements dbiInterface  {
         else {
             $dbi = [];
         }
-        
+
         /*if(!empty($where[0])) {
-            $select = [                
+            $select = [
                 'id             AS id',
                 'design_de      AS name_de',
                 'design_en      AS name_en',
@@ -101,8 +106,8 @@ class designs implements dbiInterface  {
         }*/
 
         return empty($id) ? [
-            'pagination'    => $prequery['pagination'], 
-            'where'         => $prequery['where'], 
+            'pagination'    => $prequery['pagination'],
+            'where'         => $prequery['where'],
             'contents'      => $dbi
         ] : $dbi;
     }

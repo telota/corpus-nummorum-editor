@@ -22,6 +22,11 @@ class legends implements listsInterface  {
                         WHEN is_type = 1 THEN IF("'.$language.'" = "de", "TYP", "TYPE")
                         ELSE IF("'.$language.'" = "de", "MÜNZE", "COIN")
                     END,
+                    CASE
+                        WHEN side = 0 THEN "Obv."
+                        WHEN side = 1 THEN "Rev."
+                        ELSE "Obv./Rev."
+                    END,
                     LOWER(keywords)
                 ) AS addition'),
                 // Image

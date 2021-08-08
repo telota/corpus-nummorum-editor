@@ -42,12 +42,18 @@
                         </div>
                     </v-expand-transition>
 
+                    <v-text-field dense outlined filled clearable
+                        v-model="attributes.keywords.filter"
+                        :label="attributes.keywords.text"
+                        :prepend-icon="attributes.keywords.icon"
+                    />
+
                     <InputForeignKey
                         entity="directions"
                         :label="attributes.direction.text"
                         :icon="attributes.direction.icon"
                         :selected="parseInt(attributes.direction.filter)"
-                        style="width: 100%"
+                        style="position: relative; z-index: 200"
                         v-on:select="(emit) => { attributes.direction.filter = emit }"
                     />
 
@@ -58,12 +64,6 @@
                         :items="key === 'side' ? search_sides : (key === 'role' ? search_roles : languages)"
                         :label="attributes[key].text"
                         :prepend-icon="attributes[key].icon"
-                    />
-
-                    <v-text-field dense outlined filled clearable
-                        v-model="attributes.keywords.filter"
-                        :label="attributes.keywords.text"
-                        :prepend-icon="attributes.keywords.icon"
                         :menu-props="{ offsetY: true }"
                         style="position: relative; z-index: 200"
                     />
@@ -283,12 +283,22 @@ export default {
     props: {
         dialog:     { type: Boolean, default: false },
         select:     { type: Boolean, default: false },
-        selected:   { type: [Number, String], default: null }
+        selected:   { type: [Number, String], default: null },
+        conditions: { type: Array, default: () => [] }
     },
 
     computed: {
         language () {
             return this.$root.language === 'de' ? 'de' : 'en'
+        },
+        filterSide () {
+            if (!this.conditions?.[0]) return null
+
+            let found = null
+            this.conditions.forEach((el) => {
+                if (el.side && (el.side === 'o' || el.side === 'r')) found = el.side
+            })
+            return found
         },
 
         // Dropdowns
@@ -311,10 +321,17 @@ export default {
             }})
         },
         search_sides () {
-            return this.$store.state.lists.dropdowns.sides.map((item) => { return {
+            const list = this.$store.state.lists.dropdowns.sides.map((item) => { return {
                 value: this.dialog ? item.value : (item.value + ''),
                 text: this.$root.label(item.text)
             }})
+
+            list.push(
+                { value: 'o', text: 'Obv. & Obv./Rev.' },
+                { value: 'r', text: 'Rev. & Obv./Rev.' }
+            )
+
+            return list
         },
         search_roles () {
             return this.$store.state.lists.dropdowns.typeCoin.map((item) => { return {
@@ -403,7 +420,7 @@ export default {
                     icon: 'tonality',
                     header: true,
                     sortable: true,
-                    filter: null,
+                    filter: this.filterSide,
                     clone: true,
                     content: (item) => this.sides.find((row) => row.value == item?.side)?.text ?? '--'
                 },

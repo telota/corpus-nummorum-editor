@@ -12,12 +12,24 @@
         <component-toolbar :dialog="dialog">
 
             <!-- Upload -->
-            <div class="pr-2">
+            <div>
                 <adv-btn
                     icon="cloud_upload"
                     :tooltip="'upload Files to current Directory (/' + currentDir + ')'"
+                    color-hover="header_hover"
                     :disabled="!currentDir || directoryLoading"
                     v-on:click="upload = true"
+                />
+            </div>
+
+            <!-- Directory-->
+            <div class="pr-2">
+                <adv-btn
+                    icon="create_new_folder"
+                    :tooltip="'Create new subdirectory in current Directory (/' + currentDir + ')'"
+                    color-hover="header_hover"
+                    :disabled="!currentDir || directoryLoading"
+                    v-on:click="addDirectory"
                 />
             </div>
 
@@ -27,16 +39,6 @@
                 :height="50"
                 v-on:setPath="setCurrentPath"
             />
-
-            <!-- Search
-            <div class="pl-2 pr-3" :style="'width:' + searchInputWidth + 'px'">
-                <v-text-field
-                    dense clearable
-                    v-model="searchFile"
-                    placeholder="Dateien filtern"
-                    class="mb-n3"
-                />
-            </div> -->
 
             <div :style="'width:' + searchInputWidth + 'px'">
                 <input-template
@@ -67,31 +69,9 @@
                 :loading="$store.state.storage.files.loading"
                 :disabled="!currentDir || directoryLoading"
                 tooltip="Refresh File Index"
+                color-hover="header_hover"
                 v-on:click="setFileIndex()"
             />
-
-            <!--<v-icon v-text="'search'" />
-            <div
-                class="d-flex align-center pa-2 ml-2"
-                style="height: 44px;"
-                :style="'width:' + searchInputWidth + 'px; border-bottom: 1px solid ' + ($vuetify.theme.dark ? 'white' : 'black')"
-            >
-                <input
-                    id="galery-filter"
-                    name="galery-filter"
-                    v-model="searchFile"
-                    placeholder="Dateinamen filtern"
-                    class="ml-1"
-                    style="border: 0; outline: none; width: 100%; padding: 5px; line-height: 20px;"
-                />
-                <v-fade-transition>
-                    <v-icon
-                        v-if="searchFile"
-                        v-text="'clear'"
-                        @click="searchFile = null"
-                    />
-                </v-fade-transition>
-            </div>-->
         </component-toolbar>
 
         <!-- Directory Drawer -->
@@ -143,6 +123,42 @@
         v-on:close="upload = false"
     />
 
+    <!-- New Dir -->
+    <small-dialog
+        :show="newDir.show"
+        icon="create_new_folder"
+        :text="'New Directory' + (newDir.directory ? (' in ' + newDir.directory) : '')"
+        v-on:close="newDir.show = false"
+    >
+        <div>
+            <breadcrumbs
+                :directory="newDir.directory"
+                :height="50"
+                v-on:setPath="(emit) => { newDir.directory = emit }"
+            />
+            <v-text-field dense outlined filled clearable
+                v-model="newDir.name"
+                label="Name for new Directory"
+                class="mt-5"
+            />
+            <div class="text-center mb-3">
+                <div>For compatibility reasons, critical characters are removed from the directory name. This is a preview, the name after creation may differ.</div>
+                <div class="mt-1 mb-3"><b v-html="printNewDirName()" /></div>
+                <div>Please keep in mind that directory names are public. Please pay attention to word choice and correct spelling.</div>
+            </div>
+        </div>
+
+        <v-btn
+            tile
+            block
+            class="blue_prim"
+            :dark="!blocked || newDir.name ? true : false"
+            :disabled="blocked || !newDir.name"
+            v-text="'save'"
+            @click="createNewDir"
+        />
+    </small-dialog>
+
 </div>
 </template>
 
@@ -172,7 +188,13 @@ export default {
             showDetails: null,
             marked: [],
             closing: 0,
-            upload: false
+            upload: false,
+            newDir: {
+                show: false,
+                name: null,
+                directory: null
+            },
+            blocked: false
         }
     },
 
@@ -274,6 +296,7 @@ export default {
             else {
                 this.currentDir = null
                 this.currentFile = null
+                this.marked = []
             }
         },
 
@@ -316,6 +339,58 @@ export default {
             if (this.identifier) this.$emit('select', { key: this.identifier, path: emit })
             else this.$emit('select', emit)
             if (confirm(emit + ' has been selected. Close Dialog?')) ++this.closing
+        },
+
+        // New Directory
+        addDirectory () {
+            this.newDir = {
+                show: true,
+                name: null,
+                directory: this.currentDir
+            }
+        },
+
+        printNewDirName () {
+            let name = this.newDir.name
+            if (!name) return '--'
+            name = name
+                .toLowerCase()
+                .replaceAll(/\s+/g, ' ')
+                .replaceAll(' ', '_')
+                .replaceAll('ö', 'oe')
+                .replaceAll('ü', 'ue')
+                .replaceAll('ä', 'ae')
+                .replaceAll(/[^0-9a-z_]/g, '-')
+            return name ?? '--'
+        },
+
+        async createNewDir () {
+            const url = this.$root.baseURL + '/storage-api/action/create'
+
+            this.blocked = this.$root.loading = true
+            await axios.post(url,
+                Object.assign ({}, {
+                    name: this.newDir.name,
+                    directory: this.newDir.directory
+                }))
+                .then(async (response) => {
+                    const data = response?.data
+                    if (data.success && data.path) {
+                        this.$store.dispatch('showSnack', {
+                            color: 'success',
+                            message: data.name + ' was ' + (data.existing ? 'already existing' : 'created')
+                        })
+                        await this.$store.dispatch('fetchDirectories')
+                        this.setCurrentPath(data.path)
+                        this.newDir.show = false
+                    }
+                    else console.error(response)
+                })
+                .catch((error) => {
+                    console.error(error.message)
+                    this.$root.AXIOS_ERROR_HANDLER(error)
+                })
+            this.blocked = this.$root.loading = false
         }
     }
 }

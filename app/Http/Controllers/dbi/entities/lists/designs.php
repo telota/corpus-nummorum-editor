@@ -22,6 +22,11 @@ class designs implements listsInterface  {
                         WHEN role = 1 THEN IF("'.$language.'" = "de", "TYP", "TYPE")
                         ELSE IF("'.$language.'" = "de", "MÜNZE", "COIN")
                     END,
+                    CASE
+                        WHEN side = 0 THEN "Obv."
+                        WHEN side = 1 THEN "Rev."
+                        ELSE "Obv./Rev."
+                    END,
                     IF(border_of_dots = 1, "'.($language === 'de' ? 'Perlkreis' : 'border of dots').'", null)
                 ) AS addition')
                 // Search

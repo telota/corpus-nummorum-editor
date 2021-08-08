@@ -20,6 +20,11 @@ class legends implements dbiInterface  {
         if (empty($id)) {
             $input = Request::post();
 
+            if (!empty($input['side'])) {
+                if ($input['side'] === 'o') $input['side'] = [0, 2];
+                else if ($input['side'] === 'r') $input['side'] = [1, 2];
+            }
+
             $allowed_keys = [
                 'where' => [
                     'id'            => 'id',

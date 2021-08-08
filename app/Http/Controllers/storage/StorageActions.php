@@ -19,12 +19,19 @@ class StorageActions {
         $name = trim($name, '/');
 
         if ($this->directoryCheck($parent)) {
+            $existing = false;
             $name = $this->sanitizeName($name);
             $path = (empty($parent) ? '' : (trim($parent, '/'))).'/'.$name['name'];
 
-            Storage::makeDirectory($path);
+            if (Storage::missing($path)) Storage::makeDirectory($path);
+            else $existing = true;
 
-            return ['success' => true, 'path' => '/'.$path];
+            return [
+                'success' => true,
+                'existing' => $existing,
+                'path' => '/'.$path,
+                'name' => $name['name']
+            ];
         }
         else return ['success' => false];
     }

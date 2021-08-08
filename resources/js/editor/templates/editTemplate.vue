@@ -19,7 +19,7 @@
                     color-hover="blue_sec"
                     color-text="white"
                     :disabled="!editorItem.id || editorItem.id == selected"
-                    v-on:click="selectItem(item)"
+                    v-on:click="selectItem()"
                 />
 
                 <div :class="divider" />

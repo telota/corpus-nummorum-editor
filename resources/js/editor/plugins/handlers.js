@@ -564,21 +564,18 @@ const to_string = {
         return string ? string : '--'
     },
     weight: (data, entity, language) => {
-        const add = entity === 'types' ? (
-            data.count ? (' (&nbsp;' + data.count + '&nbsp;) ') : ''
-        ) : (
-            data.ignore ? (' (&nbsp;<i>ignore</i>&nbsp;) ') : ''
-        )
-        return !data?.value ? '--' : ( format_decimal(language, data.value) + '&nbsp;g' + add)
+        let add = ''
+        if (entity === 'types' && data?.count) add =  ' (' + data.count + ')'
+        else if (data?.ignore) add =  ' (<i>ignore</i>)'
+        return !data?.value ? '--' : (format_decimal(language, data.value) + '&nbsp;g' + add)
     },
     diameter: (data, entity, language) => {
-        if (!data?.value_min && !data?.value_max) { return '--' }
+        if (!data?.value_min && !data?.value_max) return '--'
         else {
-            const add = entity === 'types' ? (
-                data?.count ? (' (&nbsp;' + data.count + '&nbsp;) ') : ''
-            ) : (
-                data?.ignore ? (' (&nbsp;<i>ignore</i>&nbsp;) ') : ''
-            )
+            let add = ''
+            if (entity === 'types' && data?.count) add =  ' (' + data.count + ')'
+            else if (data?.ignore) add =  ' (<i>ignore</i>)'
+
             if ( data.value_min && data.value_max && data.value_min != data.value_max ) {
                 return format_decimal(language, data.value_min) + '&ndash;' + format_decimal(language, data.value_max) + '&nbsp;mm' + add
             }
@@ -591,9 +588,9 @@ const to_string = {
         }
     },
     axis: (data) => {
-        if (data === null) { return '--' }
-        else if (Number.isInteger(data)) { return '&#9719;&nbsp;' + data }
-        else { return '&#9719;&nbsp;' + (data.map((v) => { return v.value + '&ensp;(&nbsp;' + v.count + '&nbsp;)' }).join(',&ensp;')) }
+        if (!data) { return '--' }
+        else if (Number.isInteger(data)) return '&#9719;&nbsp;' + data
+        else { return '&#9719;&nbsp;' + (data.map((v) => (v.value + ' (' + v.count + ')')).join(',&ensp;')) }
     },
     centerhole: (data) => {
         return !data?.value ? '--' : (format_id(data.value) + (data.value === 1 ? 'O' : (data.value === 2 ? 'R' : 'O&nbsp;/&nbsp;R')))
