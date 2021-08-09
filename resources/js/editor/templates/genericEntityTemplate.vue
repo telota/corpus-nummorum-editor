@@ -18,6 +18,7 @@
             :defaultSortBy="defaultSortBy"
             :small-tiles="smallTiles"
             :default-layout="defaultLayout"
+            :tiles="tiles"
             :select="select"
             :selected="selected"
             v-on:select="selectItem"

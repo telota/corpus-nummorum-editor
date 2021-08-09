@@ -319,7 +319,8 @@ export default {
             if (this.rank >= 21) {
                 routes.push({ text: 'Website',  icon: 'wifi_tethering',  children: [
                     { text: this.$root.label('coin_of_the_month'),  icon: 'stars',      link: 'coinofthemonth'/*'coin-of-the-month'*/ },
-                    { text: this.$root.label('news'),               icon: 'comment',    link: 'news' }
+                    { text: this.$root.label('news'),               icon: 'comment',    link: 'news' },
+                    { text: this.$root.label('typology'),           icon: 'title',    link: 'typology' }
                 ]})
             }
 

@@ -19,6 +19,7 @@
                     icon="sort_by_alpha"
                     :dis-tooltip="'Sorted by'"
                     :color-hover="colorHover"
+                    :disabled="sorters.length < 2"
                 />
             </template>
             <v-card tile>
@@ -74,6 +75,7 @@
                     :icon="layouts[layout].icon"
                     dis-tooltip="Select Layout"
                     :color-hover="colorHover"
+                    :disabled="!layouts || Object.keys(layouts).length < 2"
                 />
             </template>
             <v-card tile>

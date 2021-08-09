@@ -38,6 +38,7 @@ return [
     'brokenlinks'   => ['read' => 2,    'write_own' => 99,  'write_all' => 99],
     'logs'          => ['read' => 31,   'write_own' => 99,  'write_all' => 99],
 
+    'typology'      => ['read' => 2,    'write_own' => 21,  'write_all' => 21],
     'coinofthemonth'=> ['read' => 2,    'write_own' => 21,  'write_all' => 21],
     'news'          => ['read' => 2,    'write_own' => 21,  'write_all' => 21],
     'team'          => ['read' => 2,    'write_own' => 22,  'write_all' => 22],

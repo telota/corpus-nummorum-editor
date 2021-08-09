@@ -251,6 +251,11 @@ const router = new Router({
             name: 'coinofthemonth',
             component: require ('./../pages/website/coinofthemonth').default,
         },
+        {
+            path: '/typology/:id?', //'/coin-of-the-month/:id?',
+            name: 'typology',
+            component: require ('./../pages/website/typology').default,
+        },
         /*{
             path: '/coinofthemonth/:id?',
             redirect: '/coin-of-the-month/:id?'

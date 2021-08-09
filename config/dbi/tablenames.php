@@ -73,6 +73,8 @@ return [
     'team'                  => $db_app.'app_website_team',
     'texts'                 => $db_app.'app_website_texts',
     'users'                 => $db_app.'app_editor_users',
+    'typology'              => $db_data.'data_typology',
+    'typology_text'         => $db_data.'data_typology_text',
 
     // Indexes
     'index_coins'           => $db_data.'index_coins',
