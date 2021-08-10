@@ -43,8 +43,10 @@
                 <!-- Quicksearch -->
                 <v-card tile class="appbar mb-5" height="160">
                     <v-card-title class="mb-1">
-                        <div v-text="labels[resource]"></div>
-                        <v-spacer></v-spacer>
+                        <div v-text="labels[resource]" />
+
+                        <v-spacer />
+
                         <a :href="'/editor#/' + resource + '/edit'" class="ml-1 mr-1">
                             <v-btn icon>
                                 <v-icon>add</v-icon>
@@ -60,11 +62,12 @@
                     <v-card-text class="d-flex">
                         <v-text-field dense filled outlined clearable
                             v-model="search[resource]"
-                            :label="'cn ' + resource.slice(0, -1) + ' ID quick search'"
+                            :label="'cn ' + resource.slice(0, -1) + ' ID quick select'"
                             hint="Number only"
                             :prepend-icon="resource === 'coins' ? 'copyright' : 'blur_circular'"
                             class="mr-1"
-                        ></v-text-field>
+                        />
+
                         <div v-if="parseInt(search[resource])" class="d-flex">
                             <a v-for="(icon, link) in search_buttons" :key="link" :href="'/editor#/' + resource + '/' + link + '/' + search[resource]" class="ml-1">
                                 <v-btn icon>
@@ -72,6 +75,7 @@
                                 </v-btn>
                             </a>
                         </div>
+
                         <div v-else class="d-flex">
                             <v-btn v-for="(icon, link) in search_buttons" :key="link" icon disabled class="ml-1">
                                 <v-icon v-text="icon"></v-icon>

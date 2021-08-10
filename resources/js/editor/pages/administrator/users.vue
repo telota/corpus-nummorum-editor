@@ -2,41 +2,39 @@
 <div>
     <!-- Toolbar -->
     <component-toolbar>
-        <v-row class="pa-0 ma-0">
-            <v-col cols=6 md=3>
-                <div class="headline" v-text="'Userverwaltung'"></div>
-            </v-col>
-            <v-col cols=6 md=3>
+        <adv-btn
+            icon="sync"
+            color-hover="header_hover"
+            @click="getItems()"
+        />
+        <div class="headline ml-3" v-text="'Userverwaltung'"/>
 
-            </v-col>
-            <v-col cols=12 md=6>
-                <div class="d-flex justify-end">
-                    <v-btn
-                        tile
-                        color="blue_prim"
-                        v-html="'CN Team'"
-                        :disabled="tab === 'team'"
-                        @click="tab = 'team'"
-                    ></v-btn>
-                    <v-btn
-                        tile
-                        color="blue_prim"
-                        v-html="'Community'"
-                        :disabled="tab === 'community'"
-                        class="ml-4"
-                        @click="tab = 'community'"
-                    ></v-btn>
-                    <v-btn
-                        tile
-                        :color="items.new.length > 0 ? 'blue_prim' : null"
-                        :disabled="tab === 'new' || items.new.length < 1"
-                        class="ml-4"
-                        v-html="items.new.length < 1 ? 'Keine neuen Registrierungen' : (items.new.length + '&nbsp;neue Registrierung' + (items.new.length > 1 ? 'en' : ''))"
-                        @click="tab = 'new'"
-                    ></v-btn>
-                </div>
-            </v-col>
-        </v-row>
+        <v-spacer />
+
+        <v-btn
+            tile
+            color="blue_prim"
+            v-html="'CN Team'"
+            :disabled="tab === 'team'"
+            class="ml-4"
+            @click="$router.push('/users/team')"
+        />
+        <v-btn
+            tile
+            color="blue_prim"
+            v-html="'Community'"
+            :disabled="tab === 'community'"
+            class="ml-4"
+            @click="$router.push('/users/community')"
+        />
+        <v-btn
+            tile
+            :color="items.new.length > 0 ? 'blue_prim' : null"
+            :disabled="tab === 'new' || items.new.length < 1"
+            class="ml-4 mr-2"
+            v-html="items.new.length < 1 ? 'Keine neuen Registrierungen' : (items.new.length + '&nbsp;neue Registrierung' + (items.new.length > 1 ? 'en' : ''))"
+            @click="$router.push('/users/new')"
+        />
     </component-toolbar>
 
     <!-- Content -->
@@ -134,7 +132,7 @@ export default {
         return {
             entity:     'users',
             search:     '',
-            tab:        'team',
+            //tab:        'team',
             loading:    false,
 
             items:      {
@@ -167,19 +165,30 @@ export default {
         }
     },
 
-    computed: {},
+    computed: {
+        tab () {
+            let route = 'team'
+            ;['new', 'community', 'team'].forEach((section) => {
+                if (this.$route?.params?.id === section) route = section
+            })
+            this.$root.setTitle('Users, ' + route)
+            return route
+        }
+    },
 
     created () {
-        if (this.$route?.params?.id === 'new') {
-            this.tab = 'new'
-            this.$router.push('/users')
-        }
-        this.getItems();
+        if (!this.$route?.params?.id) this.$router.replace('/users/team')
+        this.getItems()
     },
 
     methods: {
         async getItems () {
-            this.loading = true
+            this.loading = this.$root.loading = true
+            this.items = {
+                team: [],
+                community: [],
+                new: []
+            }
             let dbi = {}
 
             dbi = await this.$root.DBI_SELECT_GET(this.entity, null)
@@ -193,7 +202,7 @@ export default {
                 }
             }
 
-            this.loading = false
+            this.loading = this.$root.loading = false
         },
 
         showRank (level) {

@@ -30,9 +30,13 @@
             <div
                 v-if="!expand"
                 style="position: absolute;"
+                class="d-flex align-center fill-height"
+                :class="background"
                 :style="'left:' + (publisher ? 40 : 0) + 'px; width:' + imgSize + 'px'"
             >
-                <coin-images :images="item.id ? item.images : []" :vertical="Vertical" />
+                <div :style="'width:' + imgSize + 'px'">
+                    <coin-images :images="item.id ? item.images : []" :vertical="Vertical" />
+                </div>
             </div>
         </v-slide-x-transition>
 
@@ -230,6 +234,11 @@ export default {
         },
         left () {
             return (this.expand ? 0 : this.imgSize) + (this.publisher ? 40 : 0)
+        },
+        background () {
+            if (!this.item?.images?.[0]?.id) return null
+            const img = this.item.images[0]
+            return img.bg_color ?? (img.kind === 'plastercast' ? 'imgbg' : 'white')
         }
     },
 
