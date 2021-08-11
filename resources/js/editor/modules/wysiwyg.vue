@@ -117,49 +117,46 @@
     </div>
 
     <!-- LinkDialog -->
-    <simpleSelectDialog
-        :active="linkDialog.active"
+    <small-dialog
+        :show="linkDialog.active"
         :text="$root.label('link')"
         icon="link"
-        :width="500"
         v-on:close="resetLinkDialog()"
     >
-        <template v-slot:content>
-            <v-text-field
-                dense outlined filled clearable
-                v-model="linkDialog.url"
-                label="URL"
-                prepend-icon="link"
-                @click:prepend="$root.openInNewTab(linkDialog.url)"
-                :rules="[$handlers.rules.link]"
+        <v-text-field
+            dense outlined filled clearable
+            v-model="linkDialog.url"
+            label="URL"
+            prepend-icon="link"
+            @click:prepend="$root.openInNewTab(linkDialog.url)"
+            :rules="[$handlers.rules.link]"
+        />
+        <v-select
+            dense outlined filled
+            v-model="linkDialog.blank"
+            :items="[
+                { value: true, text: 'new window' },
+                { value: false, text: 'same window' }
+            ]"
+            label="Target"
+            style="max-width: 50%"
+            prepend-icon="tab"
+        />
+        <v-text-field
+            dense outlined filled clearable
+            v-model="linkDialog.mask"
+            label="Text"
+            prepend-icon="short_text"
+        />
+        <div class="d-flex justify-center">
+            <v-btn
+                text
+                v-text="'OK'"
+                :disabled="!linkDialog.url"
+                @click="addLink()"
             />
-            <v-select
-                dense outlined filled
-                v-model="linkDialog.blank"
-                :items="[
-                    { value: true, text: 'new window' },
-                    { value: false, text: 'same window' }
-                ]"
-                label="Target"
-                style="max-width: 50%"
-                prepend-icon="tab"
-            />
-            <v-text-field
-                dense outlined filled clearable
-                v-model="linkDialog.mask"
-                label="Text"
-                prepend-icon="short_text"
-            />
-            <div class="d-flex justify-center">
-                <v-btn
-                    text
-                    v-text="'OK'"
-                    :disabled="!linkDialog.url"
-                    @click="addLink()"
-                />
-            </div>
-        </template>
-    </simpleSelectDialog>
+        </div>
+    </small-dialog>
 
 </div>
 </template>

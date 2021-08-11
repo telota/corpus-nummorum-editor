@@ -1660,19 +1660,20 @@ export default {
     data () {
         return {
             loading:            false,
+            directory:          'coins',
             refresh:            0,
             gallery_refresh:    0,
 
             //tab:                null,
             //imgId:              null,
             //img_refresh:        0,
-            showImported:      false,
+            showImported:       false,
 
             item:               {}, // processed item
             item_data:          {}, // raw DBI data
 
             new_link:           null,
-            wraped:             'd-flex component-wrap align-start',
+            wraped:             'd-flex align-start',
 
             // Inheritancestuff:
             inheriting_type:        {}, // processed item
@@ -1684,8 +1685,6 @@ export default {
                 active: false,
                 data: {}
             },
-
-            directory: 'coin-images',
 
             // Relation Keys
             edit_relations: {},

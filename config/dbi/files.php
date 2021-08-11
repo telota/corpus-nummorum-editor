@@ -25,8 +25,8 @@ return [
 
     'root_directories' => [
         'coins'             => 'Coins (old)',
-        'coin-images'       => 'Coin Images (CN)',
-        'coin-images-ext'   => 'Coin Images (external Users)',
+        //'coin-images'       => 'Coin Images (CN)',
+        //'coin-images-ext'   => 'Coin Images (external Users)',
         'CoinOfMonth'       => 'Coin of the Month',
         'db1995'            => 'DB (1995)',
         'legend-directions' => 'Legend Directions',

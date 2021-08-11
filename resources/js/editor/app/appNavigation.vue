@@ -291,7 +291,7 @@ export default {
 
         manageFavorites (toggle) {
             if (toggle) {
-                this.selectedFavs = this.favorites.splice(0)
+                this.selectedFavs = [ ...this.favorites ]
                 this.showFavorites = true
             }
             else {

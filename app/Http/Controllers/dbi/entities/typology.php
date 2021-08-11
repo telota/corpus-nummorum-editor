@@ -67,6 +67,8 @@ class typology implements dbiInterface  {
         if(empty($validation['error'][0])) {
             $input = $validation['input'];
 
+            die('not yet available');
+
             $ID = DB::transaction(function () use ($input) {
                 /*$values = [
                     'id'            => $input['id'],
@@ -96,6 +98,7 @@ class typology implements dbiInterface  {
         /*DB::transaction(function () use ($input) {
             DB::table(config('dbi.tablenames.tribes')) -> where('id', $input['id']) -> delete();
         });*/
+        die('not yet available');
 
         return true;
     }

@@ -1,6 +1,20 @@
 <template>
 <div>
-    <component-toolbar />
+    <component-toolbar>
+        <v-spacer />
+        <v-hover v-slot="{ hover }">
+            <div
+                class="d-flex align-center justify-center headline font-weight-bold light-blue--text text--darken-2"
+                :class="hover ? 'header_hover' : ''"
+                style="width: 200px; height: 50px; cursor: pointer;'"
+                @click="$router.push('/legends/new')"
+            >
+                <v-icon v-text="'add'" class="mr-2" color="light-blue darken-2" />
+                <div v-text="'New Item'" />
+            </div>
+        </v-hover>
+    </component-toolbar>
+
     <component-content style="overflow-y: hidden">
         <v-row class="pt-0 ma-0" no-gutters>
 

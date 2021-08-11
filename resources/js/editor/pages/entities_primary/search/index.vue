@@ -1499,13 +1499,13 @@ export default {
 
                     if (response.success) {
                         this.$store.dispatch('showSnack', { color: 'success', message: response.success })
-                        this.processQuery()
+                        this.setItems()
                     }
                 }
             }
             else {
                 this.$store.dispatch('showSnack', { color: 'error', message: 'No items selected!' })
-                this.processQuery();
+                this.setItems()
             }
         },
 

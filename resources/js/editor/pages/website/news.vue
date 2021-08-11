@@ -5,7 +5,6 @@
             :entity="entity"
             :attributes="attributes"
             default-sort-by="release.DESC"
-            default-layout="tiles"
             :dialog="dialog"
             :select="select"
             :selected="selected"

@@ -50,9 +50,9 @@
 
             <!-- Content Cards ---------------------------------------------------------------------------------------------------- -->
             <template v-slot:search-tile-header="slot">
-                <div v-html="attributes.release.content(slot.item)" class="mr-5" />
                 <div class="d-flex body-2">
-                    <div v-html="'ID&nbsp;' + attributes.id.content(slot.item) + ','" class="mr-1" />
+                    <div v-html="attributes.release.content(slot.item)" />
+                    <div v-html="'&ensp;|&ensp;ID&nbsp;' + attributes.id.content(slot.item) + ','" class="mr-1" />
                     <div v-html="attributes.id_cn.content(slot.item)" />
                 </div>
             </template>
@@ -65,7 +65,7 @@
                     background="white"
                 />
                 <div class="body-1 font-weight-bold mb-3 mt-3" v-html="attributes['header_' + language].content(slot.item)" />
-                <div class="body-2 mb-3" v-html="attributes['teaser_' + language].content(slot.item)" />
+                <!--<div class="body-2 mb-3" v-html="attributes['teaser_' + language].content(slot.item)" />-->
                 <div class="body-2 text-right" v-html="attributes.presented_by.content(slot.item)" />
             </template>
 

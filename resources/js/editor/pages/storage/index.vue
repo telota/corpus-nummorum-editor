@@ -263,7 +263,7 @@ export default {
             this.currentPath = path
         },
 
-        handlePath () {
+        async handlePath () {
             let path = this.currentPath
             //console.log(path)
 
@@ -287,8 +287,11 @@ export default {
                         this.currentFile = file ? (directory + '/' + file) : null
                     }
                     else {
-                        alert('Unknown Directory "' + directory + '"! You will be redirected to the Index.')
-                        this.currentPath = null
+                        await this.$store.dispatch('fetchDirectories')
+                        if (this.directories.includes(directory)) {
+                            alert('Unknown Directory "' + directory + '"! You will be redirected to the Index.')
+                            this.currentPath = null
+                        }
                     }
                 }
                 else this.currentPath = null
