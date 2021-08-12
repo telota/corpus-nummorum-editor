@@ -252,6 +252,7 @@ export default {
     },
 
     async created() {
+        if (!this.dialog) this.$root.setTitle('File Manager')
         if (!this.directories?.[0]) await this.$store.dispatch('fetchDirectories')
         if (this.dialog && this.selected) this.currentPath = this.selected
         if (this.currentPath) this.handlePath()
@@ -265,7 +266,7 @@ export default {
 
         async handlePath () {
             let path = this.currentPath
-            //console.log(path)
+            if (!this.dialog) this.$root.setTitle('File Manager (' + path + ')')
 
             if (path) {
                 this.searchFile = null
