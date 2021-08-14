@@ -4,6 +4,7 @@
     <edit-toolbar
         :entity="entity"
         :item="item"
+        :processing="processing"
         v-on:save="SendItem()"
         v-on:mark="MarkItemAsReadyToPublish()"
         v-on:erase="EraseItem()"
@@ -1660,6 +1661,7 @@ export default {
     data () {
         return {
             loading:            false,
+            processing:         false,
             directory:          'coins',
             refresh:            0,
             gallery_refresh:    0,
@@ -1794,7 +1796,7 @@ export default {
         },
 
         async SetItem () {
-            this.loading = this.$root.loading = true
+            this.$root.loading = this.loading = true
 
             // Get Entity Data from DBI
             const dbi = await this.$root.DBI_SELECT_GET(this.entity, this.id)
@@ -1823,23 +1825,21 @@ export default {
             // Refresh
             //this.Refresh ()
 
-            this.loading = this.$root.loading = false;
+            this.$root.loading = this.loading = false;
         },
 
         async SendItem () {
-            this.loading = true
+            this.$root.loading = this.loading = this.processing = true
 
             const response  = await this.$root.DBI_INPUT_POST(this.entity, 'input', this.item)
 
             if (response.success) {
-                this.$root.snackbar (response.success, 'success')
+                this.$store.dispatch('showSnack', { color: 'success', message: response.success })
                 this.SetItem()
             }
-            else {
-                console.log ('Data Input Error: response was not ok')
-            }
+            else console.error('Sending Item: response was not ok')
 
-            this.loading = false
+            this.$root.loading = this.loading = this.processing = false
         },
 
         async MarkItemAsReadyToPublish () {
@@ -1856,19 +1856,17 @@ export default {
             const confirmed = confirm('Are you sure you want to request deletion of ' + this.$handlers.format.cn_entity(this.entity, this.item.id) + '?')
 
             if (confirmed) {
-                this.loading = true
+                this.$root.loading = this.loading = this.processing = true
 
                 const response = await this.$root.DBI_INPUT_POST(this.entity, 'delete', this.item)
 
                 if (response.success) {
-                    this.$root.snackbar (response.success, 'success')
+                    this.$store.dispatch('showSnack', { color: 'success', message: response.success })
                     this.SetItem()
                 }
-                else {
-                    console.log ('Data Input Error: response was not ok')
-                }
+                else console.error('Deleting Item: response was not ok')
 
-                this.loading = false
+                this.$root.loading = this.loading = this.processing = false
             }
         },
 
@@ -1929,7 +1927,7 @@ export default {
             this.files_dialog = { active: false, key: null, id: null };
         },
 
-        // JK: Upload Dialog
+        // Upload Dialog
         ImgUpload (emit) {
             const split = emit.key.split('_')
             this.item.images[split[0]][split[1]].path = emit.path
@@ -2041,7 +2039,7 @@ export default {
                     id_coin:    this.item.id,
                 });
                 if (response.success) {
-                    this.$root.snackbar(response.success, 'success')
+                this.$store.dispatch('showSnack', { color: 'success', message: response.success })
                     await this.SetItem(this.id)
                     ++this.inheritance_refresh
                     this.inheritanceManage()
@@ -2060,16 +2058,14 @@ export default {
                         id_coin:    this.item.id,
                     });
                     if (response.success) {
-                        this.$root.snackbar(response.success, 'success')
+                        this.$store.dispatch('showSnack', { color: 'success', message: response.success })
                         this.inherited = this.$handlers.format.inherited() // force deletion of inheritance
                         await this.SetItem(this.id)
                         ++this.inheritance_refresh
                     }
                 }
             }
-            else {
-                alert('ERROR: No Type ID found!')
-            }
+            else alert('ERROR: No Type ID found!')
         },
 
         inheritanceManage () {
@@ -2092,7 +2088,7 @@ export default {
                 }
             })
             //return item
-            console.log(item)
+            // console.log(item)
             this.inherit_manager = { active: true, data: item }
         },
 

@@ -89,18 +89,24 @@
     <div :class="divider" />
 
     <!-- Save -->
-    <v-hover v-slot="{ hover }">
-        <div
-            class="d-flex align-center justify-center headline font-weight-bold text-uppercase"
-            :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
-            style="width: 200px; height: 50px;"
-            :style="saveDisabled ? 'cursor: default:' : 'cursor: pointer'"
-            @click="save()"
-        >
-            <v-icon v-text="'save'" class="mr-2" :class="saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2'" />
-            <div v-text="saveDisabled ? (status === 3 ? 'deleted' : 'forbidden') : 'save'" />
+    <div>
+        <div v-if="processing" class="d-flex align-center justify-center" style="width: 200px; height: 50px;">
+            <v-progress-circular indeterminate />
         </div>
-    </v-hover>
+
+        <v-hover v-else v-slot="{ hover }">
+            <div
+                class="d-flex align-center justify-center headline font-weight-bold text-uppercase"
+                :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
+                style="width: 200px; height: 50px;"
+                :style="saveDisabled ? 'cursor: default:' : 'cursor: pointer'"
+                @click="save()"
+            >
+                <v-icon v-text="'save'" class="mr-2" :class="saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2'" />
+                <div v-text="saveDisabled ? (status === 3 ? 'deleted' : 'forbidden') : 'save'" />
+            </div>
+        </v-hover>
+    </div>
 
 </component-toolbar>
 </template>
@@ -116,8 +122,9 @@ export default {
     },
 
     props: {
-        entity: { type: String, default: 'coins' },
-        item:   { type: Object, default: () => { return { id: '??', public: 0 }} }
+        entity:     { type: String, default: 'coins' },
+        item:       { type: Object, default: () => { return { id: '??', public: 0 }} },
+        processing: { type: Boolean, default: false }
     },
 
     computed: {

@@ -66,18 +66,27 @@
                 <div v-text="'Not editable'" />
             </div>
 
-            <v-hover v-else v-slot="{ hover }">
-                <div
-                    class="d-flex align-center justify-center headline font-weight-bold text-uppercase"
-                    :class="(saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2') + (hover && !saveDisabled ? ' header_hover' : ' header_bg')"
-                    style="width: 200px; height: 50px;"
-                    :style="saveDisabled ? 'cursor: default:' : 'cursor: pointer'"
-                    @click="save()"
-                >
-                    <v-icon v-text="mode === 'clone' ? 'play_arrow' : 'save'" class="mr-2" :class="saveDisabled ? 'grey--text' : 'light-blue--text text--darken-2'" />
-                    <div v-text="mode === 'clone' ? 'proceed' : 'save'" />
+            <!-- Save -->
+            <div v-else>
+                <div v-if="processing" class="d-flex align-center justify-center" style="width: 200px; height: 50px;">
+                    <v-progress-circular indeterminate />
                 </div>
-            </v-hover>
+
+                <v-hover v-else v-slot="{ hover }">
+                    <div
+                        class="d-flex align-center justify-center headline font-weight-bold text-uppercase light-blue--text text--darken-2"
+                        :class="hover ? 'header_hover' : 'header_bg'"
+                        style="width: 200px; height: 50px; cursor: pointer"
+                        @click="save()"
+                    >
+                        <v-icon
+                            v-text="mode === 'clone' ? 'play_arrow' : 'save'"
+                            class="mr-2 light-blue--text text--darken-2"
+                        />
+                        <div v-text="mode === 'clone' ? 'proceed' : 'save'" />
+                    </div>
+                </v-hover>
+            </div>
         </div>
 
     </div>
@@ -186,12 +195,12 @@ export default {
     data () {
         return {
             loading:            false,
+            processing:         false,
             mode:               null,
 
             editorItem:         {},
             cloningItem:        {},
             editorItemLabel:    this.itemLabel ?? ('cn ' + (this.entity.slice(-1) === 's' ? this.entity.slice(0, -1) : this.entity)),
-            saveDisabled:       false,
             editorExpanded:     this.select ? false : true,
 
             link: {
@@ -306,7 +315,7 @@ export default {
                         this.cloningItem[key].content = this.attributes[key].content(item)
                     }
                 })
-                console.log(this.cloningItem)
+                //console.log('clone', this.cloningItem)
             }
             else console.error('edit-template: setCloningItem: no id given')
         },
@@ -342,7 +351,7 @@ export default {
         },
 
         async sendItem () {
-            this.$root.loading = this.$root.loading = true
+            this.$root.loading = this.loading = this.processing = true
 
             const response = await this.$root.DBI_INPUT_POST(this.entity, 'input', this.editorItem);
 
@@ -352,14 +361,14 @@ export default {
             }
             else console.error('edit-template: Update/Creation: server-response was not ok')
 
-            this.$root.loading = this.$root.loading = false
+            this.$root.loading = this.loading = this.processing = false
         },
 
         async deleteItem () {
             const confirmed = confirm('Soll Eintrag ID ' + this.editorItem.id + ' wirklich gelöscht werden?')
 
             if (confirmed) {
-                this.$root.loading = this.$root.loading = true
+                this.$root.loading = this.processing = true
 
                 const response = await this.$root.DBI_INPUT_POST(this.entity, 'delete', this.editorItem)
 
@@ -370,7 +379,7 @@ export default {
                 }
                 else console.error('edit-template: Deltion: server-response was not ok');
 
-                this.$root.loading = this.$root.loading = false
+                this.$root.loading = this.processing = false
             }
         },
 
@@ -391,11 +400,10 @@ export default {
 
         save () {
             if (this.mode === 'clone') {
-                const item = {}
+                this.setEditorItemToDefault()
                 Object.keys(this.cloningItem).forEach((key) => {
-                    if (this.cloningItem[key].clone) item[key] = this.cloningItem[key].value
+                    if (this.cloningItem[key].clone) this.editorItem[key] = this.cloningItem[key].value
                 })
-                this.editorItem = item
                 this.mode = 'edit'
             }
             else this.sendItem()
