@@ -125,7 +125,7 @@
                                         >
                                             {{ key }}: {{ value }}
                                         </v-chip>
-                                    </TEMPLATE>
+                                    </template>
                                 </template>
                             </div>
                         </v-expansion-panel-content>
