@@ -121,7 +121,7 @@
                                            outlined
                                            label
                                            close
-                                           @click="typeof value === 'array' && value[0] ? filters[key] = [] : filters[key] = null"
+                                           @click:close="typeof value === 'array' && value[0] ? filters[key] = [] : filters[key] = null"
                                         >
                                             {{ key }}: {{ value }}
                                         </v-chip>
