@@ -90,10 +90,51 @@
             v-on:clear="resetFilters(true)"
         >
             <template v-slot:content>
-                <v-expansion-panels accordion tile flat v-model="activeTab" :style="'z-index:' + (dialog ? 202 : 100)">
+                <v-expansion-panels
+                    accordion
+                    tile
+                    flat
+                    multiple
+                    v-model="activeTab"
+                    :style="'z-index:' + (dialog ? 202 : 100)"
+                >
+
+                    <!-- Params ------------------------------------------------- ------------------------------------------------- -->
+                    <v-expansion-panel  :class="activeTab === 0 ? 'header_bg' : 'transparent'">
+                        <!-- Header -->
+                        <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
+                            <div class="d-flex align-center">
+                                <v-icon v-text="'list_alt'" />
+                                <div v-text="'Current Parameters'" class="ml-4 whitespace-nowrap" />
+                            </div>
+                        </v-expansion-panel-header>
+
+                        <!-- Content -->
+                        <v-expansion-panel-content>
+                            <div class="d-flex flex-wrap mt-n2">
+                                <template v-for="(value, key, i) in filters">
+                                    <template v-if="value !== undefined && value !== null && !(typeof value === 'object' && !value[0])">
+                                        <v-chip
+                                           :key="key + i"
+                                           color="blue_prim"
+                                           class="ma-1"
+                                           outlined
+                                           label
+                                           close
+                                           @click="typeof value === 'array' && value[0] ? filters[key] = [] : filters[key] = null"
+                                        >
+                                            {{ key }}: {{ value }}
+                                        </v-chip>
+                                    </TEMPLATE>
+                                </template>
+                            </div>
+                        </v-expansion-panel-content>
+                    </v-expansion-panel>
+
+                    <hr class="search-divider" />
 
                     <!-- Favorites ------------------------------------------------- ------------------------------------------------- -->
-                    <v-expansion-panel  :class="activeTab === 0 ? 'header_bg' : 'transparent'">
+                    <v-expansion-panel :class="activeTab === 1 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                             <div class="d-flex align-center">
@@ -177,7 +218,7 @@
                     <hr class="search-divider" />
 
                     <!-- String Search ------------------------------------------------- ------------------------------------------------- -->
-                    <v-expansion-panel :class="activeTab === 1 ? 'header_bg' : 'transparent'">
+                    <v-expansion-panel :class="activeTab === 2 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                             <div class="d-flex align-center">
@@ -372,7 +413,7 @@
                     <hr class="search-divider" />
 
                     <!-- Mixed ------------------------------------------------- ------------------------------------------------- -->
-                    <v-expansion-panel :class="activeTab === 2 ? 'header_bg' : 'transparent'">
+                    <v-expansion-panel :class="activeTab === 3 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                             <div class="d-flex align-center">
@@ -517,7 +558,7 @@
                     <hr class="search-divider" />
 
                     <!-- Comment, References ------------------------------------------------- ------------------------------------------------- -->
-                    <v-expansion-panel :class="activeTab === 3 ? 'header_bg' : 'transparent'">
+                    <v-expansion-panel :class="activeTab === 4 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                             <div class="d-flex align-center">
@@ -660,7 +701,7 @@
                     <hr class="search-divider" />
 
                     <!-- Production ------------------------------------------------- ------------------------------------------------- -->
-                    <v-expansion-panel :class="activeTab === 4 ? 'header_bg' : 'transparent'">
+                    <v-expansion-panel :class="activeTab === 5 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                             <div class="d-flex align-center">
@@ -783,7 +824,7 @@
                     <hr class="search-divider" />
 
                     <!-- Technical Parameters ------------------------------------------------- ------------------------------------------------- -->
-                    <v-expansion-panel :class="activeTab === 5 ? 'header_bg' : 'transparent'">
+                    <v-expansion-panel :class="activeTab === 6 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                             <div class="d-flex align-center">
@@ -885,7 +926,7 @@
                         { v: 'o', text: 'Obverse' },
                         { v: 'r', text: 'Reverse' }
                     ]">
-                        <v-expansion-panel :key="'panel' + key.text" :class="activeTab === (6 + i) ? 'header_bg' : 'transparent'">
+                        <v-expansion-panel :key="'panel' + key.text" :class="activeTab === (7 + i) ? 'header_bg' : 'transparent'">
                             <!-- Header -->
                             <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
                                 <div class="d-flex align-center">
@@ -1149,8 +1190,8 @@ export default {
             checked_state:      false,
             checked:            [],
 
-            cachedTab:          1,
-            activeTab:          null,
+            cachedTab:          [2],
+            activeTab:          [null],
 
             layout:             this.select ? 'cards' : this.$store.state.searchLayout,
             layouts:            {
@@ -1266,31 +1307,17 @@ export default {
                 query.sort_by   = this.pagination.sort_by
                 query.i         = this.queryCounter
 
+                //console.log('query', query)
+
                 return h.constructRequest(query)
-
-                /*if (this.dialog) {
-                    const query = {}
-
-                    // Filter
-                    Object.keys(this.attributes).forEach((key) => {
-                        const value = this.attributes[key].filter
-                        if (value !== undefined && value !== null) query[key] = value
-                    })
-
-                    // Pagination
-                    query.offset = this.pagination.offset
-                    query.limit = this.pagination.limit
-                    query.sort_by = this.pagination.sort_by
-
-                    return query
-                }
-                else return h.constructRequest(h.constructParams(this.routedQuery))*/
             },
 
             set: function (query) {
                 const params = h.constructParams(query)
 
                 // Filter
+                /*if (params.filters.o_design && typeof params.filters.o_design === 'array') params.filters.o_design = params.filters.o_design.join(' ')
+                if (params.filters.r_design && typeof params.filters.r_design === 'array') params.filters.o_design = params.filters.o_design.join(' ')*/
                 this.filters = params.filters
 
                 // Pagination
@@ -1372,7 +1399,10 @@ export default {
             if (caching) this.cacheCurrentQuery()
 
             if (this.dialog) this.setItems()
-            else this.$router.push({ path: '/' + this.entity + '/search', query: this.query })
+            else {
+                console.log('push', this.query)
+                this.$router.push({ path: '/' + this.entity + '/search', query: this.query })
+            }
         },
 
         queryIncrement () {
@@ -1388,7 +1418,9 @@ export default {
             this.error  = false
             this.loading = this.$root.loading = true
 
-            const dbi = await this.$root.DBI_SELECT_POST(this.entity, this.query)
+            const query = h.specialTreatment(this.query)
+
+            const dbi = await this.$root.DBI_SELECT_POST(this.entity, query)
 
             if (dbi?.contents) {
                 this.pagination = {

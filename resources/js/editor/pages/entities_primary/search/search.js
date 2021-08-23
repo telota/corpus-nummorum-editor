@@ -14,6 +14,15 @@ const constructRequest = (input) => {
     return request
 }
 
+const specialTreatment = (input) => {
+    const query = { ...input }
+
+    ;['o_design', 'r_design'].forEach((key) => {
+        if (query[key]) query[key] = query[key].trim().split(/\s+/)
+    })
+    return query
+}
+
 const constructParams = (input) => {
     const d = input === null || input === undefined || typeof input !== 'object' ? {} : { ...input }
 
@@ -73,13 +82,13 @@ const constructParams = (input) => {
             weight_end:             toFloat(d.weight_end),
             weight_start:           toFloat(d.weight_start),
 
-            o_design:               toArrayInt(d.o_design),
+            o_design:               ArrayToString(d.o_design),
             o_id_design:            toArrayInt(d.o_id_design),
             o_id_legend:            toArrayInt(d.o_id_legend),
             o_id_monogram:          toArrayInt(d.o_id_monogram),
             o_id_symbol:            toArrayInt(d.o_id_symbol),
 
-            r_design:               toArrayInt(d.r_design),
+            r_design:               ArrayToString(d.r_design),
             r_id_design:            toArrayInt(d.r_id_design),
             r_id_legend:            toArrayInt(d.r_id_legend),
             r_id_monogram:          toArrayInt(d.r_id_monogram),
@@ -98,6 +107,7 @@ const constructParams = (input) => {
 
 const toArrayInt =       (val) => val ? (typeof val === 'object' ? val : [val]).map((s) => parseInt(s)) : []
 const toArrayString =    (val) => val ? (typeof val === 'object' ? val : [val]) : []
+const ArrayToString =    (val) => val ? (typeof val === 'object' ? val.join(' ') : val) : null
 const toInt =            (val) => val ? parseInt(val) : null
 const toFloat =          (val) => val ? parseFloat(val) : null
 const toYear =           (val) => val ? (parseInt(val) ?? null) : null
@@ -118,5 +128,6 @@ export default {
     toBool,
     toYear,
     constructRequest,
-    constructParams
+    constructParams,
+    specialTreatment
 }

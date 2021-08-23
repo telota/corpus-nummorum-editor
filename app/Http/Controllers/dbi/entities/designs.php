@@ -19,6 +19,12 @@ class designs implements dbiInterface  {
         if (empty($id)) {
             $input = Request::post();
 
+            foreach (['name_de', 'name_en'] as $key) {
+                if (!empty($input[$key])) {
+                    $input[$key] = preg_split('/\s+/', trim($input[$key]));
+                }
+            }
+
             if (!empty($input['side'])) {
                 if ($input['side'] === 'o') $input['side'] = [0, 2];
                 else if ($input['side'] === 'r') $input['side'] = [1, 2];
