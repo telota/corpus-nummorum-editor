@@ -2,7 +2,7 @@
     <v-card
         tile
         :class="select && selected == item.id ? 'tile_selected' : 'tile_bg'"
-        :min-height="Height"
+        :min-height="height"
         style="position: relative"
     >
 
@@ -17,8 +17,8 @@
                         @click="$emit('checked')"
                     >
                         <v-icon
-                        :class="'pa-2' + (item.public === 3 || item.public === 1 ? ' grey--text' : (checked ? ' white--text' : ''))"
-                        v-text="checked ? 'radio_button_checked' : 'radio_button_unchecked'"
+                            :class="'pa-2' + (item.public === 3 || item.public === 1 ? ' grey--text' : (checked ? ' white--text' : ''))"
+                            v-text="checked ? 'radio_button_checked' : 'radio_button_unchecked'"
                         />
                     </button>
                 </v-hover>
@@ -32,16 +32,19 @@
                 style="position: absolute;"
                 class="d-flex align-center fill-height"
                 :class="background"
-                :style="'left:' + (publisher ? 40 : 0) + 'px; width:' + imgSize + 'px'"
+                :style="'left:' + (publisher ? 40 : 0) + 'px; width:' + imgWidth + 'px'"
             >
-                <div :style="'width:' + imgSize + 'px'">
-                    <coin-images :images="item.id ? item.images : []" :vertical="Vertical" />
+                <div :style="'width:' + imgWidth + 'px'">
+                    <coin-images
+                        :images="item.id ? item.images : []"
+                        :vertical="Vertical"
+                    />
                 </div>
             </div>
         </v-slide-x-transition>
 
         <!-- Content ------------------------------------------------- -->
-        <div :style="'min-height:' + Height + 'px; margin-left:' + left + 'px; width: calc(100% - ' + left + 'px)'">
+        <div :style="'min-height:' + height + 'px; margin-left:' + left + 'px; width: calc(100% - ' + left + 'px)'">
             <!-- Header -->
             <div class="pl-3 d-flex align-center" style="height: 40px;">
 
@@ -100,7 +103,7 @@
             <!-- Body not expand ------------------------------------------------- -->
             <div v-if="!expand">
                 <!-- not expand -->
-                <div :style="'min-height:' + (Height - 80) + 'px'">
+                <div :style="'min-height:' + (height - 80) + 'px'">
                     <div class="d-flex mt-2">
                         <!-- Types / Coins -->
                         <linkedInherited
@@ -203,7 +206,8 @@ export default {
 
     data () {
         return {
-            height: 180,
+            defaultHeight: 360,
+            noWrap: 1200,
             expand: false
         }
     },
@@ -216,25 +220,38 @@ export default {
         linking:        { type: Boolean, default: false },
         select:         { type: Boolean, default: false },
         selected:       { type: [Number, String], default: null },
-        vertical:       { type: Boolean, default: false }
+        vertical:       { type: Boolean, default: false },
+        width:          { type: Number, default: null }
     },
 
     computed: {
         language () {
             return this.$root.language
         },
-        imgSize () {
-            return this.height * (this.$vuetify.breakpoint.lgAndUp ? 2 : 1)
+
+        height () {
+            if (this.width === null) return this.defaultHeight
+            if (this.width > (this.noWrap * 1.5)) return 500
+            if (this.width > this.noWrap) return 420
+            if (this.width > 600) return this.defaultHeight
+            if (this.width > 500) return 180
+            return 150
         },
-        Height () {
-            return this.height * (this.imgSize === this.height ? 2 : 1)
-        },
+
         Vertical () {
-            return this.vertical ? true : (this.Height > this.height)
+            if (this.vertical) return true
+            if ((this.width && this.width <= this.noWrap) || this.$vuetify.breakpoint.mdAndDown) return true
+            return false
         },
+
+        imgWidth () {
+            return this.height / (this.Vertical ? 2 : 1)
+        },
+
         left () {
-            return (this.expand ? 0 : this.imgSize) + (this.publisher ? 40 : 0)
+            return (this.expand ? 0 : this.imgWidth) + (this.publisher ? 40 : 0)
         },
+
         background () {
             if (!this.item?.images?.[0]?.id) return null
             const img = this.item.images[0]

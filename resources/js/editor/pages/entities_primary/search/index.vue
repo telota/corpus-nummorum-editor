@@ -80,16 +80,17 @@
             </pagination-bar>
         </div>
 
-        <!-- Filters ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-        <drawer
-            header
+        <!-- Split Screen -->
+        <split-screen-template
             :dialog="dialog"
-            :collapse="queryCounter"
-            v-on:expand="onDrawerExpand"
-            v-on:search="runQuery()"
-            v-on:clear="resetFilters(true)"
+            :scroll-center-to-top="scrollToTop"
+            filter-drawer
+            :centerWidthMin="399"
+            @search="runQuery()"
+            @clear="resetFilters(true)"
+            @resize="(emit) => { resultsWidth = emit.center }"
         >
-            <template v-slot:content>
+            <template v-slot:left>
                 <v-expansion-panels
                     accordion
                     tile
@@ -115,13 +116,13 @@
                                 <template v-for="(value, key, i) in filters">
                                     <template v-if="value !== undefined && value !== null && !(typeof value === 'object' && !value[0])">
                                         <v-chip
-                                           :key="key + i"
-                                           color="blue_prim"
-                                           class="ma-1"
-                                           outlined
-                                           label
-                                           close
-                                           @click:close="typeof value === 'array' && value[0] ? filters[key] = [] : filters[key] = null"
+                                        :key="key + i"
+                                        color="blue_prim"
+                                        class="ma-1"
+                                        outlined
+                                        label
+                                        close
+                                        @click:close="typeof value === 'array' && value[0] ? filters[key] = [] : filters[key] = null"
                                         >
                                             {{ key }}: {{ value }}
                                         </v-chip>
@@ -994,16 +995,9 @@
 
                 </v-expansion-panels>
             </template>
-        </drawer>
 
-        <!-- Results Content ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
-        <div
-            id="primary-results-container"
-            :class="'component-content' + (dialog ? ' component-content-dialog' : '')"
-            style="padding-left: 40px;"
-        >
+            <!-- Error -->
             <v-fade-transition>
-                <!-- Error -->
                 <div
                     v-if="error"
                     class="mt-10 headline d-flex justify-center"
@@ -1016,10 +1010,7 @@
                         <v-col
                             v-for="(item, i) in items"
                             :key="i + ' ' + layout"
-                            :cols="12"
-                            :sm="layout === 'tiles' ? 6 : 12"
-                            :md="layout === 'tiles' ? 3 : 12"
-                            :lg="layout === 'tiles' ? 2 : 12"
+                            :cols="cols"
                         >
                             <component
                                 :is="layouts[layout].component"
@@ -1030,6 +1021,7 @@
                                 :checked="checked[i].state"
                                 :select="select"
                                 :selected="selected"
+                                :width="resultsWidth"
                                 v-on:publish="Publish([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0))"
                                 v-on:checked="checked[i].state = !checked[i].state"
                                 v-on:select="$emit('select', item.id)"
@@ -1109,9 +1101,10 @@
                     </v-card>
                 </div>
             </v-fade-transition>
-        </div>
+        </split-screen-template>
     </dialog-template>
 
+    <!-- ------------------------------------------------- ------------------------------------------------- ------------------------------------------------- -->
 
     <!-- Manage Favorites -->
     <v-dialog
@@ -1185,6 +1178,8 @@ export default {
 
             filters:            h.constructParams(),
             queryCounter:       0,
+            scrollToTop:        0,
+            resultsWidth:        0,
             pagination:         {},
 
             checked_state:      false,
@@ -1241,6 +1236,15 @@ export default {
 
         l () { return this.$root.language },
         labels () { return this.$root.labels },
+
+        cols () {
+            if (this.layout !== 'tiles' || this.resultsWidth < 400) return 12
+            if (this.resultsWidth < 850) return 6
+            if (this.resultsWidth < 1100) return 4
+            if (this.resultsWidth < 1500) return 3
+            if (this.resultsWidth < 2700) return 2
+            return 1
+        },
 
         sorters () {
             const sorters = [
@@ -1417,6 +1421,8 @@ export default {
             this.queried = true
             this.error  = false
             this.loading = this.$root.loading = true
+            this.items = []
+            this.scrollToTop++
 
             const query = h.specialTreatment(this.query)
 
@@ -1446,11 +1452,6 @@ export default {
             }
 
             this.loading = this.$root.loading = false
-            this.scrollToTop()
-        },
-
-        scrollToTop () {
-            document.getElementById('primary-results-container')?.scrollTo(0, 0)
         },
 
         setOffset (value) {
@@ -1607,7 +1608,7 @@ export default {
 <style scoped>
 
     .start-screen {
-        position: fixed;
+        position: absolute;
         width: 500px;
         left: 50%;
         margin-left: -250px;

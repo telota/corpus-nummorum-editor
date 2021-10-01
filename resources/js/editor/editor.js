@@ -62,6 +62,7 @@ Vue.component('generic-entity-template',      require('./templates/genericEntity
 Vue.component('sheet-template',      require('./templates/sheetTemplate.vue').default);
 Vue.component('small-dialog',       require('./templates/dialogSmall.vue').default);
 Vue.component('input-template',       require('./templates/inputTemplate.vue').default);
+Vue.component('splitScreenTemplate',       require('./templates/splitScreenTemplate.vue').default);
 
 Vue.component('Imager',             require('./modules/Imager.vue').default);
 //Vue.component('coin-images',        require('./modules/coinImages.vue').default);
@@ -84,6 +85,7 @@ Vue.component('pagination-bar',     require('./modules/paginationBar.vue').defau
 Vue.component('dialogbartop',       require('./modules/dialogBarTop.vue').default);
 Vue.component('vertical-divider',   require('./modules/verticalDivider.vue').default);
 Vue.component('drawer',             require('./modules/drawer.vue').default);
+Vue.component('filterDrawer',             require('./modules/filterDrawer.vue').default);
 Vue.component('clipboard-copy',     require('./modules/clipboardCopy.vue').default);
 
 
