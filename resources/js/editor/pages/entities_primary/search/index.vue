@@ -85,10 +85,15 @@
             :dialog="dialog"
             :scroll-center-to-top="scrollToTop"
             filter-drawer
-            :centerWidthMin="399"
+            :center-width-min="399"
+            :left-width-default="400"
             @search="runQuery()"
             @clear="resetFilters(true)"
-            @resize="(emit) => { resultsWidth = emit.center }"
+            @resize="(emit) => {
+                resultsWidth = emit.center
+                filterWidth = emit.left
+            }"
+            @expand="handleDrawerExpansion"
         >
             <template v-slot:left>
                 <v-expansion-panels
@@ -163,7 +168,7 @@
                                         <template v-if="cachedQueries[0]">
                                             <div
                                                 v-for="(q, i) in cachedQueries"
-                                                :key="'storedQ' + i"
+                                                :key="'cachedQ' + i"
                                                 class="pt-1 pb-1 pr-5"
                                             >
                                                 <div
@@ -184,7 +189,7 @@
                                     <div class="font-weight-bold ml-2" v-html="'Favorites&nbsp;(' + Object.keys(storedQueries).length + ')'" />
                                     <v-spacer />
                                     <div
-                                        v-text="'+ Add current Query to Favorites'"
+                                        v-text="'+ Add current Query'"
                                         class="caption"
                                         style="cursor: pointer;"
                                         @click="showQueryDialog"
@@ -232,6 +237,7 @@
                         <v-expansion-panel-content>
 
                             <v-text-field dense outlined filled clearable
+                                ref="stringSearchInput"
                                 v-model="filters.q"
                                 :label="$root.label('keywords')"
                                 append-icon="keyboard"
@@ -413,7 +419,7 @@
 
                     <hr class="search-divider" />
 
-                    <!-- Mixed ------------------------------------------------- ------------------------------------------------- -->
+                    <!-- System ------------------------------------------------- ------------------------------------------------- -->
                     <v-expansion-panel :class="activeTab === 3 ? 'header_bg' : 'transparent'">
                         <!-- Header -->
                         <v-expansion-panel-header class="pl-2 font-weight-bold" style="height: 40px">
@@ -425,9 +431,9 @@
 
                         <!-- Content -->
                         <v-expansion-panel-content>
-                            <div class="d-flex">
+                            <div :class="fCols.small.flex">
                                 <!-- ID -->
-                                <div class="search-field-50 side-l">
+                                <div :class="fCols.small.l">
                                     <v-text-field dense outlined filled clearable
                                         v-model="filters.id"
                                         :label="labels[entity.slice(0, -1)] + ' ID'"
@@ -437,7 +443,7 @@
                                 </div>
 
                                 <!-- Public -->
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <v-select dense outlined filled
                                         :items="selects.state_public"
                                         v-model="filters.state_public"
@@ -449,9 +455,9 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex">
+                            <div :class="fCols.small.flex">
                                 <!-- Linked to Type/coin -->
-                                <div class="search-field-50 side-l">
+                                <div :class="fCols.small.l">
                                     <v-select dense outlined filled
                                         :prepend-icon="entity == 'coins' ? 'blur_circular' : 'copyright'"
                                         :label="'Linked to '+(entity == 'coins' ? 'Type' : 'Coin')+'?'"
@@ -463,7 +469,7 @@
                                 </div>
 
                                 <!-- Linked to Type/coin -->
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <v-select dense outlined filled
                                         prepend-icon="sync"
                                         :label="(entity == 'coins' ? 'Is inherited' : 'Inherits to Coins')+'?'"
@@ -475,9 +481,9 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex">
+                            <div :class="fCols.small.flex">
                                 <!-- ID Opposite Entity -->
-                                <div class="search-field-50 side-l">
+                                <div :class="fCols.small.l">
                                     <v-text-field dense outlined filled clearable
                                         v-model="filters['id_'+(entity == 'coins' ? 'type' : 'coin')]"
                                         :label="'Linked '+(entity == 'coins' ? 'Type' : 'Coin')+' ID'"
@@ -485,12 +491,12 @@
                                         v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
-                                <div class="search-field-50 side-r"/>
+                                <div :class="fCols.small.r"/>
                             </div>
 
                             <!-- Creator / Editor -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="users"
                                         label="Creator"
@@ -501,7 +507,7 @@
                                     />
                                 </div>
 
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <SearchForeignKey
                                         entity="users"
                                         label="Editor"
@@ -513,18 +519,9 @@
                                 </div>
                             </div>
 
-                            <v-select dense outlined filled
-                                v-model="filters.imported"
-                                :items="$store.state.lists.manual.imports"
-                                prepend-icon="arrow_circle_down"
-                                label="Scripted Coin Import"
-                                :menu-props="{ offsetY: true }"
-                                v-on:keyup.enter="runQuery()"
-                            />
-
                             <!-- Source -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <v-select dense outlined filled
                                         v-model="filters.state_source"
                                         :items="selects.state_yes_no"
@@ -535,7 +532,7 @@
                                     />
                                 </div>
 
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <v-text-field dense outlined filled clearable
                                         v-model="filters.source"
                                         label="Source Link"
@@ -545,14 +542,32 @@
                                 </div>
                             </div>
 
-                            <SearchForeignKey
-                                entity="objectgroups"
-                                label="Object Group"
-                                icon="control_camera"
-                                :selected="filters.id_group"
-                                v-on:select="(emit) => { filters.id_group = emit }"
-                                v-on:keyup_enter="runQuery()"
-                            />
+                            <!-- Import / Group -->
+                            <div :class="fCols.large.flex">
+                                <div :class="fCols.large.l">
+
+                                    <v-select dense outlined filled
+                                        v-model="filters.imported"
+                                        :items="$store.state.lists.manual.imports"
+                                        prepend-icon="arrow_circle_down"
+                                        label="Scripted Coin Import"
+                                        :menu-props="{ offsetY: true }"
+                                        v-on:keyup.enter="runQuery()"
+                                    />
+                                </div>
+
+                                <div :class="fCols.large.r">
+
+                                    <SearchForeignKey
+                                        entity="objectgroups"
+                                        label="Object Group"
+                                        icon="control_camera"
+                                        :selected="filters.id_group"
+                                        v-on:select="(emit) => { filters.id_group = emit }"
+                                        v-on:keyup_enter="runQuery()"
+                                    />
+                                </div>
+                            </div>
                         </v-expansion-panel-content>
                     </v-expansion-panel>
 
@@ -572,8 +587,8 @@
                         <v-expansion-panel-content>
 
                             <!-- Public Comment -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <v-select dense outlined filled
                                         v-model="filters.state_comment_public"
                                         :items="selects.state_yes_no"
@@ -583,7 +598,7 @@
                                     />
                                 </div>
 
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <v-text-field dense outlined filled clearable
                                         v-model="filters.comment_public"
                                         label="Public Comment"
@@ -594,8 +609,8 @@
                             </div>
 
                             <!-- Private Comment -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <v-select dense outlined filled
                                         v-model="filters.state_comment_private"
                                         :items="selects.state_yes_no"
@@ -605,7 +620,7 @@
                                     />
                                 </div>
 
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <v-text-field dense outlined filled clearable
                                         v-model="filters.comment_private"
                                         label="Private Comment"
@@ -616,49 +631,65 @@
                             </div>
 
                             <!-- Private Description -->
-                            <v-text-field dense outlined filled clearable
-                                v-model="filters.description_private"
-                                label="Private Description"
-                                prepend-icon="label_important"
-                                v-on:keyup.enter="runQuery()"
-                            />
-                            <v-text-field dense outlined filled clearable
-                                v-if="entity === 'types'"
-                                v-model="filters.name_private"
-                                label="Private Name"
-                                prepend-icon="label"
-                                v-on:keyup.enter="runQuery()"
-                            />
+                            <div :class="fCols.large.flex">
+                                <div :class="fCols.large.l">
+                                    <v-text-field dense outlined filled clearable
+                                        v-model="filters.description_private"
+                                        label="Private Description"
+                                        prepend-icon="label_important"
+                                        v-on:keyup.enter="runQuery()"
+                                    />
+                                </div>
+                                <div :class="fCols.large.r">
+                                    <v-text-field dense outlined filled clearable
+                                        v-if="entity === 'types'"
+                                        v-model="filters.name_private"
+                                        label="Private Name"
+                                        prepend-icon="label"
+                                        v-on:keyup.enter="runQuery()"
+                                    />
+                                </div>
+                            </div>
 
                             <!-- References -->
-                            <SearchForeignKey
-                                entity="references"
-                                label="Bibliography"
-                                icon="menu_book"
-                                :selected="filters.id_reference"
-                                v-on:select="(emit) => { filters.id_reference = emit }"
-                                v-on:keyup_enter="runQuery()"
-                            />
+                            <div :class="fCols.large.flex">
+	                            <div :class="fCols.large.l">
+                                    <SearchForeignKey
+                                        entity="references"
+                                        label="Bibliography"
+                                        icon="menu_book"
+                                        :selected="filters.id_reference"
+                                        v-on:select="(emit) => { filters.id_reference = emit }"
+                                        v-on:keyup_enter="runQuery()"
+                                    />
+                                </div>
+                                <div :class="fCols.large.r">
+                                    <!-- Owner -->
+                                    <SearchForeignKey
+                                        entity="owners"
+                                        label="Owner"
+                                        icon="account_circle"
+                                        :selected="filters.id_owner"
+                                        v-on:select="(emit) => { filters.id_owner = emit }"
+                                        v-on:keyup_enter="runQuery()"
+                                    />
+                                </div>
+                            </div>
 
-                            <!-- Owner -->
-                            <SearchForeignKey
-                                entity="owners"
-                                label="Owner"
-                                icon="account_circle"
-                                :selected="filters.id_owner"
-                                v-on:select="(emit) => { filters.id_owner = emit }"
-                                v-on:keyup_enter="runQuery()"
-                            />
                             <template v-if="entity === 'coins'">
-                                <v-text-field dense outlined filled clearable
-                                    v-if="entity === 'coins'"
-                                    v-model="filters.provenience"
-                                    label="Provenience"
-                                    prepend-icon="play_circle_outline"
-                                    v-on:keyup.enter="runQuery()"
-                                />
-                                <div class="d-flex">
-                                    <div class="search-field-50 side-l">
+                                <div :class="fCols.large.flex">
+                                    <div :class="fCols.large.l">
+                                        <v-text-field dense outlined filled clearable
+                                            v-model="filters.provenience"
+                                            label="Provenience"
+                                            prepend-icon="play_circle_outline"
+                                            v-on:keyup.enter="runQuery()"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div :class="fCols.small.flex">
+                                    <div :class="fCols.small.l">
                                         <v-text-field dense outlined filled clearable
                                             v-model="filters.collection_nr"
                                             label="Collection Nr."
@@ -666,7 +697,7 @@
                                             v-on:keyup.enter="runQuery()"
                                         />
                                     </div>
-                                    <div class="search-field-50 side-r">
+                                    <div :class="fCols.small.r">
                                         <v-text-field dense outlined filled clearable
                                             v-model="filters.plastercast_nr"
                                             label="Plastercast Nr."
@@ -677,25 +708,30 @@
                                 </div>
                             </template>
 
-                            <!-- Hoards -->
-                            <SearchForeignKey
-                                entity="hoards"
-                                label="Hoard"
-                                icon="grain"
-                                :selected="filters.id_hoard"
-                                v-on:select="(emit) => { filters.id_hoard = emit }"
-                                v-on:keyup_enter="runQuery()"
-                            />
-
-                            <!-- Findspots -->
-                            <SearchForeignKey
-                                entity="findspots"
-                                label="Findspot"
-                                icon="pin_drop"
-                                :selected="filters.id_findspot"
-                                v-on:select="(emit) => { filters.id_findspot = emit }"
-                                v-on:keyup_enter="runQuery()"
-                            />
+                            <div :class="fCols.large.flex">
+	                            <div :class="fCols.large.l">
+                                    <!-- Hoards -->
+                                    <SearchForeignKey
+                                        entity="hoards"
+                                        label="Hoard"
+                                        icon="grain"
+                                        :selected="filters.id_hoard"
+                                        v-on:select="(emit) => { filters.id_hoard = emit }"
+                                        v-on:keyup_enter="runQuery()"
+                                    />
+                                </div>
+                                <div :class="fCols.large.r">
+                                    <!-- Findspots -->
+                                    <SearchForeignKey
+                                        entity="findspots"
+                                        label="Findspot"
+                                        icon="pin_drop"
+                                        :selected="filters.id_findspot"
+                                        v-on:select="(emit) => { filters.id_findspot = emit }"
+                                        v-on:keyup_enter="runQuery()"
+                                    />
+                                </div>
+                            </div>
                         </v-expansion-panel-content>
                     </v-expansion-panel>
 
@@ -714,8 +750,8 @@
                         <!-- Content -->
                         <v-expansion-panel-content>
                             <!-- Region / Mint -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="regions"
                                         label="Region"
@@ -725,7 +761,7 @@
                                         v-on:keyup_enter="runQuery()"
                                     />
                                 </div>
-                                <div class="search-field-50 side-l">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="mints"
                                         label="Mint"
@@ -737,8 +773,8 @@
                                 </div>
                             </div>
                             <!-- Type of Coinage -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="authorities"
                                         label="Type of Coinage"
@@ -747,12 +783,12 @@
                                         v-on:select="(emit) => { filters.id_authority = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
-                                </div><div class="search-field-50 side-r"/>
+                                </div><div :class="fCols.small.r"/>
                             </div>
 
                             <!-- Authority -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="persons"
                                         :conditions="[{ authority: 1 }]"
@@ -763,7 +799,7 @@
                                         v-on:keyup_enter="runQuery()"
                                     />
                                 </div>
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <SearchForeignKey
                                         entity="tribes"
                                         label="Tribe"
@@ -786,8 +822,8 @@
                             />
 
                             <!-- Period -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="periods"
                                         label="Epoch"
@@ -797,12 +833,12 @@
                                         v-on:keyup_enter="runQuery()"
                                     />
                                 </div>
-                                <div class="search-field-50 side-r"></div>
+                                <div :class="fCols.small.r"></div>
                             </div>
 
                             <!-- Date -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <v-text-field dense outlined filled
                                         v-model="filters.date_start"
                                         label="Date Start"
@@ -810,7 +846,7 @@
                                         v-on:keyup.enter="runQuery()"
                                     />
                                 </div>
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <v-text-field dense outlined filled
                                         v-model="filters.date_end"
                                         label="Date End"
@@ -838,8 +874,8 @@
                         <v-expansion-panel-content>
 
                             <!-- Material -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="materials"
                                         label="Material"
@@ -848,12 +884,12 @@
                                         v-on:select="(emit) => { filters.id_material = emit }"
                                         v-on:keyup_enter="runQuery()"
                                     />
-                                </div><div class="search-field-50 side-l" />
+                                </div><div :class="fCols.small.l" />
                             </div>
 
                             <!-- Standard / Denomination -->
-                            <div class="d-flex">
-                                <div class="search-field-50 side-l">
+                            <div :class="fCols.small.flex">
+                                <div :class="fCols.small.l">
                                     <SearchForeignKey
                                         entity="denominations"
                                         label="Denomination"
@@ -863,7 +899,7 @@
                                         v-on:keyup_enter="runQuery()"
                                     />
                                 </div>
-                                <div class="search-field-50 side-r">
+                                <div :class="fCols.small.r">
                                     <SearchForeignKey
                                         entity="standards"
                                         label="Standard"
@@ -878,8 +914,8 @@
                             <template v-if="entity === 'coins'">
 
                                 <!-- Weight -->
-                                <div class="d-flex">
-                                    <div class="search-field-50 side-l">
+                                <div :class="fCols.small.flex">
+                                    <div :class="fCols.small.l">
                                         <v-text-field dense outlined filled
                                             v-model="filters.weight_start"
                                             label="Weight Min."
@@ -887,7 +923,7 @@
                                             v-on:keyup.enter="runQuery()"
                                         />
                                     </div>
-                                    <div class="search-field-50 side-r">
+                                    <div :class="fCols.small.r">
                                         <v-text-field dense outlined filled
                                             v-model="filters.weight_end"
                                             label="Weight Max."
@@ -898,8 +934,8 @@
                                 </div>
 
                                 <!-- Diameter -->
-                                <div class="d-flex">
-                                    <div class="search-field-50 side-l">
+                                <div :class="fCols.small.flex">
+                                    <div :class="fCols.small.l">
                                         <v-text-field dense outlined filled
                                             v-model="filters.diameter_start"
                                             label="Diameter Min."
@@ -907,7 +943,7 @@
                                             v-on:keyup.enter="runQuery()"
                                         />
                                     </div>
-                                    <div class="search-field-50 side-r">
+                                    <div :class="fCols.small.r">
                                         <v-text-field dense outlined filled
                                             v-model="filters.diameter_end"
                                             label="Diameter Max."
@@ -998,6 +1034,7 @@
 
             <!-- Error -->
             <v-fade-transition>
+                <!-- Error -->
                 <div
                     v-if="error"
                     class="mt-10 headline d-flex justify-center"
@@ -1032,73 +1069,88 @@
 
                 <!-- No results -->
                 <div
-                    v-else-if="loading || queried"
+                    v-else-if="loading"
                     class="mt-10 headline d-flex justify-center"
                     v-html="loading ? 'Loading ...' : 'Sorry, no matching Records!'"
                 />
 
-                <!-- Start Screen -->
-                <div v-else class="start-screen">
+                <div v-else style="padding: 20px; padding-left: 40px">
+                    <!-- Header -->
                     <v-card
                         tile
-                        raised
-                        class="header_bg"
-                        style="height: 100%; position: relative"
+                        class="tile_bg d-flex align-center justify-center"
+                        style="height: 60px"
                     >
-                        <div class="pa-3">
-                            <div class="text-center title text-uppercase" v-text="'Search ' + entity" />
-                            <a :href="'/editor#/' + (entity === 'coins' ? 'types' : 'coins') + '/search'">
-                                <div class="text-center caption mb-4" v-text="'Looking for ' + (entity === 'coins' ? 'types' : 'coins') + '?'" />
-                            </a>
-
-                            <v-text-field clearable dense
-                                v-model="filters.id"
-                                label="ID"
-                                class="mb-5"
-                                v-on:keyup.enter="runQuery()"
-                                style="width: 50%"
-                            />
-
-                            <v-text-field clearable dense
-                                v-model="filters.q"
-                                ref="stringSearchInput"
-                                :label="$root.label('keywords')"
-                                append-icon="keyboard"
-                                class="mb-n2"
-                                v-on:keyup.enter="runQuery()"
-                                v-on:click:append="searchStringKeyboard = !searchStringKeyboard"
-                            />
-                            <v-expand-transition>
-                                <div v-if="searchStringKeyboard" class="d-flex justify-center">
-                                    <keyboard
-                                        :string="filters.q"
-                                        layout="el_uc"
-                                        small
-                                        hide_options
-                                        v-on:input="(emit) => { filters.q = emit }"
-                                    />
-                                </div>
-                            </v-expand-transition>
-                        </div>
-
-                        <!-- Search Button -->
                         <div
-                            class="text-center mt-1 pa-3"
-                            style="position:absolute; bottom: 0; width: 100%"
-                        >
-                            <div class="text-center body-2 mb-3" v-text="'Please check the left sidebar for advanced filters.'" />
-                            <v-btn
-                                tile
-                                block
-                                dark
-                                color="blue_prim"
-                                class="title"
-                                v-text="'search'"
-                                :width="350"
-                                @click="runQuery()"
-                            />
-                        </div>
+                            class="headline font-bold"
+                            v-text="queried ? ('Sorry, no matching ' + $root.label(entity)) : ('New ' + $root.label(entity) + ' Search')"
+                        />
                     </v-card>
+
+                    <template v-if="!dialog">
+
+                        <div style="height: 20px" />
+
+                        <!-- Cache -->
+                        <v-card
+                            tile
+                            class="tile_bg"
+                        >
+                            <v-card-title v-text="'Session History'" style="height: 60px" />
+                            <v-divider />
+
+                            <v-card-text
+                                style="overflow-y: scroll;"
+                                :style="'height: calc((100vh - ' + ((dialog ? 170 : 90) + 270) + 'px) / 2)'"
+                            >
+                                <template v-if="cachedQueries[0]">
+                                    <div
+                                        v-for="(q, i) in cachedQueries"
+                                        :key="'ycachedQ' + i"
+                                        class="pt-1 pb-1 pr-5"
+                                    >
+                                        <div
+                                            class="text-truncate" v-text="q.text"
+                                            style="cursor: pointer"
+                                            @click="restoreCachedQuery(q.value)"
+                                        />
+                                    </div>
+                                </template>
+                                <span v-else v-text="'--'" />
+                            </v-card-text>
+                        </v-card>
+
+                        <div style="height: 20px" />
+
+                        <!-- Favorites -->
+                        <v-card
+                            tile
+                            class="tile_bg"
+                        >
+                            <v-card-title v-text="'Favorites'" style="height: 60px" />
+                            <v-divider />
+
+                            <v-card-text
+                                style="overflow-y: scroll;"
+                                :style="'height: calc((100vh - ' + ((dialog ? 170 : 90) + 270) + 'px) / 2)'"
+                            >
+                                <template v-if="Object.keys(storedQueries)[0]">
+                                    <div
+                                        v-for="(value, name, i) in storedQueries"
+                                        :key="'ystoredQ' + i"
+                                        class="d-flex justify-space-between pt-1 pb-1"
+                                    >
+                                        <div
+                                            class="text-truncate" v-text="name"
+                                            style="cursor: pointer"
+                                            @click="restoreCachedQuery(value)"
+                                        />
+                                    </div>
+                                </template>
+                                <span v-else v-text="'--'" />
+                            </v-card-text>
+                        </v-card>
+                    </template>
                 </div>
             </v-fade-transition>
         </split-screen-template>
@@ -1179,14 +1231,15 @@ export default {
             filters:            h.constructParams(),
             queryCounter:       0,
             scrollToTop:        0,
-            resultsWidth:        0,
+            resultsWidth:       0,
+            filterWidth:        0,
             pagination:         {},
 
             checked_state:      false,
             checked:            [],
 
-            cachedTab:          [2],
-            activeTab:          [null],
+            cachedTab:          [],
+            activeTab:          [],
 
             layout:             this.select ? 'cards' : this.$store.state.searchLayout,
             layouts:            {
@@ -1244,6 +1297,24 @@ export default {
             if (this.resultsWidth < 1500) return 3
             if (this.resultsWidth < 2700) return 2
             return 1
+        },
+
+        fCols () {
+            const small = this.filterWidth > 500 ? true : false
+            const large = this.filterWidth > 750 ? true : false
+
+            return {
+                small: {
+                    flex: small ? 'd-flex' : '',
+                    r: 'search-field-50' + (small ? ' side-r' : ''),
+                    l: 'search-field-50' + (small ? ' side-l' : '')
+                },
+                large: {
+                    flex: large ? 'd-flex' : '',
+                    r: 'search-field-50' + (large ? ' side-r' : ''),
+                    l: 'search-field-50' + (large ? ' side-l' : '')
+                }
+            }
         },
 
         sorters () {
@@ -1349,7 +1420,7 @@ export default {
 
     mounted () {
         if (!this.dialog) {
-            this.$refs.stringSearchInput.$refs.input.focus()
+            //this.$refs.stringSearchInput.$refs.input.focus()
             this.handleQuery()
         }
         else if (this.select && this.selected) {
@@ -1474,7 +1545,7 @@ export default {
             this.layout = value
         },
 
-        onDrawerExpand (expand) {
+        handleDrawerExpansion (expand) {
             if (expand) {
                 if ([null, undefined].includes(this.activeTab)) setTimeout(() => { this.activeTab = this.cachedTab }, 350)
             }

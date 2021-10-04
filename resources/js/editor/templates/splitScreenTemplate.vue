@@ -37,12 +37,15 @@
 
     <!-- Left -->
     <template v-if="givenSlots.left">
-        <div style="position: absolute; top: 0; left: 0; box-shadow: 0px 0px 10px rgba(0,0,0,0.25);'">
+        <div
+            style="position: absolute; top: 0; left: 0; box-shadow: 0px 0px 10px rgba(0,0,0,0.35);'"
+            :style="'border-right: 2px solid ' + $root.colors.blue_prim + ';'"
+        >
             <vue-resizable
                 :active="['r']"
-                :width="left.startWidth"
-                :minWidth="left.minWidth"
-                :maxWidth="leftMaxWidth"
+                :width="left.resizeWidth"
+                :minWidth="leftWidthMin"
+                :maxWidth="leftWidthMax"
                 @resize:move="resizeLeft"
             >
                 <div
@@ -64,10 +67,23 @@
             </vue-resizable>
         </div>
 
+        <!-- Drag Handler -->
         <div
             :class="dragHandler.classes"
             :style="dragHandler.styles"
         />
+
+        <!-- Expansion Toggle -->
+        <div
+            :class="toggle.classes"
+            :style="toggle.styles"
+            @click="toggleExpansion()"
+        >
+            <v-icon
+                class="white--text"
+                v-text="'chevron_' + (expanded ? 'left' : 'right')"
+            />
+        </div>
     </template>
 </div>
 </template>
@@ -83,9 +99,9 @@ export default {
     data () {
         return {
             left: {
-                minWidth: 40,
-                startWidth: this.leftWidthDefault,
-                currentWidth: this.leftWidthDefault
+                resizeWidth: this.leftWidthDefault,
+                currentWidth: this.leftWidthDefault,
+                cachedWidth: this.leftWidthDefault
             }
         }
     },
@@ -93,10 +109,12 @@ export default {
     props: {
         dialog:             { type: Boolean, default: false },
         filterDrawer:       { type: Boolean, default: false },
+        leftWidthMin:       { type: Number, default: 40 },
         leftWidthDefault:   { type: Number, default: 350 },
         rightWidthDefault:  { type: Number, default: 200 },
         centerWidthMin:     { type: Number, default: 350 },
-        scrollCenterToTop:  { type: Number, default: 350 }
+        scrollCenterToTop:  { type: Number, default: 350 },
+        freshOpened:        { type: Boolean, default: false }
     },
 
     computed: {
@@ -123,7 +141,7 @@ export default {
             return this.totalWidth - this.centerPad.left - this.centerPad.right
         },
 
-        leftMaxWidth () {
+        leftWidthMax () {
             const available = this.totalWidth - this.rightWidth - this.centerWidthMin
             return available > this.leftWidthDefault ? available : this.leftWidthDefault
         },
@@ -152,6 +170,28 @@ export default {
                     'border-bottom-right-radius: 7px'
                 ].join(';')
             }
+        },
+
+        expanded () {
+            return this.left.currentWidth > this.leftWidthMin ? true : false
+        },
+
+        toggle () {
+            const size = 26
+
+            return {
+                classes: 'blue_prim d-flex align-center text--white',
+                styles: [
+                    'position: absolute',
+                    'bottom: 0',
+                    'left:' + this.left.currentWidth + 'px',
+                    'width:' + size + 'px',
+                    'height:' + (size * 2) + 'px',
+                    'cursor: pointer',
+                    'border-top-right-radius:' + size + 'px',
+                    'border-bottom-right-radius:' + size + 'px',
+                ].join(';')
+            }
         }
     },
 
@@ -164,34 +204,48 @@ export default {
                 behavior: 'smooth'
             })
             this.$emit('scroll', el ? true : false)
+        },
+
+        expanded: function () {
+            this.$emit('expand', this.expanded)
         }
     },
 
     mounted () {
-        this.emitSpace()
+        this.emitWidth()
     },
 
     methods: {
-        resizeLeft (event) {
-            this.left.currentWidth = event.width
-            this.emitSpace()
-        },
-
-        emitSpace () {
+        emitWidth () {
             this.$emit('resize', {
                 total:  this.totalWidth,
                 left:   this.left.currentWidth,
                 center: this.centerWidth,
                 right:  this.rightWidth
             })
+        },
+
+        resizeLeft (event) {
+            this.left.currentWidth = event.width
+            this.left.resizeWidth = event.width
+            this.emitWidth()
+        },
+
+        toggleExpansion () {
+            if (this.left.resizeWidth !== this.left.currentWidth) this.left.resizeWidth = this.left.currentWidth
+
+            if (this.expanded) {
+                this.left.cachedWidth = this.left.currentWidth
+                this.left.resizeWidth = this.leftWidthMin
+                this.resizeLeft({ width: this.leftWidthMin })
+            }
+            else {
+                if (this.left.resizeWidth === this.left.cachedWidth) this.left.cachedWidth = this.leftWidthDefault
+                this.left.resizeWidth = this.left.cachedWidth
+                this.resizeLeft({ width: this.left.cachedWidth })
+                this.left.cachedWidth = this.leftWidthMin
+            }
         }
     }
 }
 </script>
-
-<style scoped>
-    #dragHandler {
-        position: absolute;
-        pointer-events: none;
-    }
-</style>

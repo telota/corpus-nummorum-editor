@@ -25,10 +25,6 @@
                     :style="'padding-left: 50px;'"
                     v-text="'search'"
                 />
-                <hr
-                    class="white"
-                    style="width: 100%; margin: 0 20px 0 20px;"
-                />
             </div>
         </v-hover>
 
@@ -50,10 +46,6 @@
                 <div
                     v-text="'Clear Query Parameters'"
                     :style="'padding-left: 50px;'"
-                />
-                <hr
-                    class="white"
-                    style="width: 100%; margin: 0 20px 0 20px;"
                 />
             </div>
         </v-hover>
