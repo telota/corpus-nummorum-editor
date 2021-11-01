@@ -7,6 +7,8 @@ use DB;
 class generic_select {
 
     public function preQuery ($table, $allowed_keys, $input) {
+        $limitMax = 1001;
+
         // Set Table Instructions
         $table = $this -> parseTable($table);
 
@@ -107,8 +109,8 @@ class generic_select {
         $count = $pagination['count'] = empty($dbi[0]) ? 0 : count($dbi);
 
         // Limit
-        $input_LIMIT    = empty($input['limit']) ? 10 : $input['limit']; // JK: ensure limit is set, otherwise set it to dafault of 10
-        $limit          = $pagination['limit'] = intval($input_LIMIT > 50 ? 50 : $input_LIMIT); // JK: ensure limit is not higher than 50 to save performance
+        $input_LIMIT    = empty($input['limit']) ? 10 : $input['limit']; // JK: ensure limit is set, otherwise set it to default of 10
+        $limit          = $pagination['limit'] = intval($input_LIMIT > $limitMax ? $limitMax : $input_LIMIT); // JK: ensure limit is not higher than $limitMax to save performance
 
         // Offset
         $input_OFFSET   = empty($input['offset']) ? 0 : $input['offset']; // JK: ensure offset is set, otherwise set it to dafault of 0
@@ -142,8 +144,11 @@ class generic_select {
             }
         };
 
+        // Add select if given
+        if (!empty($select)) $query->select($select);
+
         // Execute Query
-        $dbi = $query -> select($select)
+        $dbi = $query
             -> whereIntegerInRaw($table['as'].'id', $ids)
             -> orderByRaw('FIELD('.$table['as'].'id, '.implode(',', $ids).')')
             -> get();

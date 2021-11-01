@@ -27,6 +27,7 @@ return [
     'owners'        => ['read' => 10,   'write_own' => 11,  'write_all' => 12],
     'periods'       => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'persons'       => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
+    'persons_index' => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'regions'       => ['read' => 2,    'write_own' => 99,  'write_all' => 99],
     'standards'     => ['read' => 2,    'write_own' => 11,  'write_all' => 12],
     'symbols'       => ['read' => 2,    'write_own' => 11,  'write_all' => 12],

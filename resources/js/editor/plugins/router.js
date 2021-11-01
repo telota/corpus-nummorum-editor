@@ -233,6 +233,11 @@ const router = new Router({
             })
         },
         {
+            path: '/lgpn',
+            name: 'lgpn',
+            component: require ('./../pages/tools/lgpn').default,
+        },
+        {
             path: '/sparql',
             name: 'sparql',
             component: require ('./../pages/tools/sparql').default,

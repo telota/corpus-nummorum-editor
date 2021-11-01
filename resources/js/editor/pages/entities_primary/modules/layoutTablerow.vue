@@ -12,7 +12,7 @@
                         :class="'d-flex align-center ' + (checked ? 'blue_prim' : (hover && item.public !== 3 & item.public !== 1 ? 'sysbar' : 'transparent'))"
                         style="height: 100%;"
                         :disabled="item.public === 3 || item.public === 1"
-                        @click="$emit('checked')"
+                        @click="$emit('check')"
                     >
                         <v-icon
                         :class="'pa-2' + (item.public === 3 || item.public === 1 ? ' grey--text' : (checked ? ' white--text' : ''))"

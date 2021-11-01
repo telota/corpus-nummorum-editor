@@ -5,10 +5,11 @@
         :entity="entity"
         :item="item"
         :processing="processing"
-        v-on:save="SendItem()"
-        v-on:mark="MarkItemAsReadyToPublish()"
-        v-on:erase="EraseItem()"
-        v-on:details="(emit) => { this.detailsDialog = emit }"
+        @refresh="SetItem()"
+        @save="SendItem()"
+        @setStatus="setStatus"
+        @erase="EraseItem()"
+        @details="(emit) => { this.detailsDialog = emit }"
     />
 
     <!-- Images -->
@@ -1842,12 +1843,17 @@ export default {
             this.$root.loading = this.loading = this.processing = false
         },
 
-        async MarkItemAsReadyToPublish () {
-            const confirmed = confirm('Wenn Sie fortfahren, werden Ihre Eingaben gespeichert und das Objekt als "bereit zur Publikation" markiert.' +
-            ' Ein verantwortliches Teammitglied wird es anschließend prüfen und über die Freigabe entscheiden.')
+        async setStatus (status) {
+            const confirmed = confirm(
+                status === 2 ?
+                'Wenn Sie fortfahren, werden Ihre Eingaben gespeichert und das Objekt als "bereit zur Publikation" markiert.' +
+                ' Ein verantwortliches Teammitglied wird es anschließend prüfen und über die Freigabe entscheiden.'
+                :
+                'Publiziertes Item zurückziehen? (es wird nicht mehr öffentlich einsehbar sein)'
+            )
 
             if (confirmed) {
-                this.item.public = 2
+                this.item.public = status
                 this.SendItem()
             }
         },

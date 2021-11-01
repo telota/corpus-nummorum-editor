@@ -63,6 +63,7 @@ return [
     'standards'             => $db_data.'data_standards',
     'symbols'               => $db_data.'data_symbols',
     'tribes'                => $db_data.'data_tribes',
+    'lgpn_names'            => $db_data.'lgpn_names',
 
     // Others
     'brokenlinks'           => $db_app.'app_statistics_coins_error',

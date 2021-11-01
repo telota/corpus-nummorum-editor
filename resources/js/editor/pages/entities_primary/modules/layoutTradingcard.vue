@@ -6,7 +6,7 @@
             :color="checked ? 'blue_prim' : 'transparent'"
             :dark="checked"
             :disabled="item.public === 3 || item.public === 1"
-            @click="$emit('checked')"
+            @click="$emit('check')"
         >
             <v-icon v-text="checked ? 'radio_button_checked' : 'radio_button_unchecked'" />
         </v-btn>

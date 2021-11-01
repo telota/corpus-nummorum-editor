@@ -29,17 +29,26 @@
                 <template v-slot:right>
                     <template v-if="!dialog">
                         <template v-if="$root.user.level > 17">
-                            <!-- Publisher Functions -->
+                            <v-slide-x-reverse-transition>
+                                <item-publisher-group
+                                    :entity="entity"
+                                    :items="checkedItems"
+                                    :checked-state="checkedState"
+                                    @checkall="checkAll()"
+                                    @refresh="setItems()"
+                                />
+                            </v-slide-x-reverse-transition>
+                            <!-- Publisher Functions
                             <v-slide-x-reverse-transition>
                                 <adv-btn
                                     v-if="publisher"
-                                    :icon="checked_state ? 'radio_button_unchecked' : 'radio_button_checked'"
-                                    :tooltip="(checked_state ? 'Deselect' : 'Select') + ' all ' + labels[entity]"
+                                    :icon="checkedState ? 'radio_button_unchecked' : 'radio_button_checked'"
+                                    :tooltip="(checkedState ? 'Deselect' : 'Select') + ' all ' + labels[entity]"
                                     :disabled="items[0] ? false : true"
                                     color-main="blue_prim"
                                     color-hover="blue_sec"
                                     color-text="white"
-                                    @click="checked_state = !checked_state; SetChecked(checked_state);"
+                                    @click="checkedState = !checkedState; SetChecked(checkedState);"
                                 />
                             </v-slide-x-reverse-transition>
 
@@ -54,7 +63,7 @@
                                     color-text="white"
                                     @click="Publish(checked, 1)"
                                 />
-                            </v-slide-x-reverse-transition>
+                            </v-slide-x-reverse-transition> -->
 
                             <!-- Publisher Toggle -->
                             <adv-btn
@@ -102,7 +111,7 @@
                     flat
                     multiple
                     v-model="activeTab"
-                    :style="'z-index:' + (dialog ? 202 : 100)"
+                    :dis-style="'z-index:' + (dialog ? 202 : 100)"
                 >
 
                     <!-- Params ------------------------------------------------- ------------------------------------------------- -->
@@ -1043,25 +1052,27 @@
 
                 <!-- Results -->
                 <div v-else-if="items[0] && ['tiles', 'cards', 'table'].includes(layout)" class="pa-3">
-                    <v-row class="ma-0 pa-0">
+                    <v-row
+                        class="ma-0 pa-0"
+                        :key="entity + layout + (publisher ? 1 : 0)"
+                    >
                         <v-col
                             v-for="(item, i) in items"
-                            :key="i + ' ' + layout"
+                            :key="i"
                             :cols="cols"
                         >
                             <component
                                 :is="layouts[layout].component"
-                                :key="layout + item.id + entity + (publisher ? 1 : 0) + item.public + (checked[i].state ? 1 : 0)"
+                                :key="i + item.id + item.public"
                                 :entity="entity"
                                 :item="item"
                                 :publisher="publisher"
-                                :checked="checked[i].state"
+                                :checked="checkedItems[i].state"
                                 :select="select"
                                 :selected="selected"
                                 :width="resultsWidth"
-                                v-on:publish="Publish([{ id: item.id, state: true }], (item.public === 0 ? 1 : 0))"
-                                v-on:checked="checked[i].state = !checked[i].state"
-                                v-on:select="$emit('select', item.id)"
+                                @check="checkedItems[i].state = !checkedItems[i].state"
+                                @select="$emit('select', item.id)"
                             />
                         </v-col>
                     </v-row>
@@ -1210,13 +1221,15 @@ import h            from './search.js'
 import tradingcard  from './../modules/layoutTradingcard.vue'
 import indexcard    from './../modules/layoutIndexcard.vue'
 import tablerow     from './../modules/layoutTablerow.vue'
+import itemPublisherGroup     from './../modules/itemPublisherGroup.vue'
 
 export default {
     components: {
         dialogTemplate,
         tradingcard,
         indexcard,
-        tablerow
+        tablerow,
+        itemPublisherGroup
     },
 
     data () {
@@ -1235,8 +1248,8 @@ export default {
             filterWidth:        0,
             pagination:         {},
 
-            checked_state:      false,
-            checked:            [],
+            checkedState:       false,
+            checkedItems:       [],
 
             cachedTab:          [],
             activeTab:          [],
@@ -1285,10 +1298,17 @@ export default {
     },
 
     computed: {
-        router () { return !this.dialog },
+        router () {
+            return !this.dialog
+        },
 
-        l () { return this.$root.language },
-        labels () { return this.$root.labels },
+        l () {
+            return this.$root.language
+        },
+
+        labels () {
+            return this.$root.labels
+        },
 
         cols () {
             if (this.layout !== 'tiles' || this.resultsWidth < 400) return 12
@@ -1466,7 +1486,7 @@ export default {
 
             if (offset) {
                 caching = false
-                offset = offset === 'noCaching' ? 0 : offset
+                if (offset === 'noCaching') offset = 0
             }
 
             this.pagination.offset = offset
@@ -1474,10 +1494,10 @@ export default {
             if (caching) this.cacheCurrentQuery()
 
             if (this.dialog) this.setItems()
-            else {
-                console.log('push', this.query)
-                this.$router.push({ path: '/' + this.entity + '/search', query: this.query })
-            }
+            else this.$router.push({
+                path: '/' + this.entity + '/' + (this.publisher ? 'publish' : 'search'),
+                query: this.query
+            })
         },
 
         queryIncrement () {
@@ -1493,7 +1513,7 @@ export default {
             this.error  = false
             this.loading = this.$root.loading = true
             this.items = []
-            this.scrollToTop++
+            //this.scrollToTop++
 
             const query = h.specialTreatment(this.query)
 
@@ -1510,7 +1530,7 @@ export default {
 
                 if (dbi.contents[0]) {
                     this.items = dbi.contents
-                    this.SetChecked (false)
+                    this.checkAll(false)
                 }
                 else {
                     this.items = []
@@ -1552,64 +1572,6 @@ export default {
             else {
                 this.cachedTab = this.activeTab
                 this.activeTab = null
-            }
-        },
-
-        // Publisher ---------------------------------------------------------------------------
-        SetChecked (state) {
-            const checkers = []
-            this.checked = []
-
-            this.items.forEach((item) => {
-                checkers.push({ id: item.id, state: [0, 2].includes(item.public) ? state : false })
-            })
-            this.checked = checkers
-        },
-
-        togglePublisher () {
-            if (!this.publisher) this.showPublisher()
-            else this.$router.push('/' + this.entity + '/search')
-        },
-
-        showPublisher (replace) {
-            if (Object.keys(this.routedQuery)[0]) {
-                let q = window.location.href?.split('?') ?? [null]
-                q.shift()
-                q = q.join('?')
-                this.$router.push('/' + this.entity + '/publish?' + q)
-            }
-            else {
-                const path = {
-                    path: '/' + this.entity + '/publish',
-                    query: {
-                        limit: this.pagination.limit,
-                        sort_by: 'updated.DESC',
-                        public: 2
-                    }
-                }
-
-                this.$router[replace ? 'replace' : 'push'](path)
-            }
-        },
-
-        async Publish (input, mode) {
-            let items = input.filter(item => { return item.state === true })
-
-            if (items[0]) {
-                let confirmed = mode === 1 ? true : (confirm(this.labels[this.entity.slice(0, -1)] + ' ' + input[0].id + ' will be ' + (mode === 3 ? 'deleted!' : 'unpublished!') ));
-
-                if (confirmed === true) {
-                    const response = await this.$root.DBI_INPUT_POST('publish', 'input', { entity: this.entity, items: items.map((item) => { return item.id }), mode: mode });
-
-                    if (response.success) {
-                        this.$store.dispatch('showSnack', { color: 'success', message: response.success })
-                        this.setItems()
-                    }
-                }
-            }
-            else {
-                this.$store.dispatch('showSnack', { color: 'error', message: 'No items selected!' })
-                this.setItems()
             }
         },
 
@@ -1670,7 +1632,65 @@ export default {
             //console.log(query)
             window.location.href = '/editor#/' + this.entity + '/' + (this.publisher ? 'publish' : 'search') + '?' + query
             this.queryIncrement()
+        },
+
+        // Publisher ---------------------------------------------------------------------------
+        togglePublisher () {
+            if (!this.publisher) this.showPublisher()
+            else this.$router.push('/' + this.entity + '/search')
+        },
+
+        showPublisher (replace) {
+            if (Object.keys(this.routedQuery)[0]) {
+                let q = window.location.href?.split('?') ?? [null]
+                q.shift()
+                q = q.join('?')
+                this.$router.push('/' + this.entity + '/publish?' + q)
+            }
+            else {
+                const path = {
+                    path: '/' + this.entity + '/publish',
+                    query: {
+                        limit: this.pagination.limit,
+                        sort_by: 'updated.DESC',
+                        public: 2
+                    }
+                }
+
+                this.$router[replace ? 'replace' : 'push'](path)
+            }
+        },
+
+        checkAll (state = !this.checkedState) {
+            this.checkedState = state
+
+            this.checkedItems = this.items.map((item) => { return {
+                id: item.id,
+                public: item.public,
+                state: [0, 2].includes(item.public) ? state : false
+            }})
         }
+
+        /*async Publish (input, mode) {
+            let items = input.filter(item => { return item.state === true })
+
+            if (items[0]) {
+                let confirmed = mode === 1 ? true : (confirm(this.labels[this.entity.slice(0, -1)] + ' ' + input[0].id + ' will be ' + (mode === 3 ? 'deleted!' : 'unpublished!') ));
+
+                if (confirmed === true) {
+                    const response = await this.$root.DBI_INPUT_POST('publish', 'input', { entity: this.entity, items: items.map((item) => { return item.id }), mode: mode });
+
+                    if (response.success) {
+                        this.$store.dispatch('showSnack', { color: 'success', message: response.success })
+                        this.setItems()
+                    }
+                }
+            }
+            else {
+                this.$store.dispatch('showSnack', { color: 'error', message: 'No items selected!' })
+                this.setItems()
+            }
+        }*/
     }
 }
 
