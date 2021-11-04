@@ -4,12 +4,14 @@
     <edit-toolbar
         :entity="entity"
         :item="item"
+        :data="item_data"
         :processing="processing"
         @refresh="SetItem()"
         @save="SendItem()"
         @setStatus="setStatus"
         @erase="EraseItem()"
         @details="(emit) => { this.detailsDialog = emit }"
+        @loading="(emit) => { processing = emit }"
     />
 
     <!-- Images -->

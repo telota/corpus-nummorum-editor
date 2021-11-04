@@ -121,7 +121,7 @@
             :select="select"
             :selected="selected"
             :linking="linking"
-            v-on:publish="$emit('publish')"
+            @refresh="$emit('refresh')"
             v-on:unlink="$emit('unlink')"
             v-on:inherit="$emit('inherit')"
             v-on:represent="$emit('represent')"

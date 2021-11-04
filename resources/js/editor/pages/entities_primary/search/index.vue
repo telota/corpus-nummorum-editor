@@ -31,6 +31,7 @@
                         <template v-if="$root.user.level > 17">
                             <v-slide-x-reverse-transition>
                                 <item-publisher-group
+                                    v-if="publisher"
                                     :entity="entity"
                                     :items="checkedItems"
                                     :checked-state="checkedState"
@@ -1073,6 +1074,7 @@
                                 :width="resultsWidth"
                                 @check="checkedItems[i].state = !checkedItems[i].state"
                                 @select="$emit('select', item.id)"
+                                @refresh="setItems()"
                             />
                         </v-col>
                     </v-row>

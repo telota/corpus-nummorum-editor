@@ -90,6 +90,7 @@
 
             <div :class="divider" />
 
+            <!--
             <div>
                 <a v-if="status === 1" :href="'https://www.corpus-nummorum.eu/' + entity + '/' + id" target="_blank">
                     <adv-btn
@@ -117,6 +118,14 @@
                 :disabled="$root.user.level < 12 || status === 1 || status === 3"
                 @click="erase()"
             />
+            -->
+            <item-publisher-single
+                :entity="entity"
+                :item="item"
+                @refresh="++refresh"
+            />
+
+            <div :class="divider" />
 
             <a :href="'/editor#/' + entity + '/edit/' + id">
                 <adv-btn
@@ -130,11 +139,11 @@
 
     <div :class="'pa-5 sheet_bg component-content' + (dialog ? ' component-content-dialog-small' : '')">
         <details-content
-            :key="entity + id"
+            :key="refresh + '_' + entity + '_' + id"
             :entity="entity"
             :id="id"
-            v-on:public="(emit) => { this.status = emit }"
-            v-on:cache="(emit) => { this.$store.commit('pushToCache', { key: 'details', value: emit })}"
+            @data="(emit) => { this.item = emit }"
+            @cache="(emit) => { this.$store.commit('pushToCache', { key: 'details', value: emit })}"
         />
     </div>
 
@@ -145,17 +154,19 @@
 
 <script>
 import detailsContent from './content.vue'
+import itemPublisherSingle from './../modules/itemPublisherSingle.vue'
 
 export default {
     components: {
-        detailsContent
+        detailsContent,
+        itemPublisherSingle
     },
 
     data () {
         return {
             divider:        'header_hover fill-height width-1px',
             showHistory:    false,
-            status:         0,
+            item:           {},
             refresh:        0
         }
     },
@@ -169,6 +180,10 @@ export default {
     computed: {
         name () {
             return ['cn', this.entity.slice(0, -1), this.id].join(' ')
+        },
+
+        status () {
+            return this.item?.dbi?.public ?? 0
         },
 
         cache () {

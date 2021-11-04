@@ -22,12 +22,12 @@ class countries implements listsInterface  {
                     de
                 )) AS search')
             ]);
-        
+
         // Where
         if(!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+                    $subquery
                         -> orWhere('id_iso3166', $search)
                         -> orWhere('de', 'LIKE', '%'.$search.'%')
                         -> orWhere('en', 'LIKE', '%'.$search.'%');
@@ -37,7 +37,7 @@ class countries implements listsInterface  {
 
         // ORDER BY
         $query -> orderByRaw(
-            (empty($input['id']) ? '' : 'FIELD(id_iso3166, '.implode(',', array_reverse($input['id'])).') DESC, ').
+            (empty($input['id']) ? '' : 'FIELD(id_iso3166, "'.implode('","', array_reverse($input['id'])).'") DESC, ').
             $language.' IS NULL, '.
             $language.' ASC'
         );

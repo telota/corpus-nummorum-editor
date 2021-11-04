@@ -26,7 +26,7 @@
         <div :class="divider" />
     </div>
 
-    <adv-btn
+    <!--<adv-btn
         v-else-if="publisher"
         :icon="status === 1 ? 'get_app' : 'publish'"
         :color-main="status === 1 ? 'red darken-4' : 'blue_prim'"
@@ -37,6 +37,22 @@
         :small="small"
         :medium="!small"
         v-on:click="$emit('publish')"
+    />-->
+
+    <item-publisher-single
+        v-else-if="publisher"
+        commandbar
+        :entity="entity"
+        :item="{
+            id: id,
+            dbi: {
+                public: status,
+                creator: null
+            }
+        }"
+        :small="small"
+        :medium="!small"
+        @refresh="$emit('refresh')"
     />
 
     <adv-btn
@@ -102,8 +118,13 @@
 
 
 <script>
+import itemPublisherSingle from './itemPublisherSingle.vue'
 
 export default {
+    components: {
+        itemPublisherSingle
+    },
+
     data () {
         return {
             divider: 'header_hover fill-height width-1px'
@@ -128,9 +149,9 @@ export default {
             return 'cn ' + this.entity.slice(0, -1) + ' ' + this.id
         },
 
-        is_publisher () {
+        /*is_publisher () {
             return this.$root.user.level > 17 ? true : false
-        }
+        }*/
     }
 }
 

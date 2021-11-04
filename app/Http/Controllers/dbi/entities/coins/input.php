@@ -10,6 +10,8 @@ use App\Http\Controllers\dbi\handler\index_handler;
 class input {
 
     public function handle ($user, $input) {
+        $this->updatePublicationState($input);
+
         // Get Base Table config
         $config = new input_definitions;
         $config = $config -> instructions();
@@ -187,5 +189,27 @@ class input {
             ['id_coin' => $id, 'id_type' => $i['id_type']],
             ['id_coin' => $id, 'id_type' => $i['id_type']]
         );
+    }
+
+    function updatePublicationState ($input) {// Update Publication State
+        if (isset($input['updatePublicationState'])) {
+            $value = $input['updatePublicationState'];
+            if (in_array($value, [0, 2]) && $input['id']) {
+                DB::table(config('dbi.tablenames.coins'))->where('id', $input['id'])->update(['publication_state' => $value]);
+                $type = DB::table(config('dbi.tablenames.coins_inherit').' as c')
+                    ->join(config('dbi.tablenames.types').' as t', 't.id', '=', 'c.id_type')
+                    ->select('t.id AS id', 't.publication_state AS status')
+                    ->where('c.id', $input['id'])
+                    ->get();
+                $type = json_decode($type, true);
+                $id = empty($type[0]['id']) ? null : $type[0]['id'];
+                $status = empty($type[0]['id']) ? null : $type[0]['status'];
+                die (json_encode([
+                    'success' => true,
+                    'type' => $id,
+                    'status' => $status])
+                );
+            }
+        }
     }
 }

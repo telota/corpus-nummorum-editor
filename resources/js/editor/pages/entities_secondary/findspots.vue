@@ -102,7 +102,7 @@
                             :prepend-icon="attributes.geonames.icon"
                             :rules="[$handlers.rules.link]"
                             counter=255
-                            @click:prepend="$root.openInNewTab($handlers.constant.url.geonames + slot.item.geonames)"
+                            @click:prepend="$root.openInNewTab(slot.item.geonames)"
                         />
                     </v-col>
 

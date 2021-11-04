@@ -209,7 +209,7 @@ export default {
                     { text: this.$root.label('object_groups'),    icon: 'control_camera',     link: 'objectgroups' },
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          link: 'bibliography' },
                     { text: this.$root.label('zotero'),           icon: 'auto_stories',       link: 'https://www.zotero.org/groups/163139/thrakien/library' },
-                    { text: this.$root.label('LGPN'),             icon: 'recent_actors',      link: 'lgpn' },
+                    //{ text: this.$root.label('LGPN'),             icon: 'recent_actors',      link: 'lgpn' },
                     { text: this.$root.label('SPARQL'),           icon: 'auto_awesome',       link: 'sparql' },
                 ]}
             ]

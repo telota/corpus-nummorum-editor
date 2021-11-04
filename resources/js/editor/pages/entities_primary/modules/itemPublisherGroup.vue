@@ -27,6 +27,7 @@
         :entity="entity"
         :items="Items"
         :run="run"
+        @loading="(emit) => { $emit('loading', emit) }"
         @refresh="$emit('refresh')"
     />
 </div>

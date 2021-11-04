@@ -24,13 +24,13 @@ class coins implements dbiInterface  {
 
 
     public function input ($user, $input) {
-        $validation = $input['id'] === 'new' ? ['input' => $input] : $this -> validateInput($input);
+        $validation = $input['id'] === 'new' ? ['input' => $input] : $this->validateInput($input);
 
         if(empty($validation['error'][0])) {
             $input = $validation['input'];
 
             $handler = new input;
-            return $handler -> handle($user, $input);
+            return $handler->handle($user, $input);
         }
         // Validation Error
         else { return ['error' => $validation['error']]; }

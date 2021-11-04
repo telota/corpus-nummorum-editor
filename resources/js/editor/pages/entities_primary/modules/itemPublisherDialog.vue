@@ -41,7 +41,7 @@
                                     <v-icon
                                         x-small
                                         v-text="'publish'"
-                                        @click="publishMissingType(type, coins)"
+                                        @click="publishMissingTypeAndCoins(type, coins)"
                                     />
                                 </v-btn>
                             </div>
@@ -60,6 +60,33 @@
                     </v-row>
                 </div>
                 <v-divider />
+            </template>
+
+            <!-- Single -->
+            <template v-else>
+                <div
+                    v-for="(coins, type, t) in errors"
+                    :key="t"
+                    class="pa-4"
+                >
+                    <div
+                        class="mb-2"
+                        v-html="'cn&nbsp;coin&nbsp;' + coins[0] + ' cannot be published because the inheriting cn&nbsp;type&nbsp;' + type + ' is not published, yet.'"
+                    />
+                    <div>
+                        Check
+                        <b style="cursor: pointer"
+                            v-html="'cn&nbsp;type&nbsp;' + type"
+                            @click="$store.commit('setDetailsDialog', { entity: 'types', id: type })"
+                        />
+                        or
+                        <b style="cursor: pointer"
+                            v-html="'click'"
+                            @click="publishMissingType(type)"
+                        />
+                        to publish the inheriting type without further checks.
+                    </div>
+                </div>
             </template>
 
             <!-- Actions -->
@@ -124,6 +151,7 @@ export default {
     methods: {
         async publish () {
             if (this.Items[0]) {
+                this.$emit('loading', true)
                 const input = {
                     entity: this.entity,
                     items:  this.Items.map((item) => item.id),
@@ -148,6 +176,7 @@ export default {
                         this.errors = errors
                     }
                 }
+                this.$emit('loading', false)
             }
             else {
                 this.showError('No items selected!')
@@ -155,24 +184,41 @@ export default {
             }
         },
 
-        async publishMissingType (type, coins) {
-            if (confirm('Publish cn type ' + type + ' and linked coins without further checks?')) {
-                const response = await this.$root.DBI_INPUT_POST('publish', 'input', {
-                    entity: 'types',
-                    items:  [type],
-                    mode:   1
-                })
+        async publishMissingType (type) {
+            this.$emit('loading', true)
 
-                if (response.ok?.[0] == type) {
-                    delete this.errors[type]
-                    ++this.refresh
-                    this.showSuccess(1, [type], 'types')
+            const response = await this.$root.DBI_INPUT_POST('publish', 'input', {
+                entity: 'types',
+                items:  [type],
+                mode:   1
+            })
+
+            this.$emit('loading', false)
+
+            if (response.ok?.[0] == type) {
+                delete this.errors[type]
+                ++this.refresh
+                this.showSuccess(1, [type], 'types')
+                return true
+            }
+            return false
+        },
+
+        async publishMissingTypeAndCoins (type, coins) {
+            if (confirm('Publish cn type ' + type + ' and linked coins without further checks?')) {
+                const success = await this.publishMissingType(type)
+
+                if (success) {
+                    this.$emit('loading', true)
 
                     await this.$root.DBI_INPUT_POST('publish', 'input', {
                         entity: 'coins',
                         items:  coins,
                         mode:   1
                     })
+
+                    this.$emit('loading', false)
+
                     this.showSuccess(1, coins, 'coins')
 
                     if (!Object.keys(this.errors)?.[0]) this.close()

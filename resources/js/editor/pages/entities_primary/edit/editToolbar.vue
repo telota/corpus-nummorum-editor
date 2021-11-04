@@ -48,7 +48,7 @@
             />
         </a>
 
-        <div :class="divider" />
+       <!-- <div :class="divider" />
 
         <div>
             <adv-btn
@@ -67,7 +67,7 @@
                 :disabled="status === 3 || status === 1"
                 @click="$emit('erase', true)"
             />
-        </div>
+        </div>-->
 
         <div :class="divider" />
 
@@ -78,6 +78,7 @@
             @click="$store.commit('setDetailsDialog', { entity, id })"
         />
 
+        <!--
         <div>
             <a v-if="status === 1" :href="'https://www.corpus-nummorum.eu/' + entity + '/' + id" target="_blank">
                 <adv-btn
@@ -115,6 +116,13 @@
                 disabled
             />
         </div>
+        -->
+        <item-publisher-single
+            :entity="entity"
+            :item="data"
+            @loading="(emit) => $emit('loading', emit)"
+            @refresh="$emit('refresh')"
+        />
 
         <div :class="divider" />
 
@@ -144,8 +152,13 @@
 
 
 <script>
+import itemPublisherSingle from './../modules/itemPublisherSingle.vue'
 
 export default {
+    components: {
+        itemPublisherSingle
+    },
+
     data () {
         return {
             divider:            'header_hover fill-height width-1px'
@@ -155,6 +168,7 @@ export default {
     props: {
         entity:     { type: String, default: 'coins' },
         item:       { type: Object, default: () => { return { id: '??', public: 0 }} },
+        data:       { type: Object, default: () => { return {}}},
         processing: { type: Boolean, default: false }
     },
 

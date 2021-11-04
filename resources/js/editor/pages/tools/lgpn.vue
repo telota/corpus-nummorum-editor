@@ -121,9 +121,9 @@
                             >
                                 <span
                                     class="font-thin body-1"
-                                    v-html="item.string ? item.string : '<i>EMPTY</i>'"
+                                    v-html="item.namePlain ? item.namePlain : '<i>EMPTY</i>'"
                                 /><br />
-                                <span v-html="item.name ? item.name : '--'" />
+                                <span v-html="item.nameOrthographic ? item.nameOrthographic : '--'" />
                                 <span v-text="'(' + item.number + ')'" />,
                                 <span v-html="item.date" />
                             </div>
@@ -143,7 +143,7 @@
                     <template v-if="listSelect">
                         <div
                             class="text-center font-bold body-1 pa-3"
-                            v-text="loading.details ? 'Please wait ...' : (list.find((item) => item.id === listSelect).name + ', ' + details.length + ' occurances')"
+                            v-text="loading.details ? 'Please wait ...' : (list.find((item) => item.id === listSelect).nameOrthographic + ', ' + details.length + ' occurances')"
                         />
 
                         <v-progress-linear :indeterminate="loading.details" height="1" />
@@ -320,14 +320,14 @@ export default {
             self.listRaw = []
 
             console.log('AXIOS', '/dbi/persons_index')
-            await axios.get('/dbi/persons_index')
-            .then((response) => {
-                const dbi = response.data?.contents
-                if (dbi[0]) self.listRaw = dbi
-            })
-            .catch((error) => {
-                self.$root.AXIOS_ERROR_HANDLER(error)
-            })
+            await axios.get('/dbi/persons_index?limit=100')
+                .then((response) => {
+                    const dbi = response.data?.contents
+                    if (dbi[0]) self.listRaw = dbi
+                })
+                .catch((error) => {
+                    self.$root.AXIOS_ERROR_HANDLER(error)
+                })
 
             self.loading.list = false
         },
@@ -340,13 +340,13 @@ export default {
 
             console.log('AXIOS', item.link)
             await axios.get(item.link)
-            .then((response) => {
-                const dbi = JSON.parse(response.data?.slice(5, -3))
-                if (dbi?.persons?.[0]) self.details = dbi.persons
-            })
-            .catch((error) => {
-                self.$root.AXIOS_ERROR_HANDLER(error)
-            })
+                .then((response) => {
+                    const dbi = JSON.parse(response.data?.slice(5, -3))
+                    if (dbi?.persons?.[0]) self.details = dbi.persons
+                })
+                .catch((error) => {
+                    self.$root.AXIOS_ERROR_HANDLER(error)
+                })
 
             self.loading.details = false
         },

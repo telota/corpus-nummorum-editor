@@ -357,12 +357,17 @@ class complex_select {
     }
 
     public function handleImages ($images, $is_dbi = false) {
+        $thumbnails = config('dbi.settings.thumbnails');
+        $digilib_scaler = config('dbi.url.digilib_scaler');
+        $digilib_viewer = config('dbi.url.digilib_viewer');
+
         $column = array_column($images, 'kind');
         array_multisort($column, SORT_ASC, $images);
 
         foreach ($images as $i => $img) {
             foreach (['obverse', 'reverse'] as $side) {
                 $images[$i][$side]['digilib'] = null;
+                foreach($thumbnails as $size => $value) $images[$i][$side]['thumbnail'][$size] = $img[$side]['link'];
                 if ($is_dbi === true) $images[$i][$side]['path'] = null;
 
                 if (!empty($img[$side]['link'])) {
@@ -375,10 +380,15 @@ class complex_select {
                         if (substr($src, 0, 8) === 'storage/') $src = substr($src, 8);
                         if ($is_dbi === true) $images[$i][$side]['path'] = $src;
 
-                        $images[$i][$side]['digilib'] = config('dbi.url.digilib_viewer').$src;
+                        $images[$i][$side]['digilib'] = $digilib_viewer.$src;
 
-                        if ($ext === 'tif' || $ext === 'tiff') $images[$i][$side]['link'] = config('dbi.url.digilib_scaler').$src.'&dw=500&dh=500';
+                        if ($ext === 'tif' || $ext === 'tiff') $images[$i][$side]['link'] = $digilib_scaler.$src.'&dw=500&dh=500';
                         else $images[$i][$side]['link'] = trim(config('dbi.url.storage'), '/').'/'.$src;
+
+                        // Add digilib Thumbnails
+                        foreach($thumbnails as $size => $value) {
+                            $images[$i][$side]['thumbnail'][$size] = $digilib_scaler.$src.'&dw='.$value.'&dh='.$value;
+                        }
                     }
                 }
             }

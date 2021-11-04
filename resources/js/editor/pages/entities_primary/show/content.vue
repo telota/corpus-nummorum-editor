@@ -464,7 +464,7 @@ export default {
 
                 if (dbi.contents?.[0]?.id) {
                     this.item = dbi.contents[0]
-                    this.$emit('public', this.item.dbi?.public)
+                    this.$emit('data', this.item)
                     if (!noCaching) this.$emit('cache', { entity: this.entity, id: this.id })
                 }
                 else this.no_match = true

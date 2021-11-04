@@ -10,6 +10,8 @@ use App\Http\Controllers\dbi\handler\index_handler;
 class input {
 
     public function handle ($user, $input) {
+        $this->updatePublicationState($input);
+
         // Get Base Table config
         $config = new input_definitions;
         $config = $config -> instructions();
@@ -123,5 +125,15 @@ class input {
             );
         }
 
+    }
+
+    function updatePublicationState ($input) {// Update Publication State
+        if (isset($input['updatePublicationState'])) {
+            $value = $input['updatePublicationState'];
+            if (in_array($value, [0, 2]) && $input['id']) {
+                DB::table(config('dbi.tablenames.types'))->where('id', $input['id'])->update(['publication_state' => $value]);
+                die (json_encode(['success' => true]));
+            }
+        }
     }
 }

@@ -182,8 +182,9 @@ class request_parametric_where {
         // Obverse / Reverse
         foreach (['o', 'r'] AS $side) {
             $sides[$side] = [
-                $side.'_id_design'           => 'c.id_design_'.$side,
-                $side.'_id_legend'           => 'c.id_legend_'.$side,
+                $side.'_id_die'         => 'c.id_die_'.$side,
+                $side.'_id_design'      => 'c.id_design_'.$side,
+                $side.'_id_legend'      => 'c.id_legend_'.$side,
 
                 $side.'_design'              => [
                     'where' => ['d.design_de', 'LIKE', '%', '%'],
@@ -214,6 +215,7 @@ class request_parametric_where {
                         [$side.'cts.side', $side === 'o' ? 0 : 1]
                     ]
                 ],
+
             ];
         }
 

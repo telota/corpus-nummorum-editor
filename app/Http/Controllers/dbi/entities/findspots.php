@@ -6,22 +6,22 @@ use App\Http\Controllers\dbi\dbiInterface;
 use DB;
 
 
-class findspots implements dbiInterface  { 
+class findspots implements dbiInterface  {
 
     // Controller-Functions ------------------------------------------------------------------
 
-    public function select ($user, $id) {        
+    public function select ($user, $id) {
         $query = DB::table(config('dbi.tablenames.findspots')) -> select([
             'id             AS id',
             'findspot       AS name',
             DB::Raw('UPPER(country) AS country'),
-            'geonames_id    AS geonames',
+            DB::Raw('IF(geonames_id, CONCAT("'.config("dbi.url.geonames").'", geonames_id), NULL)    AS geonames'),
             'alias          AS alias',
             'comment        AS comment',
             'latitude       AS latitude',
             'longitude      AS longitude'
         ]);
-        
+
         // Set condition if ID is given
         if (!empty($id)) { $query -> where('id', $id); }
 
@@ -81,9 +81,9 @@ class findspots implements dbiInterface  {
     // Helper-Functions ------------------------------------------------------------------
 
     public function validateInput ($input) {
-        if (empty($input['name'])) {
-            $error[] = config('dbi.responses.validation.general.name');
-        }
+        if (empty($input['name'])) $error[] = config('dbi.responses.validation.general.name');
+
+        if (!empty($input['geonames'])) $input['geonames'] = preg_replace('/[^0-9]/', '', $input['geonames']);
 
         // Return validated input
         if (empty($error)) {
