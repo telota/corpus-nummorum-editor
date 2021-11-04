@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Request;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\standardMail;
+use DB;
+
 class RegisterController extends Controller
 {
     /*
