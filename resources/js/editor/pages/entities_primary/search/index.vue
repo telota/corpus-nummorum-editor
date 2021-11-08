@@ -1100,6 +1100,30 @@
                         />
                     </v-card>
 
+                    <div style="height: 20px" />
+
+                    <v-card
+                        tile
+                        class="tile_bg d-flex align-center justify-center"
+                        style="height: 60px"
+                    >
+                        <div class="d-flex justify-center pa-3" style="width: 100%">
+                                <v-text-field dense clearable
+                                    v-model="filters.id"
+                                    :label="labels[entity.slice(0, -1)] + ' ID'"
+                                    class="mr-2 ml-2 mt-6"
+                                    v-on:keyup.enter="runQuery()"
+                                />
+                                <v-text-field dense clearable
+                                    ref="stringSearchInput"
+                                    v-model="filters.q"
+                                    :label="$root.label('keywords')"
+                                    class="ml-2 mr-2 mt-6"
+                                    v-on:keyup.enter="runQuery()"
+                                />
+                        </div>
+                    </v-card>
+
                     <template v-if="!dialog">
 
                         <div style="height: 20px" />
@@ -1114,7 +1138,7 @@
 
                             <v-card-text
                                 style="overflow-y: scroll;"
-                                :style="'height: calc((100vh - ' + ((dialog ? 170 : 90) + 270) + 'px) / 2)'"
+                                :style="'height: calc((100vh - ' + ((dialog ? 170 : 90) + 350) + 'px) / 2)'"
                             >
                                 <template v-if="cachedQueries[0]">
                                     <div
@@ -1145,7 +1169,7 @@
 
                             <v-card-text
                                 style="overflow-y: scroll;"
-                                :style="'height: calc((100vh - ' + ((dialog ? 170 : 90) + 270) + 'px) / 2)'"
+                                :style="'height: calc((100vh - ' + ((dialog ? 170 : 90) + 350) + 'px) / 2)'"
                             >
                                 <template v-if="Object.keys(storedQueries)[0]">
                                     <div
@@ -1224,6 +1248,7 @@ import tradingcard  from './../modules/layoutTradingcard.vue'
 import indexcard    from './../modules/layoutIndexcard.vue'
 import tablerow     from './../modules/layoutTablerow.vue'
 import itemPublisherGroup     from './../modules/itemPublisherGroup.vue'
+import AdvImg from '../../../modules/advImg.vue'
 
 export default {
     components: {
@@ -1231,7 +1256,8 @@ export default {
         tradingcard,
         indexcard,
         tablerow,
-        itemPublisherGroup
+        itemPublisherGroup,
+        AdvImg
     },
 
     data () {

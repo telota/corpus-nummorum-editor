@@ -33,13 +33,13 @@ class hoards implements listsInterface  {
                     f.geonames_id
                 )) AS search')
             ]);
-        
+
         // Where
         if(!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
-                        -> orWhere('id', $search)
+                    $subquery
+                        -> orWhere('h.id', $search)
                         -> orWhere('h.hoard', 'LIKE', '%'.$search.'%')
                         -> orWhere('h.hoard_description', 'LIKE', '%'.$search.'%')
                         -> orWhere('f.findspot', 'LIKE', '%'.$search.'%')
