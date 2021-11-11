@@ -207,7 +207,7 @@ export default {
     data () {
         return {
             defaultHeight: 360,
-            noWrap: 1200,
+            noWrap: 1100,
             expand: false
         }
     },
@@ -230,10 +230,12 @@ export default {
         },
 
         height () {
-            if (this.width === null) return this.defaultHeight
-            if (this.width > (this.noWrap * 1.5)) return 500
-            if (this.width > this.noWrap) return 420
-            if (this.width > 600) return this.defaultHeight
+            const height = this.defaultHeight
+            if (this.width === null) return height
+            if (this.width > (this.noWrap * 2)) return height
+            if (this.width > (this.noWrap * 1.5)) return height / 1.25
+            if (this.width > this.noWrap) return height / 2.5
+            if (this.width > 600) return height
             if (this.width > 500) return 180
             return 150
         },
@@ -245,7 +247,7 @@ export default {
         },
 
         imgWidth () {
-            return this.height / (this.Vertical ? 2 : 1)
+            return this.height / (this.Vertical ? 2 : 0.5)
         },
 
         left () {

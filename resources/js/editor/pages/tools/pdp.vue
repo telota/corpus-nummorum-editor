@@ -5,13 +5,13 @@
             <v-col cols="12" sm="6" md="3">
                 <v-card tile>
                     <v-card-title class="sysbar">
-                        Persistent Data Provider<v-spacer></v-spacer><a href="http://jkdev:8104/collector" target="_blank"><v-icon>link</v-icon></a>
+                        Persistent Data Provider<v-spacer></v-spacer><a href="/collector" target="_blank"><v-icon>link</v-icon></a>
                     </v-card-title>
 
                     <v-card tile color="caption appbar pa-2">
                         corpus-nummorum_legends_11720
                     </v-card>
-                        
+
 
                     <v-card-text>
                         <!-- URI -->
@@ -43,7 +43,7 @@
                             ></v-text-field>
                             <v-btn text @click="run ('log', true)" class="ml-1">GO</v-btn>
                         </div>
-                        
+
                         <!-- Compare -->
                         <div class="component-wrap d-flex mt-5">
                             <v-text-field dense outlined filled
@@ -66,7 +66,7 @@
                     </v-card-text>
                 </v-card>
             </v-col>
-            
+
             <!-- JK: Index -->
             <v-col cols="12" sm="6" md="2" v-if="window.index">
                 <v-card tile :loading="loading.index">
@@ -75,9 +75,9 @@
                         <v-spacer></v-spacer>
                         <v-btn icon @click="run ('index', false)"><v-icon>clear</v-icon></v-btn>
                     </v-card-title>
-                    
+
                     <v-card tile color="caption appbar pa-2">
-                        <a :href="'http://jkdev:8104/uri/'+request.index" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.index }}
+                        <a :href="'/uri/'+request.index" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.index }}
                     </v-card>
 
                     <v-card-text>
@@ -92,9 +92,9 @@
                             }"
                         ></v-data-table>
                     </v-card-text>
-                </v-card>             
+                </v-card>
             </v-col>
-            
+
             <!-- JK: URI Content -->
             <v-col cols="12" sm="6" md="7" v-if="window.uri">
                 <v-card tile :loading="loading.uri">
@@ -103,9 +103,9 @@
                         <v-spacer></v-spacer>
                         <v-btn icon @click="run ('uri', false)"><v-icon>clear</v-icon></v-btn>
                     </v-card-title>
-                    
+
                     <v-card tile color="caption appbar pa-2">
-                        <a :href="'http://jkdev:8104/uri/'+request.uri" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.uri }}
+                        <a :href="'/uri/'+request.uri" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.uri }}
                     </v-card>
 
                     <v-card-text>
@@ -116,9 +116,9 @@
                             </tr>
                         </v-simple-table>
                     </v-card-text>
-                </v-card>             
+                </v-card>
             </v-col>
-            
+
             <!-- JK: Log -->
             <v-col cols="12" sm="6" md="7" v-if="window.log">
                 <v-card tile :loading="loading.log">
@@ -127,9 +127,9 @@
                         <v-spacer></v-spacer>
                         <v-btn icon @click="run ('log', false)"><v-icon>clear</v-icon></v-btn>
                     </v-card-title>
-                    
+
                     <v-card tile color="caption appbar pa-2">
-                        <a :href="'http://jkdev:8104/log/'+request.log" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.log }}
+                        <a :href="'/log/'+request.log" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.log }}
                     </v-card>
 
                     <v-card-text>
@@ -144,11 +144,11 @@
                             }"
                         ></v-data-table>
                     </v-card-text>
-                </v-card>             
+                </v-card>
             </v-col>
 
         </v-row>
-            
+
         <!-- JK: Comparison -->
         <v-dialog v-model="window.compare" fullscreen scrollable>
             <v-card tile :loading="loading.compare">
@@ -157,9 +157,9 @@
                     <v-spacer></v-spacer>
                     <v-btn icon @click="run ('compare', false)"><v-icon>clear</v-icon></v-btn>
                 </v-card-title>
-                
+
                 <v-card tile color="caption appbar pa-2">
-                    <a :href="'http://jkdev:8104/compare/'+request.compare" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.compare }}
+                    <a :href="'/compare/'+request.compare" target="_blank"><v-icon small class="mr-2">link</v-icon></a> {{ request.compare }}
                 </v-card>
 
                 <v-card-text>
@@ -171,8 +171,8 @@
                     </v-simple-table>
                 </v-card-text>
             </v-card>
-        </v-dialog>   
-    
+        </v-dialog>
+
     </div>
 </template>
 
@@ -189,7 +189,7 @@ const entity                = CompName; // JK: change if needed
 
 
 export default
-{    
+{
     components: {},
 
     data ()  // JK: define VueJS Variables
@@ -201,7 +201,7 @@ export default
             loading:            { uri: false, index: false, compare: false, log: false, collect: false},
             window:             { uri: false, index: false, compare: false, log: false, collect: false},
             item_edited:        {},
-            
+
             request:            { uri: null, index: null, compare: null, log: null, collect: null},
             search:             { uri: null, index: null, details: null, compare: null},
             items:              { uri: {}, index: [], details: [], compare: [] },
@@ -222,18 +222,18 @@ export default
         }
     },
 
-    props: 
+    props:
     {
         //prop_item: {type: Object}
     },
 
 
-    computed: 
+    computed:
     {
-        
+
     },
 
-    created () 
+    created ()
     {
         this.$store.commit( 'setBreadcrumbs',[ // JK: Set Breadcrumbs
             {label:CompLabelParent,to:''},
@@ -241,16 +241,16 @@ export default
         ]);
 
         this.request = {
-            uri:        'corpus-nummorum_legends_11720__2020-06-30_10-00-00', 
-            index:      'corpus-nummorum_legends_11720', 
-            compare:    'corpus-nummorum_legends_11720', 
+            uri:        'corpus-nummorum_legends_11720__2020-06-30_10-00-00',
+            index:      'corpus-nummorum_legends_11720',
+            compare:    'corpus-nummorum_legends_11720',
             log:        'corpus-nummorum_legends_11720'
         };
     },
-    
-    methods: 
+
+    methods:
     {
-        IndexClick: function (item, row) { // JK: click on table row to set selected item as item_edited   
+        IndexClick: function (item, row) { // JK: click on table row to set selected item as item_edited
             //row.select (true);
             this.request.uri = item.uri;
             this.run ('uri', true);
@@ -263,7 +263,7 @@ export default
                 else if (entity == 'log')       {this.pdpLog ();        this.window.log = true;}
                 else if (entity == 'compare')   {this.pdpCompare ();    this.window.compare = true;}
             } else {
-               this.window [entity] = false; 
+               this.window [entity] = false;
             }
         },
 
@@ -272,7 +272,7 @@ export default
 
             var self = this;
             self.items.uri = {};
-            let src = this.request.uri.includes ('//') ? this.request.uri : ('http://jkdev:8104/uri/'+this.request.uri);
+            let src = this.request.uri.includes ('//') ? this.request.uri : ('/uri/'+this.request.uri);
 
             let pdp = await axios.get (src);
 
@@ -288,7 +288,7 @@ export default
                             self.items.uri [section+'_'+key+'_'+key2] = pdp.data [section] [key] [key2];
                         });
                     }
-                });            
+                });
             });
 
             this.loading.uri = false;
@@ -299,7 +299,7 @@ export default
 
             var self = this;
             self.items.index = [];
-            let src = this.request.index.includes ('//') ? this.request.index : ('http://jkdev:8104/versions/'+this.request.index);
+            let src = this.request.index.includes ('//') ? this.request.index : ('/versions/'+this.request.index);
             let pdp = await axios.get (src);
             this.items.index = pdp.data;
 
@@ -311,7 +311,7 @@ export default
 
             var self = this;
             self.items.log = [];
-            let src = this.request.log.includes ('//') ? this.request.log : ('http://jkdev:8104/log/'+this.request.log);
+            let src = this.request.log.includes ('//') ? this.request.log : ('/log/'+this.request.log);
             let pdp = await axios.get (src);
             this.items.log = pdp.data;
 
@@ -323,7 +323,7 @@ export default
 
             var self = this;
             self.items.compare = [];
-            let src = this.request.compare.includes ('//') ? this.request.compare : ('http://jkdev:8104/compare/'+this.request.compare);
+            let src = this.request.compare.includes ('//') ? this.request.compare : ('/compare/'+this.request.compare);
             let pdp = await axios.get (src);
             this.items.compare = pdp.data;
 
@@ -338,14 +338,14 @@ export default
             this.loading = true; // JK: Loading ON
 
             let source = 'dbi/' +this.entity+ '/all';
-            
-            let dbi = await axios.get (source);          
+
+            let dbi = await axios.get (source);
             this.items.coins = Object.values (dbi.data [0]);
 
             this.loading = false; // JK: Loading OFF
         }
 
-        // JK: Parent-Child-Communication 
+        // JK: Parent-Child-Communication
         /*Receiver () { // JK: Process properties given by parent (in most cases Child Dialog Component)
                 console.log ('prop_item {key: '+this.prop_item.key+', id: '+this.prop_item.id+'}');
             let selected = this.items.find ( (item) => item.id === this.prop_item.id );
@@ -356,9 +356,9 @@ export default
 
         ChildDialog (input) { // JK: toggle child component
             this.child_dialog_data = {
-                component:  !input ? null   :   input.component, 
+                component:  !input ? null   :   input.component,
                 key:        !input ? null   :   input.key,
-                id:         !input ? null   :   input.id, 
+                id:         !input ? null   :   input.id,
             };
             this.child_dialog_active = true;
                 console.log ('Child Dialog: {component: '+this.child_dialog_data.component+', key: '+this.child_dialog_data.key+', id:'+this.child_dialog_data.id+', active: '+this.child_dialog_active+'}');
@@ -370,7 +370,7 @@ export default
             this.$store.commit ('showSnackbar', {message: 'SUCCESS: Assigned ID: '+emit.id+' from '+emit.component.charAt(0).toUpperCase()+ emit.component.slice(1)+' to form. Change not saved, yet', duration: 10000}); // JK: Response to snackbar
             this.ChildDialog (null);
         },
-        
+
         // JK: Template Components
         ItemsTemplateReceive (emit) { // JK: receive emitted Input from child component
                 console.log (CompLabelP+': received emit from Items Template (ID: '+emit.id+')')
@@ -382,7 +382,7 @@ export default
                 console.log (CompLabelP+': received emit from Input Template (refresh: '+this.items_refresh+')')
 
             if (emit.refresh) {
-                this.items_refresh = null; 
+                this.items_refresh = null;
                 this.items_refresh = emit.item ? (emit.item.id ? emit.item.id : -1) : -1
             };
 
@@ -392,12 +392,12 @@ export default
                 this.ItemDefault ();
             }
         },
-        
+
         ItemDefault () { // JK: Set edited item to default
             var self = this;
             let item = {};
 
-            Object.keys (self.attributes) .forEach (function (key) { 
+            Object.keys (self.attributes) .forEach (function (key) {
                 item [key] = self.attributes[key].default
             });
 

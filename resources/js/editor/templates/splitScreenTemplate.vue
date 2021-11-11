@@ -213,6 +213,7 @@ export default {
 
     mounted () {
         this.emitWidth()
+        window.addEventListener('resize', this.emitWidth, { passive: true })
     },
 
     methods: {

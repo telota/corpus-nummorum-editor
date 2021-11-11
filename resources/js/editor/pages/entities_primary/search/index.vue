@@ -822,6 +822,12 @@
                             </div>
 
                             <!-- persons -->
+                            <v-text-field filled dense outlined clearable
+                                v-model="filters.person"
+                                label="Person (Fulltext Search)"
+                                prepend-icon="emoji_people"
+                                v-on:keyup.enter="runQuery()"
+                            />
                             <SearchForeignKey
                                 entity="persons"
                                 label="Person"
@@ -1003,6 +1009,26 @@
                                 />
 
                                 <!-- Legend -->
+                                <v-text-field dense outlined filled clearable
+                                    v-model="filters[key.v + '_legend']"
+                                    :label="key.text + ' Legend (REGEX Search)'"
+                                    prepend-icon="notes"
+                                    append-icon="keyboard"
+                                    v-on:keyup.enter="runQuery()"
+                                    v-on:click:append="searchStringKeyboardL = !searchStringKeyboardL"
+                                />
+                                <v-expand-transition>
+                                    <div v-if="searchStringKeyboardL" class="d-flex justify-center mb-5 mt-n3 pl-10">
+                                        <keyboard
+                                            :string="filters[key.v + '_legend']"
+                                            layout="el_uc"
+                                            small
+                                            hide_options
+                                            v-on:input="(emit) => { filters[key.v + '_legend'] = emit }"
+                                        />
+                                    </div>
+                                </v-expand-transition>
+
                                 <SearchForeignKey
                                     :entity="'legends'"
                                     :conditions="[{ side: key.v }]"
@@ -1307,6 +1333,7 @@ export default {
 
             searchStringKeyboard: false,
             searchStringKeyboardF: false,
+            searchStringKeyboardL: false,
 
             queryDialog: {
                 show: false,

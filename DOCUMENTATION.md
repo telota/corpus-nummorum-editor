@@ -13,7 +13,7 @@ We have done our best to make the editor as powerful and intuitive as possible. 
 
 ### API(#usage-api)
 The API is already working but not completed, yet. We are currently implementing the [Nomisma Ontology](http://nomisma.org/ontology). We will update this documentation as soon as this feature is released.  
-Check the list of [available entities](https://data.corpus-nummorum.eu/api/entities). There are also lists of [available coin parameters](http://jkdev:8107/api/parameters/coins) and [available type parameters](http://jkdev:8107/api/parameters/types). These parameters can be passed via GET or POST as single values or as an array of values.
+Check the list of [available entities](https://data.corpus-nummorum.eu/api/entities). There are also lists of [available coin parameters](https://data.corpus-nummorum.eu/api/parameters/coins) and [available type parameters](https://data.corpus-nummorum.eu/api/parameters/types). These parameters can be passed via GET or POST as single values or as an array of values.
 
 ### SPARQL(#usage-sparql)
 We are providing a [SPARQL Endpoint](https://data.corpus-nummorum.eu/sparql). Some Frontend-features are currently not available, but the basic services are set. We are working on solving the remaining issues.

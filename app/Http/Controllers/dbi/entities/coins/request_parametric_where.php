@@ -70,6 +70,16 @@ class request_parametric_where {
                 ]
             ],
 
+            'person'             => [
+                'where' => [
+                    ['raw' => 'CONCAT_WS("&&", p.person, p.alias)'], 'LIKE', '%', '%'
+                ],
+                'joins' => [
+                    [config('dbi.tablenames.coins_to_persons').' AS ctp', 'ctp.id_coin', '=', 'c.id'],
+                    [config('dbi.tablenames.persons').' AS p', 'p.id', '=', 'ctp.id_person']
+                ]
+            ],
+
             'id_findspot'           => 'c.id_findspot',
             'id_hoard'              => 'c.id_hoard',
 
@@ -154,7 +164,7 @@ class request_parametric_where {
                 ]
             ],
 
-            'string' => [
+            /*'string' => [
                 'where' => [
                     ['raw' => 'CONCAT_WS("||",
                         sm.mint,
@@ -176,7 +186,7 @@ class request_parametric_where {
                     [config('dbi.tablenames.designs').' AS sdo', 'sdo.id', '=', 'c.id_design_o'],
                     [config('dbi.tablenames.designs').' AS sdr', 'sdr.id', '=', 'c.id_design_r']
                 ]
-            ]
+            ]*/
         ];
 
         // Obverse / Reverse
@@ -191,6 +201,14 @@ class request_parametric_where {
                     'connector' => 'AND',
                     'joins' => [
                         [config('dbi.tablenames.designs').' AS d', 'd.id', '=', 'c.id_design_'.$side]
+                    ]
+                ],
+
+                $side.'_legend'              => [
+                    'where' => ['l.legend_sort_basis', 'RLIKE', '', ''],
+                    'connector' => 'AND',
+                    'joins' => [
+                        [config('dbi.tablenames.legends').' AS l', 'l.id', '=', 'c.id_legend_'.$side]
                     ]
                 ],
 

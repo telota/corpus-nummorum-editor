@@ -82,13 +82,17 @@ const constructParams = (input) => {
             weight_end:             toFloat(d.weight_end),
             weight_start:           toFloat(d.weight_start),
 
+            person:                 d.person,
+
             o_design:               ArrayToString(d.o_design),
+            o_legend:               d.o_legend,
             o_id_design:            toArrayInt(d.o_id_design),
             o_id_legend:            toArrayInt(d.o_id_legend),
             o_id_monogram:          toArrayInt(d.o_id_monogram),
             o_id_symbol:            toArrayInt(d.o_id_symbol),
 
             r_design:               ArrayToString(d.r_design),
+            r_legend:               d.r_legend,
             r_id_design:            toArrayInt(d.r_id_design),
             r_id_legend:            toArrayInt(d.r_id_legend),
             r_id_monogram:          toArrayInt(d.r_id_monogram),

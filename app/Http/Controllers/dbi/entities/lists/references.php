@@ -13,7 +13,6 @@ class references implements listsInterface  {
 
         if (!empty($input['reduced']) && $input['reduced'] == 1) {
             $select[] = DB::raw('TRIM(CONCAT_WS(" ",
-                IF(is_trash = 1, CONCAT(IF("'.$language.'" = "de", "GELÖSCHT", "DELETED"), " ||"), null),
                 IFNULL(author, SUBSTRING(title, 1, 30)),
                 year_published
             )) AS string');
@@ -27,8 +26,7 @@ class references implements listsInterface  {
             ) AS addition');
         }
         else {
-            $select[] = DB::raw('CONCAT(
-                IF(is_trash = 1, CONCAT(IF("'.$language.'" = "de", "GELÖSCHT", "DELETED"), " ||"), null),
+            $select[] = DB::raw('CONCAT_WS("",
                 author, ", ",
                 title,
                 IF(volume > "", CONCAT(" ", volume), ""),
@@ -37,6 +35,7 @@ class references implements listsInterface  {
                 IF(year_published > "", CONCAT(" ", year_published), "")
             ) AS string');
         }
+        //IF(is_trash = 1, CONCAT(IF("'.$language.'" = "de", "GELÖSCHT", "DELETED"), " ||"), null),
 
         $query = DB::table(config('dbi.tablenames.bibliography'))
             -> select($select)
