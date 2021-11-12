@@ -17,7 +17,7 @@ class persons implements listsInterface  {
                 'person AS string',
                 // addition
                 DB::raw('CONCAT_WS(", ",
-                    IF(is_authority = 1, "(IF("'.$language.'" = "de", "AUTORITÄT", "AUTHORITY"))", null),
+                    IF(is_authority = 1, (IF("'.$language.'" = "de", "AUTORITÄT", "AUTHORITY")), null),
                     REPLACE(nomisma_id_person, "_", " "),
                     REPLACE(alias, ";", ","),
                     IF(LENGTH(comment) > 120, CONCAT(SUBSTRING(comment, 1, 120), " ..."), comment)
