@@ -17,15 +17,17 @@ class persons implements listsInterface  {
                 'person AS string',
                 // addition
                 DB::raw('CONCAT_WS(", ",
-                    IF(is_authority = 1, IF("'.$language.'" = "de", "AUTORITÄT", "AUTHORITY"), null),
+                    IF(is_authority = 1, "(IF("'.$language.'" = "de", "AUTORITÄT", "AUTHORITY"))", null),
                     REPLACE(nomisma_id_person, "_", " "),
-                    REPLACE(alias, ";", ",")
+                    REPLACE(alias, ";", ","),
+                    IF(LENGTH(comment) > 120, CONCAT(SUBSTRING(comment, 1, 120), " ..."), comment)
                 ) AS addition'),
                 // Search
-                /*DB::raw('CONCAT_ws("|",
-                    legend_sort_basis,
-                    LOWER(REPLACE(TRIM(keywords), ", ", "|"))
-                ) AS search')*/
+                DB::raw('CONCAT_ws("|",
+                    person,
+                    nomisma_id_person,
+                    alias
+                ) AS search')
             ]);
 
         // Where
@@ -54,8 +56,8 @@ class persons implements listsInterface  {
             (empty($input['id']) ? '' : 'FIELD(id, '.implode(',', array_reverse($input['id'])).') DESC, ').
             'person IS NULL, '.
             'person ASC'
-        )
-        -> limit(50);
+        );
+        //-> limit(50);
 
         return json_decode($query->get(), TRUE);
     }

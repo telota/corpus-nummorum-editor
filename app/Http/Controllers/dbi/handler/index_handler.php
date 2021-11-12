@@ -397,7 +397,7 @@ class index_handler {
         ];
 
         // References
-        if ($entity === 'literature' || $single === true) $secondaries[] = [
+        /*if ($entity === 'literature' || $single === true) $secondaries[] = [
             'key'       => 'literature',
             'value'     => 'GROUP_CONCAT(DISTINCT CONCAT_WS(
                 ", ",
@@ -423,7 +423,7 @@ class index_handler {
             'joins'     => 'LEFT JOIN '.config('dbi.tablenames.zotero').' AS zi ON zi.zotero_id = sec.zotero_id',
             'conditions' => 'sec.this_'.rtrim($entity, 's').' = 1',
             'groupBy'   => 'base.id'
-        ];
+        ];*/
 
         // Groups
         if ($entity === 'objectgroups' || $single === true) $secondaries[] = [
