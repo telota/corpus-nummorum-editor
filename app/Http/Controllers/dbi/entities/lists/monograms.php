@@ -38,25 +38,18 @@ class monograms implements listsInterface  {
             ]);
 
         // Where
-        /*if (!empty($input['id'])) {
-            $query -> orWhereIn('id', $input['id']);
-        }*/
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
-            $query -> where(function ($subquery) use ($search, $input) {
+                $query->where(function ($subquery) use ($search, $input) {
                     $subquery
-                        -> orWhere('id', $search)
-                        -> orWhere('monogram', 'LIKE', '%'.$search.'%')
-                        -> orWhere(function ($lettersubquery) use ($search) {
+                        ->orWhere('id', $search)
+                        ->orWhere('monogram', 'LIKE', '%'.$search.'%')
+                        ->orWhere(function ($lettersubquery) use ($search) {
                             // explode potential Letter combination (unicode!)
                             $letters = preg_split('~~u', $search, -1, PREG_SPLIT_NO_EMPTY);
-                            foreach($letters AS $letter) {
-                                $lettersubquery -> where('lettercomb', 'LIKE', '%'.$letter.'%');
-                            }
+                            foreach($letters AS $letter) $lettersubquery -> where('lettercomb', 'LIKE', '%'.$letter.'%');
                         });
-                    if (!empty($input['id'])) {
-                        $subquery -> orWhereIn('id', $input['id']);
-                    }
+                    if (!empty($input['id'])) $subquery->orWhereIn('id', $input['id']);
                 });
             }
         }
@@ -67,7 +60,7 @@ class monograms implements listsInterface  {
             'lettercomb IS NULL, '.
             'lettercomb ASC'
         )
-        -> limit(50);
+        -> limit(100);
 
         return json_decode($query->get(), TRUE);
     }

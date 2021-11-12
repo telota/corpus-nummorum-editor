@@ -20,20 +20,22 @@ class symbols implements listsInterface  {
                 // Image
                 DB::raw('IF(image > "", CONCAT("'.config('dbi.url.storage').'Symbols/", image), null) AS image'),
                 // Search
-                /*DB::raw('LOWER(CONCAT_ws("|",
-                    controlmark,
+                DB::raw('LOWER(CONCAT_ws("|",
+                    id,
+                    symbol_en,
+                    symbol_de,
                     comment
-                )) AS search')*/
+                )) AS search')
             ]);
-        
+
         // Where
-        if (!empty($input['id'])) {
+        /*if (!empty($input['id'])) {
             $query -> orWhereIn('id', $input['id']);
-        }
+        }*/
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
             $query -> where(function ($subquery) use ($search) {
-                    $subquery 
+                    $subquery
                         -> orWhere('id', $search)
                         -> orWhere('symbol_en', 'LIKE', '%'.$search.'%')
                         -> orWhere('symbol_de', 'LIKE', '%'.$search.'%')
@@ -47,8 +49,8 @@ class symbols implements listsInterface  {
             (empty($input['id']) ? '' : 'FIELD(id, '.implode(',', array_reverse($input['id'])).') DESC, ').
             'symbol_'.$language.' IS NULL, '.
             'symbol_'.$language.' ASC'
-        )
-        -> limit(50);
+        );
+        //-> limit(50);
 
         return json_decode($query->get(), TRUE);
     }

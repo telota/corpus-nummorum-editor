@@ -43,7 +43,7 @@ class references implements listsInterface  {
 
         // Where
         /*if (!empty($input['id'])) {
-            $query -> orWhereIn('zotero_id', $input['id']);
+            $query->orWhereIn('zotero_id', $input['id']);
         }*/
         if (!empty($input['search'])) {
             foreach($input['search'] AS $search) {
@@ -55,7 +55,7 @@ class references implements listsInterface  {
                         -> orWhere('volume', $search)
                         -> orWhere('year_published', $search);
                     if (!empty($input['id'])) {
-                        $subquery -> orWhereIn('zotero_id', $input['id']);
+                        $subquery -> orWhereIn('zotero_id', '"'.$input['id'].'"');
                     }
                 });
             }
