@@ -380,14 +380,14 @@ class complex_select {
                         if (substr($src, 0, 8) === 'storage/') $src = substr($src, 8);
                         if ($is_dbi === true) $images[$i][$side]['path'] = $src;
 
-                        $images[$i][$side]['digilib'] = $digilib_viewer.$src;
+                        $images[$i][$side]['digilib'] = $digilib_viewer.urlencode($src);
 
                         if ($ext === 'tif' || $ext === 'tiff') $images[$i][$side]['link'] = $digilib_scaler.$src.'&dw=500&dh=500';
                         else $images[$i][$side]['link'] = trim(config('dbi.url.storage'), '/').'/'.$src;
 
                         // Add digilib Thumbnails
                         foreach($thumbnails as $size => $value) {
-                            $images[$i][$side]['thumbnail'][$size] = $digilib_scaler.$src.'&dw='.$value.'&dh='.$value;
+                            $images[$i][$side]['thumbnail'][$size] = $digilib_scaler.urlencode($src).'&dw='.$value.'&dh='.$value;
                         }
                     }
                 }

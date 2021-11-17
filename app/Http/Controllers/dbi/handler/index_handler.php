@@ -36,46 +36,55 @@ class index_handler {
 
             // Arrange Index Table
             ->from(function ($indexQuery) use ($entity, $excluded) {
-                $table_id = 'id_'.rtrim($entity, 's');
+                /*$table_id = 'id_'.rtrim($entity, 's');
 
                 $indexQuery->select([
                     'id',
                     'data_string AS vals'
-                    /*$table_id.' AS id',
+                    $table_id.' AS id',
                     DB::Raw('json_arrayagg(
                         CONCAT_WS("::",
                             CONCAT_WS("_", data_key, data_language),
                             REPLACE(data_value, \'"\', "")
                         )
-                    ) AS vals')*/
+                    ) AS vals')
                 ])
                 ->from(config('dbi.tablenames.index_'.$entity).' AS concated_index');
 
                 // Add where conditions if keys have to be excluded
                 //if (!empty($excluded)) foreach ($excluded as $ex) $indexQuery->where('data_key', '!=', trim($ex));
 
-                //$indexQuery->groupBy($table_id);
+                //$indexQuery->groupBy($table_id);*/
+
+                $indexQuery->select(['id','data_string AS vals'])->from(config('dbi.tablenames.index_'.$entity).' AS concated_index');
             })
 
             // Add WhereConditions
             ->where(function ($queryByOr) use ($string, $isRegex, $isCs) {
 
-                // Split by OR
-                foreach ($this->splitString($string, false) as $byOr) {
-                    $queryByOr->orWhere(function ($queryByAnd) use (&$byOr, $isRegex, $isCs) {
-                        $byOr = trim($byOr);
-
-                        // Split by AND
-                        foreach ($this->splitString($byOr, true) as $byAnd) {
-                            $byAnd = trim($byAnd);
-
-                            $queryByAnd->where(function ($subQuery) use ($byAnd, $isRegex, $isCs) {
-                                $this->createWhere($subQuery, $byAnd, $isRegex, $isCs);
-                            });
-                        }
-                    });
+                // Handle given input as int -> ID
+                if (preg_match('/^[0-9]+$/', $string)) {
+                    $queryByOr->where('id', $string);
                 }
 
+                // Handle given input as group of strings
+                else {
+                    // Split by OR
+                    foreach ($this->splitString($string, false) as $byOr) {
+                        $queryByOr->orWhere(function ($queryByAnd) use (&$byOr, $isRegex, $isCs) {
+                            $byOr = trim($byOr);
+
+                            // Split by AND
+                            foreach ($this->splitString($byOr, true) as $byAnd) {
+                                $byAnd = trim($byAnd);
+
+                                $queryByAnd->where(function ($subQuery) use ($byAnd, $isRegex, $isCs) {
+                                    $this->createWhere($subQuery, $byAnd, $isRegex, $isCs);
+                                });
+                            }
+                        });
+                    }
+                }
             });
         });
 

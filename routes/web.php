@@ -25,7 +25,7 @@ Route::get('/home', function() {
 
 
 // Base Namespace ---------------------------------------------------------
-Route::namespace ('App\Http\Controllers\base')->group(function () {
+Route::namespace('App\Http\Controllers\base')->group(function () {
 
     // Markdown
     Route::get('/readme', 'MarkdownController@readme')->name('readme');
