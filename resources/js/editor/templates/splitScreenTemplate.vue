@@ -56,6 +56,7 @@
                     <filter-drawer
                         v-if="filterDrawer"
                         header
+                        :no-content-overflow="!expanded"
                         @search="$emit('search')"
                         @clear="$emit('clear')"
                     >
@@ -113,8 +114,8 @@ export default {
         leftWidthDefault:   { type: Number, default: 350 },
         rightWidthDefault:  { type: Number, default: 200 },
         centerWidthMin:     { type: Number, default: 350 },
-        scrollCenterToTop:  { type: Number, default: 350 },
-        freshOpened:        { type: Boolean, default: false }
+        scrollCenterToTop:  { type: Number, default: 0 },
+        //freshOpened:        { type: Boolean, default: false }
     },
 
     computed: {

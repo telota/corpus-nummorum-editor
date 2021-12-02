@@ -19,12 +19,13 @@ class lgpn_import extends Command {
 
         echo "\n--------------------- Get LGPN Data ----------------------\n\n";
 
-        $items = self::fetch();
-        $file = fopen('/opt/projects/corpus-nummorum/output/lgpn.csv', 'w');
-        //fputcsv($file, ['ID', 'NAME', 'notBefore', 'notAfter', 'firstChar', 'combination']);
+        $rawItems = self::fetch();
+        //$file = fopen('/opt/projects/corpus-nummorum/output/lgpn.csv', 'w');
+        //fputcsv($file, ['Name', 'letters', 'Variants', 'notBefore', 'notAfter', 'Occurances']);
         $sql = [];
+        $items = [];
 
-        foreach ($items as $item) {
+        foreach ($rawItems as $item) {
             $parsed = self::parseString($item['id']);
 
             if (!empty($parsed['letters']) && $item['firstChar'] != 9) {
@@ -33,21 +34,62 @@ class lgpn_import extends Command {
                 if ($item['notAfter'] == 0) $item['notAfter'] = -1;
                 if ($item['notAfter'] == 999 || $item['notAfter'] == -999) $item['notAfter'] = 'null';
 
-                //$item['combination'] = self::parseString($item['id']);
-                $sql[] = '('.implode(',', [
-                    'null',
-                    '"'.$item['id'].'"',
-                    '"'.$item['name'].'"',
-                    '"'.$parsed['sanitized'].'"',
-                    '"'.$item['firstChar'].'"',
-                    '"'.$parsed['letters'].'"',
-                    $item['notBefore'],
-                    $item['notAfter'],
-                    $item['number'],
-                    'null'
-                ]).')';
-                //fputcsv($file, array_values($item));
+                $name = $parsed['sanitized'];
+
+                if (empty($items[$name])) {
+                    $items[$name] = [
+                        'name' => $parsed['sanitized'],
+                        //'letter' => $item['firstChar'],
+                        'letters' => $parsed['letters'],
+                        'variants' => [$item['name']],
+                        'notBefore' => $item['notBefore'],
+                        'notAfter' => $item['notAfter'],
+                        'occurances' => intval($item['number'])
+                    ];
+                }
+                else {
+                    if ($items[$name]['notBefore'] !== 'null') {
+                        if ($item['notBefore'] === 'null' || $item['notBefore'] < $items[$name]['notBefore']) $items[$name]['notBefore'] = $item['notBefore'];
+                    }
+                    if ($items[$name]['notAfter'] !== 'null') {
+                        if ($item['notAfter'] === 'null' || $item['notAfter'] > $items[$name]['notAfter']) $items[$name]['notAfter'] = $item['notAfter'];
+                    }
+
+                    if (!in_array($item['name'], $items[$name]['variants'])) $items[$name]['variants'][] = $item['name'];
+                    $items[$name]['occurances'] += intval($item['number']);
+                }
             }
+        }
+
+        /*foreach ($items as $item) {
+            $variants = $item['variants'];
+            sort($variants);
+            $item['variants'] = implode(', ', $variants);
+            fputcsv($file, $item);
+        }*/
+
+        //fclose($file);
+
+        //echo 'finished';
+
+        foreach ($items as $item) {
+            if (!empty($item['variants'])) {
+                $variants = $item['variants'];
+                sort($variants);
+                $item['variants'] = implode(', ', $variants);
+            }
+            else $item['variants'] = 'null';
+
+            $sql[] = '('.implode(',', [
+                'null',
+                '"'.$item['name'].'"',
+                '"'.$item['letters'].'"',
+                '"'.$item['variants'].'"',
+                $item['notBefore'],
+                $item['notAfter'],
+                $item['occurances'],
+                'null'
+            ]).')';
         }
 
         self::writeSQLFile($sql);
@@ -63,7 +105,7 @@ class lgpn_import extends Command {
         echo "\n".'Fetching Data from "'.$src.'" ... ';
         $data = file_get_contents($src);
 
-        if (empty($data)) die('Error: Data is empty ...' + "\n\n");
+        if (empty($data)) die ('Error: Data is empty ...' + "\n\n");
         $data = substr($data, 19, -5).']';
         $data = json_decode($data, true);
 
@@ -112,17 +154,27 @@ class lgpn_import extends Command {
         $keys = [];
         $name = '';
 
+        // Transform name
         foreach (str_split($string) as $letter) {
             $greek = empty($list[$letter]) ? false : $list[$letter];
+            if ($greek !== false) $name .= $greek;
+        }
+        $string = $name;
 
-            if ($greek !== false) {
-                $keys[$letter] = $greek;
-                $name .= $greek;
+        // Remove endings
+        $endings = ['ΙΩΝ', 'ΙΑ', 'ΙΟΣ', 'ΕΙΣ', 'ΟΣ', 'ΙΣ', 'ΑΣ', 'ΗΣ', 'ΩΡ', 'Η', 'Α'];
+        foreach ($endings as $end) {
+            $end_length = mb_strlen($end);
+            //$string_length =  mb_strlen($string);
 
-                //if (empty($name)) $name = $greek;
-                //else $name .= mb_strtolower($greek, 'UTF-8');
+            if (mb_substr($string , $end_length * -1) === $end) {
+                $string = mb_substr($string , 0, $end_length * -1);
+                break;
             }
         }
+
+        // Get letters
+        foreach (mb_str_split($string) as $letter) $keys[$letter] = $letter;
 
         $keys = array_values($keys);
         sort($keys);
@@ -161,11 +213,9 @@ class lgpn_import extends Command {
             // Create Table Statement
             'CREATE TABLE `'.$table.'` (
                 `id` int NOT NULL AUTO_INCREMENT,
-                `id_lgpn` varchar(255) NOT NULL,
-                `name_original` varchar(255) NOT NULL,
-                `name_sanitized` varchar(255) NOT NULL,
-                `first_letter` char(1) NOT NULL,
+                `name` varchar(255) NOT NULL,
                 `letters` varchar(255) DEFAULT NULL,
+                `variants` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
                 `date_from` int DEFAULT NULL,
                 `date_to` int DEFAULT NULL,
                 `occurances` int DEFAULT NULL,

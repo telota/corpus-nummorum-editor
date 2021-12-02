@@ -14,11 +14,46 @@ class persons_index implements dbiInterface  {
 
     public function select ($user, $id) {
         $src = [
-            'http://clas-lgpn2.classics.ox.ac.uk/cgi-bin/lgpn_search.cgi?name=',
+            'http://clas-lgpn2.classics.ox.ac.uk/cgi-bin/lgpn_search.cgi?namenoaccents=',
             '&style=json'
         ];
 
-        $handler = new generic_select;
+        $query = DB::table(config('dbi.tablenames.lgpn_names'))->select([
+            'id',
+            'name',
+            'variants',
+            'letters',
+            'date_from AS notBefore',
+            'date_to AS notAfter',
+            'occurances AS number',
+            DB::RAW('CONCAT("'.$src[0].'", name, "'.$src[1].'") AS link') //'link' => implode('', [$src[0], urlencode($i['name']), $src[1]])
+        ]);
+
+        $input = Request::post();
+
+        // where
+        if (!empty($input['string'])) {
+            if (!empty($input['mode']) && $input['mode'] === 'monogram') {
+                $strings = mb_str_split($input['string']);
+                $strings = array_unique($strings);
+                foreach($strings as $string) $query->where('letters', 'LIKE', '%'.$string.'%');
+            }
+            else if (!empty($input['mode']) && $input['mode'] === 'regex') $query->where('name', 'RLIKE', $input['string']);
+            else {
+                $strings = explode(' ', $input['string']);
+                foreach($strings as $i => $string) if (!empty($string)) $query->where('name', 'LIKE', ($i > 0 ? '%' : '').$string.'%');
+            }
+        }
+        if (!empty($input['from'])) $query->where('date_from', '>=', $input['from']);
+        if (!empty($input['to'])) $query->where('date_to', '<=', $input['to']);
+
+        $dbi = $query->limit(1001)->get();
+        $dbi = json_decode($dbi, true);
+
+        return $dbi;
+
+
+        /*$handler = new generic_select;
 
         // DB Pre Query if no ID is given
         if (empty($id)) {
@@ -42,7 +77,7 @@ class persons_index implements dbiInterface  {
             $allowed_keys = [
                 'where' => [
                     'id'            => 'id',
-                    'string'        => ['name_sanitized', empty($input['regex']) ? 'LIKE' : 'RLIKE', '', ''],
+                    'string'        => ['name', empty($input['regex']) ? 'LIKE' : 'RLIKE', '', ''],
                     'letters'       => ['letters', 'LIKE', '%', '%'],
                     'number'        => ['occurances', '>=', '', ''],
                     'from'          => ['date_from', '>=', '', ''],
@@ -51,7 +86,7 @@ class persons_index implements dbiInterface  {
                 'order_by' => [
                     'id'            => 'id',
                     'number'        => 'occurances',
-                    'name'          => 'name_sanitized'
+                    'name'          => 'name'
                 ]
             ];
 
@@ -82,15 +117,14 @@ class persons_index implements dbiInterface  {
 
                 return [
                     'id' => $i['id'],
-                    'namePlain' => $i['name_sanitized'],
-                    'nameOrthographic' => $i['name_original'],
-                    'firstLetter' => $i['first_letter'],
+                    'name' => $i['name'],
+                    'variants' => $i['variants'],
                     'letters' => $i['letters'],
-                    'dateFrom' => $i['date_from'],
-                    'dateTo' => $i['date_to'],
-                    'dateString' => $date,
+                    'notBefore' => $i['date_from'],
+                    'notAfter' => $i['date_to'],
+                    //'dateString' => $date,
                     'number' => $i['occurances'],
-                    'link' => implode('', [$src[0], urlencode($i['name_original']), $src[1]])
+                    'link' => implode('', [$src[0], urlencode($i['name']), $src[1]])
                 ];
             }, $dbi);
         }

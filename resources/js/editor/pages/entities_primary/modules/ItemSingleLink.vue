@@ -60,6 +60,7 @@
         :key="oppositeEntity + item.id"
         :entity="oppositeEntity"
         :item="Item"
+        :width="$vuetify.breakpoint.width - 200"
     />
 
     <!-- Link Dialog -->

@@ -18,11 +18,11 @@
     <component-content style="overflow-y: hidden">
         <v-row class="pt-0 ma-0" no-gutters>
 
-            <!-- Legends Index -->
+            <!-- Persons Index -->
             <v-col cols=4>
                 <v-card
                     tile
-                    class="legend-tile sheet_bg"
+                    class="index-tile sheet_bg"
                     style="margin: 16px 8px 16px 16px;"
                     :style="'outline: 1px solid ' + ($vuetify.theme.dark ? 'black' : 'grey')"
                 >
@@ -30,7 +30,7 @@
                         <div class="pa-3">
                             <v-text-field outlined filled clearable dense
                                 ref="searchString"
-                                v-model="search.string"
+                                v-model="query.string"
                                 :label="$root.label('String')"
                                 append-icon="keyboard"
                                 class="mb-n4"
@@ -39,7 +39,7 @@
                             <v-expand-transition>
                                 <div v-if="showKB" class="d-flex justify-center">
                                     <keyboard
-                                        :string="search.string"
+                                        :string="query.string"
                                         layout="el_uc"
                                         small
                                         hide_options
@@ -50,17 +50,10 @@
                         </div>
 
                         <div class="pa-3">
-                            <!-- Combination -->
-                            <v-checkbox
-                                v-model="search.combination"
-                                label="Monogram Combination"
-                                class="ma-0 pa-0"
-                            />
-
                             <!-- Pseudo-Greek -->
-                            <div class="d-flex">
+                            <div class="d-flex mb-1">
                                 <v-checkbox
-                                    v-model="search.transform"
+                                    v-model="query.transform"
                                     label="use Pseudo-Greek"
                                     class="ma-0 pa-0"
                                 />
@@ -72,60 +65,75 @@
                                 />
                             </div>
 
-                            <!-- Regex -->
-                            <div class="d-flex">
-                                <v-checkbox
-                                    v-model="search.regex"
-                                    label="use REGEX"
-                                    class="ma-0 pa-0"
-                                />
-                                <sup class="body-1 ml-1">
-                                    <a href="https://en.wikipedia.org/wiki/Regular_expression#Syntax" target="_blank">&nbsp;*</a>
-                                </sup>
+                            <div class="d-flex justify-space-between">
+                                <div style="max-width: 250px;">
+                                    <v-select dense outlined filled
+                                        v-model="query.mode"
+                                        :items="modes"
+                                        label="Mode"
+                                        :menu-props="{ offsetY: true }"
+                                    />
+                                </div>
+                                <div v-if="query.mode === 'regex'" class="ml-3 mt-2">
+                                    <a
+                                        v-if="query.mode === 'regex'"
+                                        href="https://en.wikipedia.org/wiki/Regular_expression#Syntax"
+                                        target="_blank"
+                                        v-text="'HELP'"
+                                    />
+                                </div>
                             </div>
+
+                            <v-row>
+                                <v-col v-for="(key) in ['from', 'to']" :key="key" cols=6>
+                                    <v-text-field outlined filled clearable dense
+                                        v-model="query[key]"
+                                        :label="$root.label('date_' + key)"
+                                    />
+                                </v-col>
+                            </v-row>
                         </div>
                     </div>
                 </v-card>
             </v-col>
 
-            <!-- Legend Variants -->
+            <!-- Names -->
             <v-col cols=4>
                 <v-card
                     tile
-                    class="legend-tile sheet_bg"
+                    class="index-tile sheet_bg"
                     style="margin: 16px 8px 16px 8px;"
                     :style="'outline: 1px solid ' + ($vuetify.theme.dark ? 'black' : 'grey')"
                 >
                     <div
                         class="text-center font-bold body-1 pa-3"
                         v-text="
-                            loading.list ?
+                            pending || loading.index ?
                             'Please wait ...' :
-                            ((list.length > 1000 ? 'More than 1000' : list.length)  + ' records' + (searchDisplay ? (' for \'' + searchDisplay + '\'') : ''))
+                            ((count > 1000 ? 'More than 1000' : count)  + ' records')
                         "
                     />
 
-                    <v-progress-linear :indeterminate="loading.list" height="1" />
+                    <v-progress-linear :indeterminate="pending || loading.index" height="1" />
 
                     <v-virtual-scroll
-                        :items="list"
+                        :items="index"
                         :item-height="60"
                         style="flex: 1 1 auto;"
                     >
                         <template v-slot:default="{ item, index }">
                             <div
                                 class="pa-3 caption"
-                                :class="item.id === listSelect ? 'grey_prim' : ''"
+                                :class="item.id === Selected ? 'grey_prim' : ''"
                                 style="height: 60px; cursor: pointer;"
                                 @click="selectItem(item)"
                             >
                                 <span
                                     class="font-thin body-1"
-                                    v-html="item.namePlain ? item.namePlain : '<i>EMPTY</i>'"
+                                    v-html="item.name + ' (' + item.number + ')'"
                                 /><br />
-                                <span v-html="item.nameOrthographic ? item.nameOrthographic : '--'" />
-                                <span v-text="'(' + item.number + ')'" />,
-                                <span v-html="item.date" />
+                                <span v-html="item.variants" />,
+                                <span v-html="printDate(item).replaceAll(' ', '&nbsp;')" />
                             </div>
                         </template>
                     </v-virtual-scroll>
@@ -136,15 +144,29 @@
             <v-col cols=4>
                 <v-card
                     tile
-                    class="legend-tile sheet_bg"
+                    class="index-tile sheet_bg"
                     style="margin: 16px 16px 16px 8px; overflow-y: auto"
                     :style="'outline: 1px solid ' + ($vuetify.theme.dark ? 'black' : 'grey')"
                 >
-                    <template v-if="listSelect">
-                        <div
-                            class="text-center font-bold body-1 pa-3"
-                            v-text="loading.details ? 'Please wait ...' : (list.find((item) => item.id === listSelect).nameOrthographic + ', ' + details.length + ' occurances')"
-                        />
+                    <template v-if="Selected">
+                        <div class="text-center font-bold body-1 pa-3">
+                            <span v-if="loading.details"  v-text="'Please wait ...'" />
+                            <template v-else>
+                                <div class="d-flex">
+                                    <div class="text-truncate" v-text="detailsLabel" />
+                                    <div class="ml-1" v-text="'(' + details.length + ')'" />
+                                    <v-spacer />
+                                    <div class="ml-3">
+                                        <a
+                                            :href="'http://clas-lgpn2.classics.ox.ac.uk/cgi-bin/lgpn_search.cgi?namenoaccents=' + detailsLabel"
+                                            target="_blank"
+                                            class="font-weight-bold"
+                                            v-text="'LGPN'"
+                                        />
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
 
                         <v-progress-linear :indeterminate="loading.details" height="1" />
 
@@ -154,13 +176,15 @@
                             style="flex: 1 1 auto;"
                         >
                             <template v-slot:default="{ item, index }">
-                                <div
-                                    class="pa-3 caption"
-                                    style="height: 60px; cursor: pointer;"
-                                >
-                                    <span class="font-thin body-1" v-text="item.id" /><br />
-                                    <span v-html="item.place + ', ' + printDate(item).replaceAll(' ', '&nbsp;')" />
-                                </div>
+                                <a :href="'http://clas-lgpn2.classics.ox.ac.uk/cgi-bin/lgpn_search.cgi?id=' + item.id" target="_blank">
+                                    <div
+                                        class="pa-3 caption invert--text"
+                                        style="height: 60px; cursor: pointer;"
+                                    >
+                                        <span class="font-thin body-1" v-html="'LGPN&nbsp;' + item.id.toUpperCase()" /><br />
+                                        <span v-html="item.place + ', ' + printDate(item).replaceAll(' ', '&nbsp;')" />
+                                    </div>
+                                </a>
                             </template>
                         </v-virtual-scroll>
                     </template>
@@ -203,23 +227,34 @@ export default {
             component:          'LGPN',
             entity:             'persons_index',
 
-            search: {
+            query: {
                 string: null,
                 from: null,
                 to: null,
-                combination: false,
                 transform: false,
-                regex: false
+                mode: null
             },
+            delayedQuery: '',
+
+            modes: [
+                { value: null, text: 'Normal Search' },
+                { value: 'regex', text: 'REGEX Search' },
+                { value: 'monogram', text: 'Monogram Combination' }
+            ],
 
             showKB: true,
+            showMonogram: true,
+
             loading: {
-                list: true,
+                index: true,
                 details: false
             },
-            listRaw: [],
-            listSelect: null,
+            //listRaw: [],
+            index: [],
+            Selected: null,
             details: [],
+            detailsLabel: null,
+            count: 0,
 
             showLG: false,
             latinGreek: {
@@ -257,109 +292,88 @@ export default {
     },
 
     computed: {
+        queryString () {
+            const params = []
+            if (this.query.string) {
+                let string = this.query.string
+                if (this.query.transform) for (const [key, value] of Object.entries(this.latinGreek)) string = string.replaceAll(key, value)
+                params.push('string=' + encodeURI(string))
+                if (['regex', 'monogram'].includes(this.query.mode)) params.push('mode=' + this.query.mode)
+            }
 
-        searchString () {
-            if (!this.search.string) return this.search.string
+            if (this.query.from) params.push('from=' + this.query.from)
+            if (this.query.to) params.push('to=' + this.query.to)
 
-            let string = this.search.string.trim()
-            if (this.search.transform) for (const [key, value] of Object.entries(this.latinGreek)) string = string.replaceAll(key, value)
-            return string
+            return params[0] ? ('?' + params.join('&')) : ''
         },
 
-        searchDisplay () {
-            const toReturn = []
+        pending () {
+            return this.delayedQuery !== this.queryString
+        }
+    },
 
-            if (this.searchString) toReturn.push(this.searchString)
-            if (this.search.keywords) toReturn.push(this.search.keywords)
-
-            return toReturn[0] ? toReturn.join(', ') : null
-        },
-
-        list () {
-            if (!this.search.string) return this.listRaw
-
-            let string = this.searchString
-            if (this.search.regex) string = new RegExp(string)
-
-            return this.listRaw.filter((item) => {
-
-                let match = true
-
-                if (this.search.string) {
-                    if (!item.string) match = false
-
-                    else if (this.search.regex) match = item.string.match(string)
-                    else {
-                        string.trim().split(/\s+/).forEach((frag) => {
-                            if (match && frag) match = item.string.includes(frag)
-                        })
-                    }
-                }
-
-                if (this.search.keywords && match) {
-                    let keywords = item.records.map((r) => r.keywords).join(', ').toLowerCase()
-                    this.search.keywords.trim().split(/\s+/).forEach((frag) => {
-                        if (match && frag) match = keywords.includes(frag.toLowerCase())
-                    })
-                }
-
-                return match
-            })
+    watch: {
+        delayedQuery () {
+            this.getIndex()
         }
     },
 
     created () {
-        this.getlist()
+        this.getIndex()
+        setInterval(() => {
+            if (this.delayedQuery !== this.queryString) this.delayedQuery = this.queryString
+        }, 750)
     },
 
     methods: {
 
-        async getlist () {
+        async getIndex () {
             const self = this
-            self.loading.list = true
-            self.listRaw = []
 
-            console.log('AXIOS', '/dbi/persons_index')
-            await axios.get('/dbi/persons_index?limit=100')
-                .then((response) => {
-                    const dbi = response.data?.contents
-                    if (dbi[0]) self.listRaw = dbi
-                })
-                .catch((error) => {
-                    self.$root.AXIOS_ERROR_HANDLER(error)
-                })
+            this.loading.index = true
+            this.index = []
+            this.count = 0
 
-            self.loading.list = false
+    	    const src = '/dbi/persons_index' + this.delayedQuery
+            console.log('AXIOS', src)
+            const dbi = await axios.get(src).catch((error) => { self.$root.AXIOS_ERROR_HANDLER(error) })
+
+            if (dbi.data?.pagination.count > 0) {
+                this.index = dbi.data.contents
+                this.count = dbi.data.pagination.count
+            }
+
+            self.loading.index = false
         },
 
         async selectItem (item) {
             const self = this
-            self.loading.details = true
-            self.listSelect = item.id
-            self.details = []
+
+            this.loading.details = true
+            this.detailsLabel = null
+            this.Selected = item.id
+            this.details = []
 
             console.log('AXIOS', item.link)
-            await axios.get(item.link)
-                .then((response) => {
-                    const dbi = JSON.parse(response.data?.slice(5, -3))
-                    if (dbi?.persons?.[0]) self.details = dbi.persons
-                })
-                .catch((error) => {
-                    self.$root.AXIOS_ERROR_HANDLER(error)
-                })
+            let dbi = await axios.get(item.link).catch((error) => { self.$root.AXIOS_ERROR_HANDLER(error) })
+            dbi = JSON.parse(dbi.data?.slice(5, -3))
+            if (dbi?.persons?.[0]) {
+                this.detailsLabel = this.index.find((item) => item.id === this.Selected).name ?? null
+                this.details = dbi.persons
+            }
 
-            self.loading.details = false
+            this.loading.details = false
         },
 
         keyboardInput (emit) {
-            this.search.string = emit
+            this.query.string = emit
             this.$refs['searchString'].$refs.input.focus();
         },
 
         printDate (item) {
             let date = [
-                parseInt(item.notBefore),
-                parseInt(item.notAfter)
+                item.notBefore ? parseInt(item.notBefore) : 0,
+                item.notAfter ? parseInt(item.notAfter) : 0,
             ]
 
             date = date.map((year) => {
@@ -376,7 +390,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    .legend-tile {
+    .index-tile {
         height: calc(100vh - 122px);
         display: flex;
         flex-flow: column;

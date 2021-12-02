@@ -28,32 +28,24 @@
 
     </div>
 
-    <!-- Filter Drawer -->
-    <drawer
-        header
+    <split-screen-template
         :dialog="dialog"
-        :collapse="queryCounter"
-        v-on:expand="onDrawerExpand"
-        v-on:search="runQuery()"
-        v-on:clear="resetFilters(true)"
+        filter-drawer
+        :left-width-default="250"
+        @search="runQuery()"
+        @clear="resetFilters(true)"
+        @resize="(emit) => {
+            resultsWidth = emit.center
+            filterWidth = emit.left
+        }"
     >
-        <template v-slot:content>
-            <div class="d-flex align-center" style="height: 40px; width: 200px;" :style="showFilters ? 'cursor: default' : 'cursor: pointer'">
-                <div class="d-flex align-center justify-center" style="height: 40px; width: 40px;">
-                    <v-icon v-text="'filter_alt'" />
-                </div>
-                <div class="font-weight-bold body-1 ml-3" v-text="'Available Filters'" />
+        <template v-slot:left>
+            <div class="pa-4 pl-2">
+                <slot name="filters" />
             </div>
-            <v-expand-transition>
-                <div v-if="showFilters" class="pa-5">
-                    <slot name="filters" />
-                </div>
-            </v-expand-transition>
         </template>
-    </drawer>
 
-    <!-- Content -->
-    <div :class="'component-content' + (dialog ? ' component-content-dialog' : '')" style="padding-left: 40px;">
+        <!-- Content -->
         <v-fade-transition>
 
             <!-- Search-Table -->
@@ -113,12 +105,14 @@
                                             icon="preview"
                                             dis-tooltip="View/Edit Details"
                                             medium
+                                            color-hover="header_hover"
                                             @click="editItem(item)"
                                         />
                                         <adv-btn
                                             icon="library_add"
                                             dis-tooltip="Copy Record"
                                             medium
+                                            color-hover="header_hover"
                                             @click="cloneItem(item)"
                                         />
                                     </div>
@@ -135,13 +129,9 @@
                     <v-col
                         v-for="(item, i) in items"
                         :key="i"
-                        cols=12
-                        :sm="cols.sm"
-                        :md="cols.md"
-                        :lg="cols.lg"
-                        :xl="cols.xl"
+                        :cols="cols"
                     >
-                        <v-card tile :class="item.id == selected ? 'tile_selected' : 'tile_bg'">
+                        <v-card tile class="fill-height" :class="item.id == selected ? 'tile_selected' : 'tile_bg'">
                             <!-- Details Header -->
                             <v-card-title class="pb-n3 text-truncate">
                                 <slot name="search-tile-header" v-bind:item="item">
@@ -150,37 +140,41 @@
                             </v-card-title>
 
                             <!-- Details Body -->
-                            <v-card-text>
+                            <v-card-text style="margin-bottom: 41px; overflow-wrap: break-word;">
                                 <slot name="search-tile-body" v-bind:item="item" />
                             </v-card-text>
 
-                            <v-divider />
+                            <div style="position: absolute; bottom: 0; height: 41px; width: 100%">
+                                <v-divider />
 
-                            <div class="d-flex">
-                                <adv-btn
-                                    v-if="select"
-                                    icon="touch_app"
-                                    color-main="blue_prim"
-                                    color-hover="blue_sec"
-                                    color-text="white"
-                                    medium
-                                    :disabled="item.id == selected"
-                                    v-on:click="selectItem(item)"
-                                />
-                                <v-spacer />
-                                <v-divider vertical />
-                                <adv-btn
-                                    icon="preview"
-                                    dis-tooltip="View/Edit Details"
-                                    medium
-                                    @click="editItem(item)"
-                                />
-                                <adv-btn
-                                    icon="library_add"
-                                    dis-tooltip="Copy Record"
-                                    medium
-                                    @click="cloneItem(item)"
-                                />
+                                <div class="d-flex">
+                                    <adv-btn
+                                        v-if="select"
+                                        icon="touch_app"
+                                        color-main="blue_prim"
+                                        color-hover="blue_sec"
+                                        color-text="white"
+                                        medium
+                                        :disabled="item.id == selected"
+                                        v-on:click="selectItem(item)"
+                                    />
+                                    <v-spacer />
+                                    <v-divider vertical />
+                                    <adv-btn
+                                        icon="preview"
+                                        dis-tooltip="View/Edit Details"
+                                        medium
+                                        color-hover="header_hover"
+                                        @click="editItem(item)"
+                                    />
+                                    <adv-btn
+                                        icon="library_add"
+                                        dis-tooltip="Copy Record"
+                                        medium
+                                        color-hover="header_hover"
+                                        @click="cloneItem(item)"
+                                    />
+                                </div>
                             </div>
                         </v-card>
                     </v-col>
@@ -188,7 +182,7 @@
             </div>
 
         </v-fade-transition>
-    </div>
+    </split-screen-template>
 
 </div>
 </template>
@@ -213,7 +207,9 @@ export default {
                 limit:      12,
                 count:      0,
                 sort_by:    this.defaultSortBy
-            }
+            },
+            resultsWidth:       0,
+            filterWidth:        0,
         }
     },
 
@@ -247,8 +243,15 @@ export default {
         },
 
         cols () {
-            if (!this.smallTiles)   return { sm: 6, md: 4, lg: 3, xl: 2 }
-            else                    return { sm: 4, md: 3, lg: 2, xl: 2 }
+            const width = this.resultsWidth * (this.smallTiles ? 1 : 0.75)
+
+            if (this.layout === 'rows') return width < 2000 ? 12 : 6
+            if (this.layout !== 'tiles' || width < 400) return 12
+            if (width < 850) return 6
+            if (width < 1100) return 4
+            if (width < 1500) return 3
+            if (width < 2800) return 2
+            return 1
         },
 
         sorted () {
@@ -514,10 +517,10 @@ export default {
         },
 
         // Functional ---------------
-        onDrawerExpand (expand) {
+        /*onDrawerExpand (expand) {
             if (expand) setTimeout(() => { this.showFilters = true }, 350)
             else this.showFilters = false
-        },
+        },*/
 
         selectItem (item) {
             this.$emit('select', item)

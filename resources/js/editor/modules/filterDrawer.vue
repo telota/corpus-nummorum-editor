@@ -80,7 +80,8 @@ export default {
         color: { type: String, default: 'drawer_bg' },
         collapse:  { type: [Number, String], default: null },
         expanding: { type: [Number, String], default: null },
-        noAutoExpansion: { type: Boolean, default: false }
+        noAutoExpansion: { type: Boolean, default: false },
+        noContentOverflow: { type: Boolean, default: false }
     },
 
     computed: {
@@ -98,7 +99,7 @@ export default {
             return [
                 'height: calc(100vh - ' + ((this.dialog ? 170 : this.top) + (this.header ? 80 : this.costumHeader)) + 'px)',
                 'width: 100%',
-                'overflow-y: auto',
+                'overflow-y:' + (this.noContentOverflow ? 'hidden' : 'auto'),
                 'overflow-x: hidden'
             ].join(';\n')
         }
