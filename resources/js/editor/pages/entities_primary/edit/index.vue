@@ -41,6 +41,7 @@
                     v-on:add="AddRelation('images', {
                         id: null,
                         kind: 'plastercast',
+                        private: 0,
                         obverse: {
                             photographer: null,
                             link: null,
@@ -115,13 +116,13 @@
                                 <div class="pl-5" style="width: calc(100% - 160px)">
                                     <div class="d-flex justify-space-between">
                                         <div class="body-1 text-uppercase" v-text="$root.label(side)" />
-                                        <v-checkbox
+                                        <!--<v-checkbox
                                             class="mt-0 ml-2"
                                             label="public"
                                             v-model="item.images[i][side].public"
                                             disabled
                                             dense
-                                        />
+                                        />-->
                                     </div>
 
                                     <!-- Path-->
@@ -202,6 +203,22 @@
                                     </div>
                                 </div>
                             </div>
+                            <v-divider class="mt-1 mb-2" />
+                            <v-hover v-slot="{ hover }">
+                                <div class="caption d-flex justify-center">
+                                    <div
+                                        :class="set.private ? 'red--text' : ''"
+                                        v-text="'Imageset is marked as ' + (set.private ? 'private' : 'public') + '. It is ' + (set.private ? 'not' : '') + ' shown on public website.'"
+                                    />
+                                    <div
+                                        class="ml-1"
+                                        style="cursor:pointer"
+                                        :style="'color:' + $root.colors[hover ? 'input_hover' : 'input_main']"
+                                        v-text="(set.private ? 'Show' : 'Hide') + ' imageset!'"
+                                        @click="item.images[i].private = item.images[i].private ? 0 : 1"
+                                    />
+                                </div>
+                            </v-hover>
                         </v-card>
                     </v-col>
                 </v-row>

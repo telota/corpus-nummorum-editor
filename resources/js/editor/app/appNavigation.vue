@@ -195,7 +195,9 @@ export default {
                 { text: this.$root.label('individuals'),      icon: 'supervised_user_circle', children: [
                     { text: this.$root.label('persons'),          icon: 'emoji_people',       link: 'persons' },
                     { text: this.$root.label('owners'),           icon: 'account_circle',     link: 'owners' },
-                    { text: this.$root.label('tribes'),           icon: 'groups',             link: 'tribes' }
+                    { text: this.$root.label('tribes'),           icon: 'groups',             link: 'tribes' },
+                    null,
+                    { text: this.$root.label('LGPN'),             icon: 'recent_actors',      link: 'lgpn' }
                 ]},
                 { text: this.$root.label('locations'),         icon: 'explore',           children: [
                     { text: this.$root.label('mints'),            icon: 'museum',             link: 'mints' },
@@ -209,7 +211,6 @@ export default {
                     { text: this.$root.label('object_groups'),    icon: 'control_camera',     link: 'objectgroups' },
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          link: 'bibliography' },
                     { text: this.$root.label('zotero'),           icon: 'auto_stories',       link: 'https://www.zotero.org/groups/163139/thrakien/library' },
-                    //{ text: this.$root.label('LGPN'),             icon: 'recent_actors',      link: 'lgpn' },
                     { text: this.$root.label('SPARQL'),           icon: 'auto_awesome',       link: 'sparql' },
                 ]}
             ]

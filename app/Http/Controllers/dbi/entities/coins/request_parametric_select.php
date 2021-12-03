@@ -217,7 +217,7 @@ class request_parametric_select {
                     "bg_color",   IF( img.BackgroundColor > "" && img.ReverseImageFilename > "", img.BackgroundColor, null)
                 )))
                 FROM '.config('dbi.tablenames.images').' AS img
-                WHERE img.CoinID = c.id && 1=1
+                WHERE img.CoinID = c.id'.($user['level'] > 9 ? '' : '&& img.is_private = 0') .'
                 GROUP BY img.ImageID
                 ORDER BY img.ObjectType DESC
                 LIMIT 1

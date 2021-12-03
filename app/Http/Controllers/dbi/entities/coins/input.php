@@ -138,11 +138,10 @@ class input {
                 'o_photographer'    => $i['obverse']['photographer'],
                 'r_photographer'    => $i['reverse']['photographer'],
                 'kind'              => empty($i['kind']) ? ($i['obverse']['kind'] === 'original' ? 'original' : 'plastercast') : ($i['kind'] === 'original' ? 'original' : 'plastercast'),
-                'path'              => ''
+                'path'              => '',
+                'private'           => empty($i['private']) ? 0 : 1
             ];
         }
-
-        //die (print_r($data));
 
         $this->helpers($config, 'images', $ID, $data);
     }

@@ -4,7 +4,7 @@
             :key="language"
             :entity="entity"
             :attributes="attributes"
-            default-sort-by="mint.ASC"
+            default-sort-by="name.ASC"
             :dialog="dialog"
             :select="select"
             :selected="selected"
@@ -20,47 +20,76 @@
                     :label="attributes.id.text"
                     :prepend-icon="attributes.id.icon"
                 />
-                <InputForeignKey
-                    entity="mints"
-                    :label="attributes.id_mint.text"
-                    :icon="attributes.id_mint.icon"
-                    :selected="attributes.id_mint.filter"
-                    v-on:select="(emit) => { attributes.id_mint.filter = emit }"
+                <v-text-field dense outlined filled clearable
+                    v-model="attributes.label.filter"
+                    :label="attributes.label.text"
+                    :prepend-icon="attributes.label.icon"
                 />
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
             <template v-slot:editor="slot">
-                <v-row>
-                    <v-col cols=12 md=6>
-                        <InputForeignKey
-                            entity="mints"
-                            :label="attributes.id_mint.text"
-                            :icon="attributes.id_mint.icon"
-                            :selected="slot.item.id_mint"
-                            v-on:select="(emit) => { slot.item.id_mint = emit }"
-                        />
-                    </v-col>
+                <div class="title text-center mb-5">
+                    <div
+                        v-if="slot.item.nomisma[0]"
+                        v-text="slot.item.nomisma.map((item) => item ? (item.id ? item.id : '') : '').sort().join(' - ').replaceAll('_', ' ').toUpperCase()"
+                    />
+                    <div v-else v-text="'No Name, yet'" />
+                </div>
 
-                    <v-col cols=12 md=6>
-                        <!-- Author -->
-                        <v-text-field dense outlined filled clearable
-                            v-model="slot.item.author"
-                            :label="attributes.author.text"
-                            :prepend-icon="attributes.author.icon"
-                            counter=255
-                        />
-                    </v-col>
-                </v-row>
+                <!-- Nomisma -->
+                <subheader
+                    label="Nomisma IDs"
+                    :count="slot.item.nomisma"
+                    add
+                    class="mb-5"
+                    @add="slot.item.nomisma.push({
+                        entity: 'mint',
+                        id: null
+                    })"
+                />
 
-                <v-divider class="mt-2 mb-4" />
+                <template v-if="slot.item.nomisma[0]">
+                    <div v-for="(iterator, i) in slot.item.nomisma" :key="i" class="mt-n3">
+                        <v-row>
+                            <v-col cols="6">
+                                <v-text-field dense filled outlined
+                                    v-model="slot.item.nomisma[i].id"
+                                    label="Nomisma ID"
+                                />
+                            </v-col>
 
-                <div class="body-2">
+                            <v-col cols="6">
+                                <div class="d-flex">
+                                    <v-select dense filled outlined
+                                        v-model="slot.item.nomisma[i].entity"
+                                        :items="nomismaEntities"
+                                        label="Entity"
+                                        :menu-props="{ offsetY: true }"
+                                    />
+                                    <v-btn icon class="ml-3" @click="slot.item.nomisma.splice(i, 1)">
+                                        <v-icon>delete</v-icon>
+                                    </v-btn>
+                                </div>
+                            </v-col>
+                        </v-row>
+                    </div>
+                </template>
+                <div
+                    v-else
+                    class="font-weight-bold text-center body-2 mb-5 mt-n3 orange--text"
+                    v-text="'Please add at least one Nomisma ID!'"
+                />
+
+                <!-- Text -->
+                <subheader
+                    label="Text"
+                />
+
+                <div class="body-2 mb-8 text-center">
                     Fußnoten mit geschweiften Klammern " {} " und Links mit eckigen Klammern " [] " auszeichnen.<br/>
                     Mit <code>< b >< /b ></code> kann Text fett <b>formatiert</b> werden, mit <code>< i >< /i ></code> <i>kursiv</i>. (Bitte keine Leerzeichen zwischen Tag und spitzen Klammern setzen)
                 </div>
-
-                <v-divider class="mt-4 mb-7" />
 
                 <v-row>
                     <template v-for="(section) in sections">
@@ -134,6 +163,12 @@ export default {
                 'imperial'
             ],
 
+            nomismaEntities: [
+                'mint',
+                'ruler',
+                'tribe'
+            ],
+
             languages: ['de', 'en']
         }
     },
@@ -176,20 +211,37 @@ export default {
                     icon: 'person',
                     content: (item) => item?.author ?? '--'
                 },
-                id_mint: {
+                label: {
                     default: null,
-                    text: 'ID Mint',
-                    icon: 'museum',
+                    text: 'Nomisma ID',
+                    icon: 'monetization_on',
                     filter: null,
-                    content: (item) => item?.id_mint ? (item.mint ?? item.id_mint) : '--'
+                    content: (item) => item?.label ? item.label : '--'
                 },
-                mint: {
+                name: {
                     default: null,
-                    text: this.$root.label('mint'),
-                    icon: 'museum',
+                    text: 'Text',
+                    icon: 'label',
                     header: true,
                     sortable: true,
-                    content: (item) => item?.mint ?? '--'
+                    content: (item) => {
+                        let text = '--'
+                        this.sections.forEach((section) => {
+                            const key = this.language + '_' + section
+                            if (text === '--' && item[key]) {
+                                const split = item[key].slice(0, 500).split(/\s+/)
+                                split[split.length - 1] =  '...'
+                                text = split.join(' ')
+                            }
+                        })
+                        return '<h3 class="mb-1">' + item?.name + '</h3><p class="text-justify">' + text + '</p>'
+                    }
+                },
+                nomisma: {
+                    default: [{ entity: 'mint', id: null }],
+                    text: 'Nomisma',
+                    icon: 'museum',
+                    content: (item) => item?.nomisma ?? []
                 },
                 bibliography: {
                     default: null,
@@ -212,8 +264,7 @@ export default {
                         default: null,
                         text: this.$root.label(section) + ' (' + language.toUpperCase() + ')',
                         icon: 'notes',
-                        header: language === this.language && section === 'topography' ? true : false,
-                        content: (item) => language === this.language && section === 'topography' && item?.[key] ? (item[key].slice(0, 250) + ' ...') : (item?.[key] ?? '--')
+                        content: (item) => item?.[key] ?? '--'
                     }
                 })
             })

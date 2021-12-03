@@ -1,18 +1,7 @@
 <template>
 <div>
     <component-toolbar>
-        <v-spacer />
-        <v-hover v-slot="{ hover }">
-            <div
-                class="d-flex align-center justify-center headline font-weight-bold light-blue--text text--darken-2"
-                :class="hover ? 'header_hover' : ''"
-                style="width: 200px; height: 50px; cursor: pointer;'"
-                @click="$router.push('/persons/new')"
-            >
-                <v-icon v-text="'add'" class="mr-2" color="light-blue darken-2" />
-                <div v-text="'New Item'" />
-            </div>
-        </v-hover>
+        <div class="title pl-2" v-html="'Lexicon of Greek personal names' + $handlers.format.resource_link('https://www.lgpn.ox.ac.uk/')" />
     </component-toolbar>
 
     <component-content style="overflow-y: hidden">
@@ -50,42 +39,37 @@
                         </div>
 
                         <div class="pa-3">
-                            <!-- Pseudo-Greek -->
-                            <div class="d-flex mb-1">
-                                <v-checkbox
-                                    v-model="query.transform"
-                                    label="use Pseudo-Greek"
-                                    class="ma-0 pa-0"
-                                />
-                                <sup
-                                    class="body-1 ml-1"
-                                    style="cursor: pointer;"
-                                    v-html="'&nbsp;*'"
-                                    @click="showLG = true"
-                                />
-                            </div>
-
-                            <div class="d-flex justify-space-between">
-                                <div style="max-width: 250px;">
+                            <v-row>
+                                <!-- Mode -->
+                                <v-col cols=12 lg=6>
                                     <v-select dense outlined filled
                                         v-model="query.mode"
                                         :items="modes"
                                         label="Mode"
+                                        class="mb-n5 pa-0"
                                         :menu-props="{ offsetY: true }"
                                     />
-                                </div>
-                                <div v-if="query.mode === 'regex'" class="ml-3 mt-2">
-                                    <a
-                                        v-if="query.mode === 'regex'"
-                                        href="https://en.wikipedia.org/wiki/Regular_expression#Syntax"
-                                        target="_blank"
-                                        v-text="'HELP'"
-                                    />
-                                </div>
-                            </div>
+                                </v-col>
 
-                            <v-row>
-                                <v-col v-for="(key) in ['from', 'to']" :key="key" cols=6>
+                                <!-- Pseudo-Greek -->
+                                <v-col cols=12 lg=6>
+                                    <div class="d-flex mt-1">
+                                        <v-checkbox
+                                            v-model="query.transform"
+                                            label="use Pseudo-Greek"
+                                            class="ma-0 pa-0"
+                                        />
+                                        <sup
+                                            class="body-1 ml-1"
+                                            style="cursor: pointer;"
+                                            v-html="'&nbsp;*'"
+                                            @click="showLG = true"
+                                        />
+                                    </div>
+                                </v-col>
+
+                                <!-- Date -->
+                                <v-col v-for="(key) in ['from', 'to']" :key="key" cols=12 sm=6>
                                     <v-text-field outlined filled clearable dense
                                         v-model="query[key]"
                                         :label="$root.label('date_' + key)"
@@ -322,7 +306,7 @@ export default {
         this.getIndex()
         setInterval(() => {
             if (this.delayedQuery !== this.queryString) this.delayedQuery = this.queryString
-        }, 750)
+        }, 1000)
     },
 
     methods: {

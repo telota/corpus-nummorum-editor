@@ -181,7 +181,8 @@ class input_definitions {
                     'ObversePhotographer'   => 'o_photographer',
                     'ReversePhotographer'   => 'r_photographer',
                     'ObjectType'            => 'kind',
-                    'Path'                  => 'path'
+                    'Path'                  => 'path',
+                    'is_private'            => 'private'
                 ]
             ]
         ];

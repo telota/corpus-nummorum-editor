@@ -103,6 +103,10 @@ return [
             'year0' => [
                 'de' => 'Es gibt kein Jahr 0!',
                 'en' => 'There is no Year 0!'
+            ],
+            'nomisma' => [
+                'de' => 'Eine Nomisma ID ist erforderlich!',
+                'en' => 'A Nomisma ID is required!'
             ]
         ],
 

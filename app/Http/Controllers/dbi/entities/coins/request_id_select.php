@@ -443,8 +443,7 @@ class request_id_select {
                 "photographer", IF( img.ReversePhotographer > "" , img.ReversePhotographer, null)
             )))
             FROM '.config('dbi.tablenames.images').' AS img
-            WHERE img.CoinID = c.id &&
-            1=1
+            WHERE img.CoinID = c.id'.($user['level'] > 9 ? '' : '&& img.is_private = 0') .'
             ORDER BY img.ObjectType DESC
         )'];
 
@@ -553,21 +552,22 @@ class request_id_select {
                 "images", ( SELECT JSON_ARRAYAGG( JSON_OBJECT(
                     "id",             img.ImageID,
                     "kind",           IFNULL(img.ObjectType, "unknown"),
+                    "private",        IF(img.is_private = 1, 1, 0),
                     "obverse",        JSON_OBJECT(
                         "link",       IF( img.ObverseImageFilename > "", CONCAT( IF( img.Path > "", IF( SUBSTRING( img.Path, -1, 1 ) != "/", CONCAT( img.Path, "/" ), img.Path ),""), img.ObverseImageFilename ), null),
                         "kind",       IF( img.ObverseImageFilename > "", img.ObjectType, null),
                         "bg_color",   IF( img.BackgroundColor > "" && img.ObverseImageFilename > "", img.BackgroundColor, null),
                         "photographer", IF( img.ObversePhotographer > "" , img.ObversePhotographer, null),
-                        "public",     1,
-                        "copyright",  1
+                        "public",     null,
+                        "copyright",  null
                     ),
                     "reverse",        JSON_OBJECT(
                         "link",       IF( img.ReverseImageFilename > "", CONCAT( IF( img.Path > "", IF( SUBSTRING( img.Path, -1, 1 ) != "/", CONCAT( img.Path, "/"), img.Path ),""), img.ReverseImageFilename ), null),
                         "kind",       IF( img.ReverseImageFilename > "", img.ObjectType, null),
                         "bg_color",   IF( img.BackgroundColor > "" && img.ReverseImageFilename > "", img.BackgroundColor, null),
                         "photographer", IF( img.ReversePhotographer > "" , img.ReversePhotographer, null),
-                        "public",     1,
-                        "copyright",  1
+                        "public",     null,
+                        "copyright",  null
                     ))) FROM '.config('dbi.tablenames.images').' AS img
                     WHERE img.CoinID = c.id
                     ORDER BY img.ObjectType DESC

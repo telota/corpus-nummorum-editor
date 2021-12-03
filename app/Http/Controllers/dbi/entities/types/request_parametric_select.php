@@ -189,7 +189,7 @@ class request_parametric_select {
                     "bg_color", IF( img.BackgroundColor > "" && img.ReverseImageFilename > "", img.BackgroundColor, null )
                 )))
                 FROM '.config('dbi.tablenames.images').' AS img
-                WHERE img.ImageID = t.id_imageset),
+                WHERE img.ImageID = t.id_imageset'.($user['level'] > 9 ? '' : '&& img.is_private = 0') .'),
                 null
             )']; //"'.$storage.'",
 

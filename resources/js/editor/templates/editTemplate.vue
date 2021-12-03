@@ -291,7 +291,10 @@ export default {
             const defaultItem = {}
 
             Object.keys(this.attributes).forEach((key) => {
-                if (typeof this.attributes[key].default === 'object' && this.attributes[key].default !== null) {
+                if (Array.isArray(this.attributes[key].default) && this.attributes[key].default !== null) {
+                    defaultItem[key] = [ ... this.attributes[key].default ]
+                }
+                else if (typeof this.attributes[key].default === 'object' && this.attributes[key].default !== null) {
                     defaultItem[key] = { ... this.attributes[key].default }
                 }
                 else defaultItem[key] = this.attributes[key].default
