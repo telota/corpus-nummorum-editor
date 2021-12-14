@@ -338,13 +338,15 @@ export default {
             this.Selected = item.id
             this.details = []
 
-            console.log('AXIOS', item.link)
+            /*console.log('AXIOS', item.link)
             let dbi = await axios.get(item.link).catch((error) => { self.$root.AXIOS_ERROR_HANDLER(error) })
             dbi = JSON.parse(dbi.data?.slice(5, -3))
             if (dbi?.persons?.[0]) {
                 this.detailsLabel = this.index.find((item) => item.id === this.Selected).name ?? null
                 this.details = dbi.persons
-            }
+            }*/
+            this.detailsLabel = this.index.find((item) => item.id === this.Selected).name ?? null
+            this.details = []
 
             this.loading.details = false
         },
