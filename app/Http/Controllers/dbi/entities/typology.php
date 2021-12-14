@@ -59,27 +59,10 @@ class typology implements dbiInterface  {
                 $nomisma = [];
 
                 foreach($raw_nomisma as $n) $nomisma[$n['id']] = $n;
-
-                /*$mints = json_decode($d['mints'], TRUE);
-                $mints = empty($mints[0]) ? [] : $mints;
-
-                foreach($mints as $mint) {
-                    if (empty($nomisma[$mint['nomisma']])) {
-                        $nomisma[$mint['nomisma']] = [
-                            'id' => $mint['nomisma'],
-                            'entity' => 'mint'
-                        ];
-                    }
-                }*/
                 ksort($nomisma);
                 $nomisma = array_values($nomisma);
-
                 $items[$id]['nomisma'] = $nomisma;
-
-                $items[$id]['name'] = $items[$id]['label'] = empty($nomisma[0]) ? $id : implode('|', array_map(function ($n) { return $n['id']; }, $nomisma));
-                $items[$id]['name'] = str_replace('|', ' - ', $items[$id]['name']);
-                $items[$id]['name'] = str_replace('_', ' ', $items[$id]['name']);
-                $items[$id]['name'] = mb_strtoupper($items[$id]['name']);
+                $items[$id]['nomisma_concated'] = empty($nomisma[0]) ? $id : implode(', ', array_map(function ($n) { return $n['id']; }, $nomisma));
 
                 $items[$id]['bibliography'] = $d['bibliography'];
                 $items[$id]['links'] = $d['links'];
@@ -87,6 +70,7 @@ class typology implements dbiInterface  {
 
             $items[$id][$l.'_id'] = $d['id'];
             foreach ([
+                'label',
                 'topography',
                 'research',
                 'typology',
@@ -97,7 +81,7 @@ class typology implements dbiInterface  {
                 'hellenistic',
                 'imperial'
             ] as $section) {
-                $items[$id][$l.'_'.$section] = empty($d['section_'.$section]) ? null : trim($d['section_'.$section]);
+                $items[$id][$l.'_'.$section] = empty($d[($section === 'label' ? '' : 'section_').$section]) ? null : trim($d[($section === 'label' ? '' : 'section_').$section]);
             }
         }
 
@@ -106,6 +90,7 @@ class typology implements dbiInterface  {
 
     public function input ($user, $input) {
         $validation = $this->validateInput($input);
+        //die(print_r($validation));
 
         if(empty($validation['error'][0])) {
             $input = $validation['input'];
@@ -181,9 +166,9 @@ class typology implements dbiInterface  {
     public function validateInput ($input) {
         $nomisma = empty($input['nomisma'][0]) ? null : implode('', array_map(function ($item) { return $item['id']; }, $input['nomisma']));
 
-        if (empty($nomisma)) {
-            $error[] = config('dbi.responses.validation.general.nomisma');
-        }
+        if (empty($nomisma)) $error[] = config('dbi.responses.validation.general.nomisma');
+        if (empty($input['en_label'])) $error[] = config('dbi.responses.validation.general.name_en');
+        if (empty($input['de_label'])) $error[] = config('dbi.responses.validation.general.name_de');
 
         // Return validated input
         if (empty($error)) {
@@ -193,6 +178,7 @@ class typology implements dbiInterface  {
                 $input['strings'][$language] = [];
 
                 foreach ([
+                    'label',
                     'topography',
                     'research',
                     'typology',
@@ -204,13 +190,13 @@ class typology implements dbiInterface  {
                     'imperial'
                 ] as $section) {
                     $key = $language.'_'.$section;
-                    $input['strings'][$language]['section_'.$section] = empty($input[$key]) ? NULL : trim($input[$key]);
+                    $input['strings'][$language][($section === 'label' ? '' : 'section_').$section] = empty($input[$key]) ? NULL : trim($input[$key]);
                     unset($input[$key]);
                 }
             }
             return ['input' => $input];
         }
         // Return Error
-        else { return ['error' => $error]; }
+        else return ['error' => $error];
     }
 }

@@ -6,6 +6,8 @@
     :hint="'Click on Icon to open ' + entity + ' dialog'"
     :rules="[rule]"
     @input="select"
+    @keyup.enter="$emit('enter', false)"
+    @keydown.enter.shift="$emit('enter', true)"
 >
     <template v-slot:prepend>
         <!-- Botton -->
@@ -48,7 +50,8 @@ export default {
 
     props: {
         entity:     { type: String, required: true },
-        selected:   { type: Number, default: null }
+        selected:   { type: Number, default: null },
+        noConfirm:  { type: Boolean, default: false }
     },
 
     computed: {
@@ -69,7 +72,8 @@ export default {
 
             this.$emit('select', value)
 
-            if (this.dialog && value) {
+            if (this.noConfirm) this.dialog = false
+            else if (this.dialog && value) {
                 if (confirm('ID ' + value + ' selected! Close Dialog?')) this.dialog = false
             }
         },

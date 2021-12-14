@@ -39,7 +39,6 @@ Vue.use(Vuetify);
 
 // App Components
 Vue.component('app-settings',       require('./app/appSettings.vue').default);
-Vue.component('app-snack',          require('./app/appSnack.vue').default);
 Vue.component('app-header',         require('./app/appHeader.vue').default);
 //Vue.component('app-footer',         require('./app/appFooter.vue').default);
 Vue.component('app-loader',         require('./app/appLoader.vue').default);

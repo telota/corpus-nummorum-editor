@@ -7,7 +7,7 @@
         <v-fade-transition>
             <div
                 v-if="snackMessage"
-                class=" d-flex align-center justify-center"
+                class="d-flex align-center justify-center"
                 :style="[
                     'position: fixed',
                     'pointer-events: none',
@@ -17,7 +17,7 @@
                     'z-index: 102',
                     'height: 40px',
                     'width: 500px',
-                    'background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(' + snackBg + ',1) 20%, rgba(' + snackBg + ',0.5) 80%, rgba(0,0,0,0) 100%)'
+                    'background:' + snackBg
                 ].join(';\n')"
             >
                 <div
@@ -80,7 +80,7 @@
                 tooltip="Logout"
                 medium
                 color-hover="header_hover"
-                @click="logout()"
+                @click="$root.logout()"
                 class="mr-n4"
             />
 
@@ -111,12 +111,6 @@ export default {
     },
 
     computed: {
-        user () {
-            return this.$root.user
-        },
-        rank () {
-            return this.$root.user?.level ? this.$root.user.level : 10
-        },
         snackMessage () {
             return this.$store.state.snack?.message ?? null
         },
@@ -124,7 +118,13 @@ export default {
             return (this.$store.state.snack?.color ? this.$store.state.snack.color : 'invert') + '--text'
         },
         snackBg () {
-            return this.$vuetify.theme.dark ? '54,54,54' : '230,230,230'
+            const color = this.$vuetify.theme.dark ? '54,54,54' : '230,230,230'
+            return 'linear-gradient(' +
+                'to right,' +
+                'rgba(0,0,0,0) 0%,' +
+                'rgba(' + color + ',0.75) 20%,' +
+                'rgba(' + color + ',0.75) 80%,' +
+                'rgba(0,0,0,0) 100%)'
         },
         nightMode () {
             return this.$root.settings?.night ? true : false

@@ -294,6 +294,11 @@ const router = new Router({
             component: require ('./../pages/administrator/logs').default,
         },
         {
+            path: '/publisher',
+            name: 'publisher',
+            component: require ('./../pages/administrator/directPublisher').default,
+        },
+        {
             path: '/test',
             name: 'test',
             component: require ('./../pages/administrator/test').default,

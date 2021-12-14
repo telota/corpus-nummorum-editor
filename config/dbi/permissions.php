@@ -46,6 +46,7 @@ return [
     'texts'         => ['read' => 2,    'write_own' => 22,  'write_all' => 22],
     'users'         => ['read' => 31,   'write_own' => 31,  'write_all' => 31],
     'users_list'    => ['read' => 10,   'write_own' => 31,  'write_all' => 31],
+    'publishadmin'  => ['read' => 31,   'write_own' => 31,  'write_all' => 31],
 
     'import_sources'=> ['read' => 2,   'write_own' => 99,  'write_all' => 99],
 ];

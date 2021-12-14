@@ -99,10 +99,11 @@ export default {
 
     data () {
         return {
+            windowWidth: this.$vuetify.breakpoint.width,
             left: {
                 resizeWidth: this.leftWidthDefault,
                 currentWidth: this.leftWidthDefault,
-                cachedWidth: this.leftWidthDefault
+                cachedWidth: this.leftWidthDefault,
             }
         }
     },
@@ -131,7 +132,7 @@ export default {
         },
 
         totalWidth () {
-            return this.$vuetify.breakpoint.width - (this.dialog ? 50 : 0)
+            return this.windowWidth - (this.dialog ? 50 : 0)
         },
 
         rightWidth () {
@@ -219,6 +220,8 @@ export default {
 
     methods: {
         emitWidth () {
+            this.windowWidth = window.innerWidth
+
             this.$emit('resize', {
                 total:  this.totalWidth,
                 left:   this.left.currentWidth,

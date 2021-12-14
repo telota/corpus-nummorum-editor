@@ -206,7 +206,6 @@ export default {
                     { text: this.$root.label('hoards'),           icon: 'grain',              link: 'hoards' }
                 ]},
                 { text: this.$root.label('tools'),            icon: 'build_circle',       children: [
-                    //{ text: this.$root.label('file_browser'),     icon: 'folder_open',        link: 'files' },
                     { text: this.$root.label('file_manager'),     icon: 'folder_open',        link: 'storage' },
                     { text: this.$root.label('object_groups'),    icon: 'control_camera',     link: 'objectgroups' },
                     { text: this.$root.label('bibliography'),     icon: 'menu_book',          link: 'bibliography' },
@@ -243,7 +242,9 @@ export default {
                 routes.push({ text: 'Admin',  icon: 'font_download',  children: [
                     { text: 'Users',    icon: 'people',                 link: 'users' },
                     { text: 'Logs',     icon: 'format_list_bulleted',   link: 'logs' },
-                    { text: 'Gitlab',   icon: 'pending_actions',        link: 'https://gitup.uni-potsdam.de/TELOTA/cluster-alte-welt/corpus-nummorum/cn-dokumentation/issues' }
+                    { text: 'Gitlab',   icon: 'pending_actions',        link: 'https://gitup.uni-potsdam.de/TELOTA/cluster-alte-welt/corpus-nummorum/cn-dokumentation/issues' },
+                    null,
+                    { text: this.$root.label('direct_publisher'),   icon: 'publish',    link: 'publisher' }
                 ]})
             }
 

@@ -43,14 +43,15 @@ class request_id_select {
                 "en", c.pecularities_en
             )'],
 
-            'types'             =>  ['raw' => '(SELECT JSON_ARRAYAGG( JSON_OBJECT(
-                    "self",       CONCAT("'.config('dbi.url.api').'types/", ct.id_type),
-                    "id",         ct.id_type,
-                    "inherited",  IF(cti.id IS NOT NULL, 1, 0)
-                ))
+            'types'             =>  ['raw' => '(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    "self",         CONCAT("'.env('APP_API').'/types/", ct.id_type),
+                    "id",           ct.id_type,
+                    "inherited",    IF(cti.id IS NOT NULL, 1, 0))
+                )
                 FROM '.config('dbi.tablenames.coins_to_types').'        AS ct
                 LEFT JOIN '.config('dbi.tablenames.coins_inherit').'    AS cti on cti.id = ct.id_coin
-                WHERE ct.id_coin = c.id
+                LEFT JOIN '.config('dbi.tablenames.types').'            AS st on st.id = ct.id_type
+                WHERE ct.id_coin = c.id'.($user['level'] > 9 ? '' : ' && st.publication_state = 1').'
             )'],
 
             'is_forgery'        =>  'c.is_forgery',

@@ -21,22 +21,14 @@
                     :prepend-icon="attributes.id.icon"
                 />
                 <v-text-field dense outlined filled clearable
-                    v-model="attributes.label.filter"
-                    :label="attributes.label.text"
-                    :prepend-icon="attributes.label.icon"
+                    v-model="attributes.nomisma_concated.filter"
+                    :label="attributes.nomisma_concated.text"
+                    :prepend-icon="attributes.nomisma_concated.icon"
                 />
             </template>
 
             <!-- Editor ---------------------------------------------------------------------------------------------------- -->
             <template v-slot:editor="slot">
-                <div class="title text-center mb-5">
-                    <div
-                        v-if="slot.item.nomisma[0]"
-                        v-text="slot.item.nomisma.map((item) => item ? (item.id ? item.id : '') : '').sort().join(' - ').replaceAll('_', ' ').toUpperCase()"
-                    />
-                    <div v-else v-text="'No Name, yet'" />
-                </div>
-
                 <!-- Nomisma -->
                 <subheader
                     label="Nomisma IDs"
@@ -82,13 +74,11 @@
                 />
 
                 <!-- Text -->
-                <subheader
-                    label="Text"
-                />
+                <subheader label="Text" />
 
                 <div class="body-2 mb-8 text-center">
-                    Fußnoten mit geschweiften Klammern " {} " und Links mit eckigen Klammern " [] " auszeichnen.<br/>
-                    Mit <code>< b >< /b ></code> kann Text fett <b>formatiert</b> werden, mit <code>< i >< /i ></code> <i>kursiv</i>. (Bitte keine Leerzeichen zwischen Tag und spitzen Klammern setzen)
+                    Fußnoten mit geschweiften Klammern <code v-text="'{ }'" /> und Links mit eckigen Klammern <code v-text="'[ ]'" /> auszeichnen.<br/>
+                    Mit <code v-text="'<b> </b>'" /> kann Text fett <b>formatiert</b> werden, mit <code v-text="'<i> </i>'" /> <i>kursiv</i>.
                 </div>
 
                 <v-row>
@@ -102,8 +92,10 @@
 
                                 <v-textarea dense outlined filled
                                     no-resize
-                                    rows=7
+                                    :rows="section === 'label' ? 2 : 7"
                                     v-model="slot.item[l + '_' + section]"
+                                    :hint="section === 'label' ? 'required' : null" 
+                                    :persistent-hint="section === 'label' ? true : false"
                                     counter=21845
                                 />
                             </v-col>
@@ -152,6 +144,7 @@ export default {
             htmleditor:         false,
 
             sections: [
+                'label',
                 'topography',
                 'research',
                 'typology',
@@ -211,12 +204,16 @@ export default {
                     icon: 'person',
                     content: (item) => item?.author ?? '--'
                 },
-                label: {
+                nomisma_concated: {
                     default: null,
                     text: 'Nomisma ID',
                     icon: 'monetization_on',
                     filter: null,
-                    content: (item) => item?.label ? item.label : '--'
+                    content: (item) => {
+                        if (!item?.nomisma_concated) return '--'
+                        const links = item.nomisma_concated.split(', ').split.maph((id) => this.$handlers.format.nomisma_link(id))
+                        return links.join(', ')
+                    }
                 },
                 name: {
                     default: null,
@@ -225,16 +222,21 @@ export default {
                     header: true,
                     sortable: true,
                     content: (item) => {
+                        let header = ''
                         let text = '--'
+
+                        header += '<h3 class="body-2 mb-1">' + (item?.[this.language + '_label'] ? item[this.language + '_label'] : ('ID ' + item.id)) + '</h3>'                        
+                        header += item?.nomisma_concated ? ('<div class="font-weight-bold mb-1">' + item.nomisma_concated.split(', ').map((id) => this.$handlers.format.nomisma_link(id)).join(', ') + '</div>') : ''
+
                         this.sections.forEach((section) => {
                             const key = this.language + '_' + section
-                            if (text === '--' && item[key]) {
+                            if (section !== 'label' && text === '--' && item[key]) {
                                 const split = item[key].slice(0, 500).split(/\s+/)
                                 split[split.length - 1] =  '...'
-                                text = split.join(' ')
+                                text = '<div class="text-justify">' + split.join(' ') + '</div>'
                             }
                         })
-                        return '<h3 class="mb-1">' + item?.name + '</h3><p class="text-justify">' + text + '</p>'
+                        return header + text
                     }
                 },
                 nomisma: {

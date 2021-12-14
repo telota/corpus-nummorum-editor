@@ -28,7 +28,8 @@ class request_parametric_select {
                     )
                     FROM '.config('dbi.tablenames.coins_to_types').'        AS ct
                     LEFT JOIN '.config('dbi.tablenames.coins_inherit').'    AS cti on cti.id = ct.id_coin
-                    WHERE ct.id_coin = c.id
+                    LEFT JOIN '.config('dbi.tablenames.types').'            AS st on st.id = ct.id_type
+                    WHERE ct.id_coin = c.id'.($user['level'] > 9 ? '' : ' && st.publication_state = 1').'
                 )'],
 
                 'owner'             =>  ['raw' => 'JSON_OBJECT(
