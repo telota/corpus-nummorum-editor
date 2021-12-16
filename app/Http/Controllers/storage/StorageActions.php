@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\storage;
 
+use App\Http\Controllers\storage\ImageHandler;
 use Storage;
 use DB;
 use Auth;
@@ -103,6 +104,12 @@ class StorageActions {
             'size' => Storage::size($path),
             'relations' => $dbi
         ];
+    }
+
+    public function createThumbnails ($src, $transformation = null) {
+        //$handler = new ImageHandler();
+        //return $handler->createThumbnails($src, $transformation);
+        return ['success' => true];
     }
 
     // --------------------------------------------------------------------

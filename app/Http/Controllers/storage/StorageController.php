@@ -119,6 +119,7 @@ class StorageController extends Controller {
             //$response = ['error' => json_decode($request['meta'.$fi], true)];
 
             $success = Storage::putFileAs($directory, $file, $file_name);
+            if (!empty($success)) $handler->createThumbnails($directory.$file_name);
 
             // Store Meta
             /*if (!empty($success) && !empty($request['meta'.$fi])) {
@@ -151,6 +152,12 @@ class StorageController extends Controller {
             if (empty($POST['name'])) die(abort(404));
             $response = $handler->createDirectory($POST['name'], $POST['directory'] ?? null);
             return Response::json($response, empty($response['success']) ? 404 : 201);
+        }
+
+        if ($action === 'edit') {
+            if (empty($POST['path']) || empty($POST['transformation'])) die(abort(404));
+            $response = $handler->createThumbnails($POST['path'], $POST['transformation']);
+            return Response::json($response, empty($response['success']) ? 404 : 200);
         }
 
         else if ($action === 'publish') {

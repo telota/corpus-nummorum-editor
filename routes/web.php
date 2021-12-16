@@ -118,6 +118,8 @@ Route::middleware(['auth'])->group(function () {
     // Storage Namespace
     Route::prefix('storage-api')->namespace('App\Http\Controllers\storage')->group(function() {
 
+        Route::get  ('/img',                     'ImageHandler@test');
+
         Route::get  ('/search',                     'SearchController@select');
         Route::get  ('/index/{directory?}',         'StorageController@index')->where('directory', '.+');
         Route::post ('/action/upload',              'StorageController@upload');
