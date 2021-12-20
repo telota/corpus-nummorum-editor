@@ -21,7 +21,7 @@
             <template v-slot:filters>
                 <v-text-field dense outlined filled clearable
                     v-model="attributes[key].filter"
-                    v-for="(key) in ['id', 'name_de', 'name_en']"
+                    v-for="(key) in ['id', 'name_de', 'name_en', 'name_bg']"
                     :key="key"
                     :label="attributes[key].text"
                     :prepend-icon="attributes[key].icon"
@@ -57,7 +57,7 @@
                     class="mb-3"
                 />
                 <div
-                    v-for="(key) in [(language === 'de' ? 'de' : 'en'), (language === 'de' ? 'en' : 'de')]"
+                    v-for="(key) in [(language === 'de' ? 'de' : 'en'), (language === 'de' ? 'en' : 'de'), 'bg']"
                     :key="key"
                     class="body-2 mb-3"
                     v-html="'(' + key.toUpperCase() + ')&ensp;' + attributes['name_' + key].content(slot.item)"
@@ -68,10 +68,11 @@
             <template v-slot:editor="slot">
                 <v-row>
                     <v-col
-                        v-for="key in ['name_de', 'name_en']"
+                        v-for="key in ['name_de', 'name_en', 'name_bg']"
                         :key="key"
                         cols=12
                         md=6
+                        xl=4
                     >
                         <v-textarea dense outlined filled clearable
                             no-resize
@@ -83,12 +84,15 @@
                             counter=21845
                         />
                     </v-col>
+                </v-row>
+                <v-row>
                     <v-col
                         v-for="key in ['role', 'side', 'border_dots']"
                         :key="key"
                         cols=12
                         sm=6
                         md=3
+                        xl=2
                     >
                         <v-select dense outlined filled
                             v-model="slot.item[key]"
@@ -224,6 +228,16 @@ export default {
                     filter: null,
                     clone: true,
                     content: (item) => item?.name_en ?? '--'
+                },
+                name_bg: {
+                    default: null,
+                    text: this.$root.label('design') + ' (BG)',
+                    icon: 'label',
+                    header: true,
+                    sortable: true,
+                    filter: null,
+                    clone: true,
+                    content: (item) => item?.name_bg ?? '--'
                 },
                 border_dots: {
                     default: 0,

@@ -19,7 +19,7 @@ class designs implements dbiInterface  {
         if (empty($id)) {
             $input = Request::post();
 
-            foreach (['name_de', 'name_en'] as $key) {
+            foreach (['name_de', 'name_en', 'name_bg'] as $key) {
                 if (!empty($input[$key])) {
                     $input[$key] = preg_split('/\s+/', trim($input[$key]));
                 }
@@ -35,6 +35,7 @@ class designs implements dbiInterface  {
                     'id'            => 'id',
                     'name_de'       => ['design_de', 'LIKE', '%', '%'],
                     'name_en'       => ['design_en', 'LIKE', '%', '%'],
+                    'name_bg'       => ['design_bg', 'LIKE', '%', '%'],
                     'border_dots'   => 'border_of_dots',
                     'role'          => 'role',
                     'side'          => 'side'
@@ -43,6 +44,7 @@ class designs implements dbiInterface  {
                     'id'            => 'id',
                     'name_de'       => 'design_de',
                     'name_en'       => 'design_en',
+                    'name_bg'       => 'design_bg',
                     'border_dots'   => 'border_of_dot',
                     'side'          => 'side',
                     'role'          => 'role'
@@ -70,6 +72,7 @@ class designs implements dbiInterface  {
                     'd.id             AS id',
                     'd.design_de      AS name_de',
                     'd.design_en      AS name_en',
+                    'd.design_bg      AS name_bg',
                     'd.border_of_dots AS border_dots',
                     DB::raw('IFNULL(d.role, 0) AS role'),
                     DB::raw('IFNULL(d.side, 0) AS side'),
@@ -128,6 +131,7 @@ class designs implements dbiInterface  {
                 $values = [
                     'design_de'     => $input['name_de'],
                     'design_en'     => $input['name_en'],
+                    'design_bg'     => empty($input['name_bg']) ? null : $input['name_bg'],
                     'border_of_dots'=> empty($input['border_dots']) ? 0 : 1,
                     'role'          => empty($input['role'])        ? 0 : $input['role'],
                     'side'          => empty($input['side'])        ? 0 : $input['side']

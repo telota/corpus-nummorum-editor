@@ -102,7 +102,7 @@
                     :min="-100"
                 />
 
-                <v-btn tile block v-text="'save'" :disabled="loading" @click="save" />
+                <v-btn tile block v-text="'save'" :disabled="true || loading" @click="save" />
             </div>
         </div>
     </div>
