@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('zotero:import')->dailyAt('04:20');
         $schedule->command('index:create')->dailyAt('05:20');
         $schedule->command('check:references')->weeklyOn(1, '06:20');
-        $schedule->command('translate:designs')->everyTwoHours();
+        //$schedule->command('translate:designs')->everyTwoHours();
     }
 
     /**
