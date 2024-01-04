@@ -1,0 +1,40 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Corpus Nummorum Editor
+message: >-
+  This is an older version of our software that does not
+  reflect the current state. It may be difficult to set up.
+  We are working on a version that is easier to use. Until
+  then, however, parts of the code can be adapted as you
+  wish.
+type: software
+authors:
+  - given-names: Jan
+    family-names: Köster
+    affiliation: BBAW
+    orcid: 'https://orcid.org/0000-0003-2713-5207'
+  - given-names: Claus
+    family-names: Franke
+    affiliation: BBAW
+    orcid: 'https://orcid.org/0000-0003-3371-6163'
+repository-code: 'https://github.com/telota/corpus-nummorum-editor'
+abstract: >-
+  A Client-Server-architecture to edit coins and coin types
+  of the Corpus Nummorum Project at the BBAW, Germany. This
+  software is tailored to the specific needs of the project
+  and its infrastructure. It is possible, but may be
+  difficult, to set up this software 1:1. If you would like
+  to use the software, we recommend contacting us directly
+  or adapting only individual code components.
+keywords:
+  - numismatics
+  - SQL
+  - PHP
+  - Laravel
+  - Vue.js
+license: GPL-3.0
+commit: eb31ec3
+version: v0.9.0.1
+date-released: '2021-04-23'
